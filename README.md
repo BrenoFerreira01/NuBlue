@@ -1,1 +1,11 @@
-# NuBlue
+
+  # Plataforma de aprendizado Nublue
+
+  This is a code bundle for Plataforma de aprendizado Nublue. The original project is available at https://www.figma.com/design/MmbJtiGGPAitCHVnflifcj/Plataforma-de-aprendizado-Nublue.
+
+  ## Running the code
+
+  Run `npm i` to install the dependencies.
+
+  Run `npm run dev` to start the development server.
+  
