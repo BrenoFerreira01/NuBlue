@@ -32,6 +32,16 @@
   - **Prototipação e design:** a definir.
   - **Versionamento:** Git e GitHub.
 
+## Etapas do projeto
+
+  1. **Problema:** identificar as dificuldades relacionadas ao aprendizado de matemática.
+  2. **Definição:** estabelecer público-alvo, objetivos e funcionalidades prioritárias.
+  3. **Pesquisa:** estudar soluções semelhantes e estratégias de aprendizagem gamificada.
+  4. **Planejamento:** organizar requisitos, tarefas e cronograma.
+  5. **Arquitetura:** definir a estrutura da aplicação e a modelagem inicial dos dados.
+  6. **Desenvolvimento inicial:** implementar a interface e as primeiras funcionalidades.
+  7. **Testes e melhorias:** verificar o funcionamento e aprimorar a experiência de uso.
+
 ## Equipe
 
   | Integrante | Responsabilidade |
