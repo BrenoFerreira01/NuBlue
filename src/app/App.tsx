@@ -130,9 +130,9 @@ const DIFF_LABEL: Record<Difficulty, string> = {
   hard: "Difícil",
 };
 const DIFF_CHIP: Record<Difficulty, string> = {
-  easy: "bg-emerald-500/20 text-emerald-400",
-  medium: "bg-amber-500/20 text-amber-400",
-  hard: "bg-red-500/20 text-red-400",
+  easy: "bg-[#dcfce7] text-[#166534]",
+  medium: "bg-[#fff1c2] text-[#8a5700]",
+  hard: "bg-[#ffe3e8] text-[#b42346]",
 };
 
 // ── Procedural Puzzle Generator ───────────────────────────────────────────────
@@ -270,7 +270,7 @@ function Cell({
     return (
       <div className={clsx(
         "w-12 h-12 flex-shrink-0 flex items-center justify-center select-none font-black md:w-14 md:h-14",
-        cell.isVertical ? "text-sm text-[#5040a0]" : "text-2xl text-[#9080cc]",
+        cell.isVertical ? "text-sm text-[#126b82]" : "text-2xl text-[#17616b]",
       )}>
         {sym}
       </div>
@@ -282,7 +282,7 @@ function Cell({
       <div className={clsx(
         "w-12 h-12 flex-shrink-0 rounded-xl flex items-center justify-center",
         "font-black text-xl select-none",
-        "bg-[#f4e5bc] text-[#1a0840] border-b-4 border-[#c8a060] shadow-sm",
+        "bg-[#c7ede8] text-[#154952] border-b-4 border-[#45b5c4] shadow-sm",
         "md:w-14 md:h-14 md:text-2xl md:rounded-2xl",
       )}>
         {cell.value}
@@ -299,9 +299,9 @@ function Cell({
         "w-12 h-12 flex-shrink-0 rounded-xl flex items-center justify-center",
         "font-black text-xl border-2 transition-colors duration-150 cursor-pointer",
         "md:w-14 md:h-14 md:text-2xl md:rounded-2xl",
-        !filled && !canReceive && "bg-[#100840] border-[#5040ee] text-[#5040ee]",
-        !filled && canReceive && "bg-[#1c1260] border-[#9070ff] text-[#9070ff] shadow-[0_0_12px_rgba(144,112,255,0.4)]",
-        filled && status === null && "bg-[#5040ff] border-[#7060ff] text-white shadow-[0_0_12px_rgba(80,64,255,0.45)]",
+        !filled && !canReceive && "bg-white border-[#13acf7] text-[#126b82]",
+        !filled && canReceive && "bg-[#dff6f3] border-[#45b5c4] text-[#126b82] shadow-[0_0_12px_rgba(69,181,196,0.4)]",
+        filled && status === null && "bg-[#13acf7] border-[#7ececa] text-[#154952] shadow-[0_0_12px_rgba(19,172,247,0.45)]",
         filled && status === "correct" && "bg-emerald-500 border-emerald-400 text-white",
         filled && status === "wrong" && "bg-red-500 border-red-400 text-white",
       )}
@@ -348,14 +348,14 @@ function PuzzleScreen({
       <div className="flex items-center gap-3 px-4 pt-6 pb-2">
         <button
           onClick={onBack}
-          className="w-10 h-10 rounded-xl flex items-center justify-center text-[#6050a0] hover:text-[#c0b0ff] hover:bg-[#1e1254] transition-colors"
+          className="w-10 h-10 rounded-xl flex items-center justify-center text-[#126b82] hover:text-[#154952] hover:bg-white transition-colors"
         >
           <ArrowLeft size={20} />
         </button>
-        <div className="flex-1 h-3 rounded-full bg-[#1a1050] overflow-hidden">
+        <div className="flex-1 h-3 rounded-full bg-[#eaf8f6] overflow-hidden">
           <motion.div
             className="h-full rounded-full"
-            style={{ background: "linear-gradient(90deg, #5040ff, #c080ff)" }}
+            style={{ background: "linear-gradient(90deg, #13acf7, #7ececa)" }}
             animate={{ width: `${progress * 100}%` }}
             transition={{ type: "spring", stiffness: 80 }}
           />
@@ -365,7 +365,7 @@ function PuzzleScreen({
             <Heart
               key={i}
               size={18}
-              className={i < hearts ? "fill-red-500 text-red-500" : "fill-[#1e1254] text-[#1e1254]"}
+              className={i < hearts ? "fill-red-500 text-red-500" : "fill-[#c7ede8] text-[#c7ede8]"}
             />
           ))}
         </div>
@@ -374,9 +374,9 @@ function PuzzleScreen({
       {/* Challenge badge */}
       {isChallenge && (
         <div className="px-5 pt-2">
-          <div className="inline-flex items-center gap-1.5 bg-[#c080ff]/15 border border-[#c080ff]/30 rounded-full px-3 py-1">
-            <Swords size={12} className="text-[#c080ff]" />
-            <span className="text-xs font-black text-[#c080ff]">
+          <div className="inline-flex items-center gap-1.5 bg-[#7ececa]/15 border border-[#45b5c4]/45 rounded-full px-3 py-1">
+            <Swords size={12} className="text-[#176976]" />
+            <span className="text-xs font-black text-[#176976]">
               Desafio · Rodada {challengeRound}
             </span>
           </div>
@@ -389,16 +389,16 @@ function PuzzleScreen({
           <span className={clsx("text-xs font-black rounded-full px-2 py-0.5", DIFF_CHIP[level.difficulty])}>
             {DIFF_LABEL[level.difficulty]}
           </span>
-          <span className="text-xs text-[#5040a0] font-bold">+{level.xpReward} XP</span>
+          <span className="text-xs text-[#126b82] font-bold">+{level.xpReward} XP</span>
         </div>
-        <h2 className="text-xl font-black text-white">{level.title}</h2>
-        <p className="text-sm text-[#7060aa]">{level.subtitle}</p>
+        <h2 className="text-xl font-black text-[#154952]">{level.title}</h2>
+        <p className="text-sm text-[#176976]">{level.subtitle}</p>
       </div>
 
       <div className="px-5 pb-3">
-        <p className="text-xs text-[#5040a0]">
+        <p className="text-xs text-[#126b82]">
           Selecione um número abaixo e toque na célula{" "}
-          <span className="text-[#8070cc] font-bold">?</span> para preencher
+          <span className="text-[#17616b] font-bold">?</span> para preencher
         </p>
       </div>
 
@@ -406,7 +406,7 @@ function PuzzleScreen({
       <div className="flex-1 flex items-center justify-center px-4 py-2">
         <div
           className="relative rounded-3xl p-5"
-          style={{ background: "rgba(26, 16, 80, 0.4)", backdropFilter: "blur(12px)" }}
+          style={{ background: "rgba(255, 255, 255, 0.82)", backdropFilter: "blur(12px)" }}
         >
           <div className="flex flex-col gap-1.5">
             {level.grid.map((row, ri) => (
@@ -431,7 +431,7 @@ function PuzzleScreen({
 
       {/* Number bank */}
       <div className="px-5 pb-3">
-        <p className="text-xs font-black text-[#4030a0] uppercase tracking-widest text-center mb-3">
+        <p className="text-xs font-black text-[#126b82] uppercase tracking-widest text-center mb-3">
           Banco de Números
         </p>
         <div className="flex flex-wrap gap-2 justify-center">
@@ -447,10 +447,10 @@ function PuzzleScreen({
                 className={clsx(
                   "w-12 h-12 rounded-xl font-black text-xl border-b-4 transition-all select-none",
                   isSelected
-                    ? "bg-[#c080ff] border-[#9050cc] text-white shadow-lg shadow-[#c080ff]/40 scale-105"
+                    ? "bg-[#7ececa] border-[#45b5c4] text-[#07364a] shadow-lg shadow-[#7ececa]/40 scale-105"
                     : isUsed
-                    ? "bg-[#120840] border-[#1e1050] text-[#30208a]"
-                    : "bg-[#1e1254] border-[#382080] text-[#c8b8ff] hover:bg-[#2a1a7a]",
+                    ? "bg-[#eaf8f6] border-[#a0ded6] text-[#126b82]"
+                    : "bg-white border-[#7ececa] text-[#154952] hover:bg-[#c7ede8]",
                 )}
               >
                 {num}
@@ -469,8 +469,8 @@ function PuzzleScreen({
           className={clsx(
             "w-full py-4 rounded-2xl font-black text-lg border-b-4 transition-all",
             canCheck && !hasChecked
-              ? "bg-[#5040ff] border-[#3020cc] text-white shadow-lg shadow-[#5040ff]/40 hover:bg-[#6050ff]"
-              : "bg-[#1a1050] border-[#251570] text-[#3a2870] cursor-not-allowed",
+              ? "bg-[#13acf7] border-[#0d83b7] text-[#07364a] shadow-lg shadow-[#13acf7]/40 hover:bg-[#45b5c4]"
+              : "bg-[#eaf8f6] border-[#a0ded6] text-[#126b82] cursor-not-allowed",
           )}
         >
           Verificar Resposta
@@ -520,7 +520,7 @@ function ResultScreen({
         transition={{ type: "spring", stiffness: 220, delay: 0.05 }}
         className={clsx(
           "w-32 h-32 rounded-3xl flex items-center justify-center mb-5",
-          !isCorrect && "bg-[#140a3a] border-2 border-[#3a1a6a]",
+          !isCorrect && "bg-[#ffe8ec] border-2 border-[#f3b0bc]",
         )}
         style={
           isCorrect
@@ -557,27 +557,27 @@ function ResultScreen({
         {isChallenge ? (
           isCorrect ? (
             <>
-              <h1 className="text-3xl font-black text-white mb-1">Rodada {challengeRound} concluída!</h1>
-              <p className="text-[#8070bb]">Pronto para o próximo desafio?</p>
+              <h1 className="text-3xl font-black text-[#154952] mb-1">Rodada {challengeRound} concluída!</h1>
+              <p className="text-[#17616b]">Pronto para o próximo desafio?</p>
             </>
           ) : (
             <>
-              <h1 className="text-3xl font-black text-white mb-1">Sequência encerrada!</h1>
-              <p className="text-[#8070bb]">
-                Você chegou até a <span className="text-white font-black">Rodada {challengeRound}</span>
+              <h1 className="text-3xl font-black text-[#154952] mb-1">Sequência encerrada!</h1>
+              <p className="text-[#17616b]">
+                Você chegou até a <span className="text-[#154952] font-black">Rodada {challengeRound}</span>
               </p>
             </>
           )
         ) : (
           isCorrect ? (
             <>
-              <h1 className="text-3xl font-black text-white mb-1">Incrível! 🎉</h1>
-              <p className="text-[#8070bb]">Você resolveu todas as equações!</p>
+              <h1 className="text-3xl font-black text-[#154952] mb-1">Incrível! 🎉</h1>
+              <p className="text-[#17616b]">Você resolveu todas as equações!</p>
             </>
           ) : (
             <>
-              <h1 className="text-3xl font-black text-white mb-1">Quase lá...</h1>
-              <p className="text-[#8070bb]">Não desista! Você consegue.</p>
+              <h1 className="text-3xl font-black text-[#154952] mb-1">Quase lá...</h1>
+              <p className="text-[#17616b]">Não desista! Você consegue.</p>
             </>
           )
         )}
@@ -589,13 +589,13 @@ function ResultScreen({
           initial={{ opacity: 0, scale: 0.88 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.32 }}
-          className="flex items-center gap-3 rounded-2xl px-6 py-4 mb-6 border border-[#3a2090]/30 w-full max-w-xs"
-          style={{ background: "rgba(18, 8, 64, 0.8)" }}
+          className="flex items-center gap-3 rounded-2xl px-6 py-4 mb-6 border border-[#45b5c4]/45 w-full max-w-xs"
+          style={{ background: "rgba(255, 255, 255, 0.9)" }}
         >
           <Zap size={28} className="fill-yellow-400 text-yellow-400 flex-shrink-0" />
           <div className="text-left">
-            <p className="text-xs text-[#7060aa] font-black uppercase tracking-wide">XP Ganho</p>
-            <p className="text-2xl font-black text-white">+{xpEarned} XP</p>
+            <p className="text-xs text-[#176976] font-black uppercase tracking-wide">XP Ganho</p>
+            <p className="text-2xl font-black text-[#154952]">+{xpEarned} XP</p>
           </div>
         </motion.div>
       )}
@@ -608,8 +608,8 @@ function ResultScreen({
           transition={{ delay: 0.38 }}
           className="flex items-center gap-2 mb-6"
         >
-          <Swords size={18} className="text-[#c080ff]" />
-          <span className="text-[#8070bb] font-bold">Melhor resultado: Rodada {challengeRound}</span>
+          <Swords size={18} className="text-[#176976]" />
+          <span className="text-[#17616b] font-bold">Melhor resultado: Rodada {challengeRound}</span>
         </motion.div>
       )}
 
@@ -625,15 +625,15 @@ function ResultScreen({
             <>
               <button
                 onClick={onNextRound}
-                className="w-full py-4 rounded-2xl font-black text-lg text-white border-b-4 border-[#3020cc] transition-all hover:brightness-110 active:border-b-0 active:translate-y-1 flex items-center justify-center gap-2"
-                style={{ background: "#5040ff" }}
+                className="w-full py-4 rounded-2xl font-black text-lg text-[#07364a] border-b-4 border-[#0d83b7] transition-all hover:brightness-110 active:border-b-0 active:translate-y-1 flex items-center justify-center gap-2"
+                style={{ background: "#13acf7" }}
               >
                 Próxima Rodada <ChevronRight size={20} />
               </button>
               <button
                 onClick={onEndChallenge}
-                className="w-full py-4 rounded-2xl font-black text-lg text-[#8070bb] hover:text-white transition-colors"
-                style={{ background: "rgba(26, 16, 80, 0.6)" }}
+                className="w-full py-4 rounded-2xl font-black text-lg text-[#17616b] hover:text-[#154952] transition-colors"
+                style={{ background: "rgba(199, 237, 232, 0.88)" }}
               >
                 Encerrar Desafio
               </button>
@@ -642,15 +642,15 @@ function ResultScreen({
             <>
               <button
                 onClick={onRetry}
-                className="w-full py-4 rounded-2xl font-black text-lg text-white border-b-4 border-[#3020cc] transition-all hover:brightness-110"
-                style={{ background: "#5040ff" }}
+                className="w-full py-4 rounded-2xl font-black text-lg text-[#07364a] border-b-4 border-[#0d83b7] transition-all hover:brightness-110"
+                style={{ background: "#13acf7" }}
               >
                 Tentar Novamente
               </button>
               <button
                 onClick={onEndChallenge}
-                className="w-full py-4 rounded-2xl font-black text-lg text-[#8070bb] hover:text-white transition-colors"
-                style={{ background: "rgba(26, 16, 80, 0.6)" }}
+                className="w-full py-4 rounded-2xl font-black text-lg text-[#17616b] hover:text-[#154952] transition-colors"
+                style={{ background: "rgba(199, 237, 232, 0.88)" }}
               >
                 Voltar
               </button>
@@ -660,8 +660,8 @@ function ResultScreen({
           isCorrect ? (
             <button
               onClick={onContinue}
-              className="w-full py-4 rounded-2xl font-black text-lg text-white border-b-4 border-[#3020cc] transition-all hover:brightness-110 active:border-b-0 active:translate-y-1"
-              style={{ background: "#5040ff" }}
+              className="w-full py-4 rounded-2xl font-black text-lg text-[#07364a] border-b-4 border-[#0d83b7] transition-all hover:brightness-110 active:border-b-0 active:translate-y-1"
+              style={{ background: "#13acf7" }}
             >
               Continuar
             </button>
@@ -669,15 +669,15 @@ function ResultScreen({
             <>
               <button
                 onClick={onRetry}
-                className="w-full py-4 rounded-2xl font-black text-lg text-white border-b-4 border-[#3020cc] transition-all hover:brightness-110"
-                style={{ background: "#5040ff" }}
+                className="w-full py-4 rounded-2xl font-black text-lg text-[#07364a] border-b-4 border-[#0d83b7] transition-all hover:brightness-110"
+                style={{ background: "#13acf7" }}
               >
                 Tentar Novamente
               </button>
               <button
                 onClick={onContinue}
-                className="w-full py-4 rounded-2xl font-black text-lg text-[#8070bb] hover:text-white transition-colors"
-                style={{ background: "rgba(26, 16, 80, 0.6)" }}
+                className="w-full py-4 rounded-2xl font-black text-lg text-[#17616b] hover:text-[#154952] transition-colors"
+                style={{ background: "rgba(199, 237, 232, 0.88)" }}
               >
                 Voltar ao Início
               </button>
@@ -709,28 +709,28 @@ function SkillPathTab({
       {/* Chapter card */}
       <div className="px-4 pt-4 pb-2">
         <div
-          className="rounded-2xl px-4 py-4 border border-[#3a2090]/30"
-          style={{ background: "rgba(18, 8, 64, 0.8)" }}
+          className="rounded-2xl px-4 py-4 border border-[#45b5c4]/45"
+          style={{ background: "rgba(255, 255, 255, 0.9)" }}
         >
           <div className="flex items-center gap-2 mb-1">
-            <BookOpen size={13} className="text-[#c080ff]" />
-            <span className="text-xs font-black text-[#c080ff] uppercase tracking-widest">Capítulo 1</span>
+            <BookOpen size={13} className="text-[#176976]" />
+            <span className="text-xs font-black text-[#176976] uppercase tracking-widest">Capítulo 1</span>
           </div>
-          <h1 className="text-xl font-black text-white">Cruzadinhas de Matemática</h1>
-          <p className="text-xs text-[#7060aa] mt-0.5">
+          <h1 className="text-xl font-black text-[#154952]">Cruzadinhas de Matemática</h1>
+          <p className="text-xs text-[#176976] mt-0.5">
             Equações cruzadas · Preencha os números que faltam
           </p>
           <div className="flex items-center gap-2 mt-3">
-            <div className="flex-1 h-2 bg-[#2a1a6e] rounded-full overflow-hidden">
+            <div className="flex-1 h-2 bg-[#c7ede8] rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full transition-all duration-700"
                 style={{
                   width: `${(completedLevels.length / levels.length) * 100}%`,
-                  background: "linear-gradient(90deg, #5040ff, #c080ff)",
+                  background: "linear-gradient(90deg, #13acf7, #7ececa)",
                 }}
               />
             </div>
-            <span className="text-xs text-[#8070bb] font-bold">
+            <span className="text-xs text-[#17616b] font-bold">
               {completedLevels.length}/{levels.length}
             </span>
           </div>
@@ -740,7 +740,7 @@ function SkillPathTab({
       {/* Skill path */}
       <div className="relative px-4 pb-8">
         <div className="relative max-w-sm mx-auto pt-4 pb-8">
-          <div className="absolute left-1/2 top-10 bottom-10 -translate-x-px w-px border-l-2 border-dashed border-[#2a1a6e]" />
+          <div className="absolute left-1/2 top-10 bottom-10 -translate-x-px w-px border-l-2 border-dashed border-[#a0ded6]" />
           <div className="flex flex-col gap-6">
             {allNodes.map((node, idx) => {
               const locked =
@@ -765,13 +765,13 @@ function SkillPathTab({
                     <div className={clsx(
                       "w-[88px] h-[88px] rounded-[22px] flex items-center justify-center relative border-b-4 transition-all duration-200",
                       completed && "bg-emerald-500 border-emerald-700 shadow-xl shadow-emerald-500/30",
-                      current && "bg-[#5040ff] border-[#3020cc] shadow-2xl shadow-[#5040ff]/50 group-hover:brightness-110",
-                      locked && "bg-[#140a3a] border-[#221660]",
+                      current && "bg-[#13acf7] border-[#0d83b7] shadow-2xl shadow-[#13acf7]/50 group-hover:brightness-110",
+                      locked && "bg-[#eaf8f6] border-[#a0ded6]",
                     )}>
                       {completed ? (
                         <Check size={34} strokeWidth={3} className="text-white" />
                       ) : locked ? (
-                        <Lock size={26} className="text-[#3a2a70]" />
+                        <Lock size={26} className="text-[#126b82]" />
                       ) : (
                         <span className="text-4xl">{node.emoji}</span>
                       )}
@@ -784,10 +784,10 @@ function SkillPathTab({
                       )}
                     </div>
                     <div className="text-center px-1">
-                      <p className={clsx("font-black text-sm leading-tight", locked ? "text-[#3a2a70]" : "text-white")}>
+                      <p className={clsx("font-black text-sm leading-tight", locked ? "text-[#126b82]" : "text-[#154952]")}>
                         {node.title}
                       </p>
-                      <span className={clsx("text-xs font-bold rounded-full px-2 py-0.5 mt-0.5 inline-block", locked ? "text-[#3a2a70]" : DIFF_CHIP[node.difficulty])}>
+                      <span className={clsx("text-xs font-bold rounded-full px-2 py-0.5 mt-0.5 inline-block", locked ? "text-[#126b82]" : DIFF_CHIP[node.difficulty])}>
                         {DIFF_LABEL[node.difficulty]}
                       </span>
                     </div>
@@ -814,52 +814,52 @@ function ChallengesTab({
     <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
       {/* Hero card */}
       <div
-        className="rounded-2xl p-5 border border-[#c080ff]/20 relative overflow-hidden"
-        style={{ background: "linear-gradient(135deg, rgba(80,64,255,0.25) 0%, rgba(192,128,255,0.15) 100%)" }}
+        className="rounded-2xl p-5 border border-[#45b5c4]/35 relative overflow-hidden"
+        style={{ background: "linear-gradient(135deg, rgba(19,172,247,0.25) 0%, rgba(126,206,202,0.15) 100%)" }}
       >
         <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full opacity-10"
-          style={{ background: "radial-gradient(#c080ff, transparent)" }} />
+          style={{ background: "radial-gradient(#7ececa, transparent)" }} />
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-10 h-10 rounded-xl bg-[#c080ff]/20 flex items-center justify-center">
-            <Swords size={20} className="text-[#c080ff]" />
+          <div className="w-10 h-10 rounded-xl bg-[#7ececa]/20 flex items-center justify-center">
+            <Swords size={20} className="text-[#176976]" />
           </div>
           <div>
-            <h2 className="font-black text-white text-lg">Desafio Diário</h2>
-            <p className="text-xs text-[#9080cc]">Cruzadinhas progressivas</p>
+            <h2 className="font-black text-[#154952] text-lg">Desafio Diário</h2>
+            <p className="text-xs text-[#17616b]">Cruzadinhas progressivas</p>
           </div>
         </div>
-        <p className="text-sm text-[#9080cc] leading-relaxed">
+        <p className="text-sm text-[#17616b] leading-relaxed">
           Resolva cruzadinhas matemáticas cada vez mais difíceis. A dificuldade aumenta suavemente a cada rodada — até você perder!
         </p>
       </div>
 
       {/* Best score */}
       <div
-        className="rounded-2xl p-4 border border-[#3a2090]/30 flex items-center gap-4"
-        style={{ background: "rgba(18, 8, 64, 0.8)" }}
+        className="rounded-2xl p-4 border border-[#45b5c4]/45 flex items-center gap-4"
+        style={{ background: "rgba(255, 255, 255, 0.9)" }}
       >
         <div className="w-12 h-12 rounded-xl bg-yellow-500/15 flex items-center justify-center flex-shrink-0">
           <Trophy size={22} className="text-yellow-400" />
         </div>
         <div>
-          <p className="text-xs text-[#6050a0] font-black uppercase tracking-wide">Melhor Sequência</p>
+          <p className="text-xs text-[#126b82] font-black uppercase tracking-wide">Melhor Sequência</p>
           {bestRound > 0 ? (
-            <p className="text-2xl font-black text-white">
+            <p className="text-2xl font-black text-[#154952]">
               Rodada {bestRound}
-              <span className="text-sm text-[#8070bb] font-bold ml-2">🏆 Recorde</span>
+              <span className="text-sm text-[#17616b] font-bold ml-2">🏆 Recorde</span>
             </p>
           ) : (
-            <p className="text-lg font-bold text-[#4030a0]">Ainda sem recorde</p>
+            <p className="text-lg font-bold text-[#126b82]">Ainda sem recorde</p>
           )}
         </div>
       </div>
 
       {/* How it works */}
       <div
-        className="rounded-2xl p-4 border border-[#3a2090]/20"
-        style={{ background: "rgba(18, 8, 64, 0.6)" }}
+        className="rounded-2xl p-4 border border-[#45b5c4]/35"
+        style={{ background: "rgba(199, 237, 232, 0.8)" }}
       >
-        <p className="text-xs font-black text-[#c080ff] uppercase tracking-widest mb-3">Como funciona</p>
+        <p className="text-xs font-black text-[#176976] uppercase tracking-widest mb-3">Como funciona</p>
         {[
           { emoji: "🧩", text: "Cada rodada gera uma cruzadinha matemática única" },
           { emoji: "📈", text: "A dificuldade aumenta sutilmente a cada rodada" },
@@ -869,17 +869,17 @@ function ChallengesTab({
         ].map(({ emoji, text }) => (
           <div key={text} className="flex items-start gap-3 mb-2.5 last:mb-0">
             <span className="text-base flex-shrink-0">{emoji}</span>
-            <p className="text-sm text-[#8070bb]">{text}</p>
+            <p className="text-sm text-[#17616b]">{text}</p>
           </div>
         ))}
       </div>
 
       {/* Difficulty progression */}
       <div
-        className="rounded-2xl p-4 border border-[#3a2090]/20"
-        style={{ background: "rgba(18, 8, 64, 0.6)" }}
+        className="rounded-2xl p-4 border border-[#45b5c4]/35"
+        style={{ background: "rgba(199, 237, 232, 0.8)" }}
       >
-        <p className="text-xs font-black text-[#c080ff] uppercase tracking-widest mb-3">Progressão de Dificuldade</p>
+        <p className="text-xs font-black text-[#176976] uppercase tracking-widest mb-3">Progressão de Dificuldade</p>
         <div className="space-y-2">
           {[
             { range: "Rodadas 1–2", label: "Adição", color: "bg-emerald-500" },
@@ -889,8 +889,8 @@ function ChallengesTab({
           ].map(({ range, label, color }) => (
             <div key={range} className="flex items-center gap-3">
               <div className={clsx("w-2.5 h-2.5 rounded-full flex-shrink-0", color)} />
-              <span className="text-xs text-[#6050a0] w-28 font-bold">{range}</span>
-              <span className="text-xs text-[#9080cc]">{label}</span>
+              <span className="text-xs text-[#126b82] w-28 font-bold">{range}</span>
+              <span className="text-xs text-[#17616b]">{label}</span>
             </div>
           ))}
         </div>
@@ -900,8 +900,8 @@ function ChallengesTab({
       <motion.button
         whileTap={{ scale: 0.97 }}
         onClick={onStartChallenge}
-        className="w-full py-4 rounded-2xl font-black text-lg text-white border-b-4 border-[#9050cc] transition-all hover:brightness-110 flex items-center justify-center gap-2"
-        style={{ background: "linear-gradient(135deg, #6040ff, #c080ff)" }}
+        className="w-full py-4 rounded-2xl font-black text-lg text-[#07364a] border-b-4 border-[#45b5c4] transition-all hover:brightness-110 flex items-center justify-center gap-2"
+        style={{ background: "linear-gradient(135deg, #45b5c4, #7ececa)" }}
       >
         <Swords size={20} />
         Iniciar Desafio
@@ -936,17 +936,17 @@ function RankingTab({ userXp, userStreak }: { userXp: number; userStreak: number
       <div className="px-4 pt-4 pb-2">
         <div className="flex items-center gap-3 mb-4">
           <Trophy size={22} className="text-yellow-400" />
-          <h2 className="text-xl font-black text-white">Ranking</h2>
+          <h2 className="text-xl font-black text-[#154952]">Ranking</h2>
         </div>
         {/* Toggle */}
-        <div className="flex bg-[#1a1050] rounded-xl p-1">
+        <div className="flex bg-[#eaf8f6] rounded-xl p-1">
           {(["weekly", "all"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
               className={clsx(
                 "flex-1 py-2 rounded-lg font-black text-sm transition-all",
-                tab === t ? "bg-[#5040ff] text-white shadow-lg" : "text-[#6050a0]",
+                tab === t ? "bg-[#13acf7] text-[#07364a] shadow-lg" : "text-[#126b82]",
               )}
             >
               {t === "weekly" ? "Esta Semana" : "Geral"}
@@ -969,13 +969,13 @@ function RankingTab({ userXp, userStreak }: { userXp: number; userStreak: number
               className={clsx(
                 "flex items-center gap-3 rounded-2xl px-4 py-3 border transition-all",
                 isUser
-                  ? "border-[#5040ff]/50 shadow-lg shadow-[#5040ff]/15"
-                  : "border-[#2a1a6e]/40",
+                  ? "border-[#13acf7]/50 shadow-lg shadow-[#13acf7]/15"
+                  : "border-[#a0ded6]/40",
               )}
               style={{
                 background: isUser
-                  ? "rgba(80, 64, 255, 0.15)"
-                  : "rgba(18, 8, 64, 0.7)",
+                  ? "rgba(19, 172, 247, 0.15)"
+                  : "rgba(255, 255, 255, 0.86)",
               }}
             >
               {/* Rank */}
@@ -983,27 +983,27 @@ function RankingTab({ userXp, userStreak }: { userXp: number; userStreak: number
                 {rank <= 3 ? (
                   <span className="text-xl">{medals[rank - 1]}</span>
                 ) : (
-                  <span className="text-sm font-black text-[#5040a0]">{rank}</span>
+                  <span className="text-sm font-black text-[#126b82]">{rank}</span>
                 )}
               </div>
 
               {/* Avatar */}
               <div className={clsx(
                 "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-xl",
-                isUser ? "bg-[#5040ff]/30" : "bg-[#1e1254]",
+                isUser ? "bg-[#13acf7]/30" : "bg-white",
               )}>
                 {player.emoji}
               </div>
 
               {/* Name + streak */}
               <div className="flex-1 min-w-0">
-                <p className={clsx("font-black text-sm truncate", isUser ? "text-white" : "text-[#c8b8ff]")}>
+                <p className="font-black text-sm truncate text-[#154952]">
                   {player.name}
-                  {isUser && <span className="text-[#c080ff] ml-1">· Você</span>}
+                  {isUser && <span className="text-[#176976] ml-1">· Você</span>}
                 </p>
                 <div className="flex items-center gap-1">
                   <Flame size={11} className="text-orange-400 fill-orange-400" />
-                  <span className="text-xs text-[#6050a0] font-bold">{player.streak} dias</span>
+                  <span className="text-xs text-[#126b82] font-bold">{player.streak} dias</span>
                 </div>
               </div>
 
@@ -1011,11 +1011,11 @@ function RankingTab({ userXp, userStreak }: { userXp: number; userStreak: number
               <div className="text-right flex-shrink-0">
                 <div className="flex items-center gap-1">
                   <Zap size={13} className="fill-yellow-400 text-yellow-400" />
-                  <span className={clsx("font-black text-sm", isUser ? "text-white" : "text-[#c8b8ff]")}>
+                  <span className="font-black text-sm text-[#154952]">
                     {player.score.toLocaleString("pt-BR")}
                   </span>
                 </div>
-                <span className="text-xs text-[#5040a0]">XP</span>
+                <span className="text-xs text-[#126b82]">XP</span>
               </div>
             </motion.div>
           );
@@ -1083,33 +1083,33 @@ function ProfileTab({
     <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
       {/* Profile card */}
       <div
-        className="rounded-2xl p-5 border border-[#3a2090]/30 relative overflow-hidden"
-        style={{ background: "linear-gradient(135deg, rgba(80,64,255,0.2) 0%, rgba(18,8,64,0.9) 100%)" }}
+        className="rounded-2xl p-5 border border-[#45b5c4]/45 relative overflow-hidden"
+        style={{ background: "linear-gradient(135deg, rgba(19,172,247,0.2) 0%, rgba(199,237,232,0.9) 100%)" }}
       >
         <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full opacity-10"
-          style={{ background: "radial-gradient(#c080ff, transparent)" }} />
+          style={{ background: "radial-gradient(#7ececa, transparent)" }} />
         <div className="flex items-center gap-4">
           <div
             className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0"
-            style={{ background: "linear-gradient(135deg, #5040ff, #c080ff)" }}
+            style={{ background: "linear-gradient(135deg, #13acf7, #7ececa)" }}
           >
             🧑‍💻
           </div>
           <div>
-            <h2 className="text-xl font-black text-white">Jogador</h2>
+            <h2 className="text-xl font-black text-[#154952]">Jogador</h2>
             <div className="flex items-center gap-3 mt-1">
               <div className="flex items-center gap-1">
                 <Flame size={13} className="fill-orange-400 text-orange-400" />
-                <span className="text-xs font-black text-white">{streak} dias</span>
+                <span className="text-xs font-black text-[#154952]">{streak} dias</span>
               </div>
               <div className="flex items-center gap-1">
                 <Zap size={13} className="fill-yellow-400 text-yellow-400" />
-                <span className="text-xs font-black text-white">{xp} XP</span>
+                <span className="text-xs font-black text-[#154952]">{xp} XP</span>
               </div>
             </div>
-            <div className="mt-1.5 inline-flex items-center gap-1 bg-[#5040ff]/30 rounded-full px-2 py-0.5">
+            <div className="mt-1.5 inline-flex items-center gap-1 bg-[#13acf7]/30 rounded-full px-2 py-0.5">
               <Star size={11} className="fill-yellow-400 text-yellow-400" />
-              <span className="text-xs font-black text-white">Nível {userLevel}</span>
+              <span className="text-xs font-black text-[#154952]">Nível {userLevel}</span>
             </div>
           </div>
         </div>
@@ -1124,43 +1124,43 @@ function ProfileTab({
         ].map(({ label, value, icon }) => (
           <div
             key={label}
-            className="rounded-2xl p-3 border border-[#2a1a6e]/40 text-center"
-            style={{ background: "rgba(18, 8, 64, 0.7)" }}
+            className="rounded-2xl p-3 border border-[#a0ded6]/40 text-center"
+            style={{ background: "rgba(255, 255, 255, 0.86)" }}
           >
             <span className="text-2xl block mb-1">{icon}</span>
-            <p className="text-lg font-black text-white leading-none">{value}</p>
-            <p className="text-xs text-[#6050a0] mt-0.5 font-bold">{label}</p>
+            <p className="text-lg font-black text-[#154952] leading-none">{value}</p>
+            <p className="text-xs text-[#126b82] mt-0.5 font-bold">{label}</p>
           </div>
         ))}
       </div>
 
       {/* XP Progress */}
       <div
-        className="rounded-2xl p-4 border border-[#2a1a6e]/40"
-        style={{ background: "rgba(18, 8, 64, 0.7)" }}
+        className="rounded-2xl p-4 border border-[#a0ded6]/40"
+        style={{ background: "rgba(255, 255, 255, 0.86)" }}
       >
         <div className="flex items-center justify-between mb-2">
-          <p className="text-xs font-black text-[#c080ff] uppercase tracking-widest">Progresso XP</p>
-          <p className="text-xs text-[#6050a0] font-bold">Nível {userLevel} → {userLevel + 1}</p>
+          <p className="text-xs font-black text-[#176976] uppercase tracking-widest">Progresso XP</p>
+          <p className="text-xs text-[#126b82] font-bold">Nível {userLevel} → {userLevel + 1}</p>
         </div>
-        <div className="h-3 bg-[#2a1a6e] rounded-full overflow-hidden mb-2">
+        <div className="h-3 bg-[#c7ede8] rounded-full overflow-hidden mb-2">
           <motion.div
             className="h-full rounded-full"
-            style={{ background: "linear-gradient(90deg, #5040ff, #c080ff)" }}
+            style={{ background: "linear-gradient(90deg, #13acf7, #7ececa)" }}
             initial={{ width: 0 }}
             animate={{ width: `${progressPct}%` }}
             transition={{ duration: 0.8, type: "spring" }}
           />
         </div>
         <div className="flex justify-between">
-          <span className="text-xs text-[#6050a0]">{xpInLevel} XP</span>
-          <span className="text-xs text-[#6050a0]">50 XP</span>
+          <span className="text-xs text-[#126b82]">{xpInLevel} XP</span>
+          <span className="text-xs text-[#126b82]">50 XP</span>
         </div>
       </div>
 
       {/* Achievements */}
       <div>
-        <p className="text-xs font-black text-[#c080ff] uppercase tracking-widest mb-3 px-1">
+        <p className="text-xs font-black text-[#176976] uppercase tracking-widest mb-3 px-1">
           Conquistas
         </p>
         <div className="grid grid-cols-2 gap-3">
@@ -1172,22 +1172,22 @@ function ProfileTab({
               className={clsx(
                 "rounded-2xl p-3 border transition-all",
                 a.unlocked
-                  ? "border-[#c080ff]/30 shadow-sm shadow-[#c080ff]/10"
-                  : "border-[#1e1254]/60",
+                  ? "border-[#7ececa]/30 shadow-sm shadow-[#7ececa]/10"
+                  : "border-[#c7ede8]/60",
               )}
               style={{
                 background: a.unlocked
-                  ? "rgba(192, 128, 255, 0.1)"
-                  : "rgba(10, 5, 30, 0.6)",
+                  ? "rgba(126, 206, 202, 0.1)"
+                  : "rgba(255, 255, 255, 0.7)",
               }}
             >
               <span className={clsx("text-2xl block mb-1.5", !a.unlocked && "grayscale opacity-30")}>
                 {a.emoji}
               </span>
-              <p className={clsx("font-black text-xs", a.unlocked ? "text-white" : "text-[#3a2a70]")}>
+              <p className={clsx("font-black text-xs", a.unlocked ? "text-[#154952]" : "text-[#126b82]")}>
                 {a.name}
               </p>
-              <p className={clsx("text-xs mt-0.5", a.unlocked ? "text-[#9080cc]" : "text-[#2a1a60]")}>
+              <p className={clsx("text-xs mt-0.5", a.unlocked ? "text-[#17616b]" : "text-[#426c70]")}>
                 {a.desc}
               </p>
               {a.unlocked && (
@@ -1233,28 +1233,28 @@ function MainScreen({
       {/* Glow */}
       <div
         className="fixed inset-0 pointer-events-none"
-        style={{ background: "radial-gradient(ellipse 80% 40% at 50% 0%, rgba(80,64,255,0.15) 0%, transparent 70%)" }}
+        style={{ background: "radial-gradient(ellipse 80% 40% at 50% 0%, rgba(19,172,247,0.15) 0%, transparent 70%)" }}
       />
 
       {/* Shared header */}
-      <div className="relative flex items-center justify-between px-4 py-3 border-b border-[#1e1254]">
+      <div className="relative flex items-center justify-between px-4 py-3 border-b border-[#c7ede8]">
         <div className="flex items-center gap-2.5">
           <div
-            className="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg shadow-[#5040ff]/30"
-            style={{ background: "linear-gradient(135deg, #5040ff 0%, #c080ff 100%)" }}
+            className="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg shadow-[#13acf7]/30"
+            style={{ background: "linear-gradient(135deg, #13acf7 0%, #7ececa 100%)" }}
           >
-            <span className="text-white font-black text-sm leading-none">N</span>
+            <span className="text-[#07364a] font-black text-sm leading-none">N</span>
           </div>
-          <span className="font-black text-lg text-white tracking-tight">nublue</span>
+          <span className="font-black text-lg text-[#154952] tracking-tight">nublue</span>
         </div>
         <div className="flex gap-2">
-          <div className="flex items-center gap-1.5 bg-[#1a1050] rounded-full px-3 py-1.5">
+          <div className="flex items-center gap-1.5 bg-[#eaf8f6] rounded-full px-3 py-1.5">
             <Flame size={14} className="fill-orange-400 text-orange-400" />
-            <span className="text-sm font-black text-white">{streak}</span>
+            <span className="text-sm font-black text-[#154952]">{streak}</span>
           </div>
-          <div className="flex items-center gap-1.5 bg-[#1a1050] rounded-full px-3 py-1.5">
+          <div className="flex items-center gap-1.5 bg-[#eaf8f6] rounded-full px-3 py-1.5">
             <Zap size={14} className="fill-yellow-400 text-yellow-400" />
-            <span className="text-sm font-black text-white">{xp} XP</span>
+            <span className="text-sm font-black text-[#154952]">{xp} XP</span>
           </div>
         </div>
       </div>
@@ -1324,14 +1324,14 @@ function MainScreen({
       </div>
 
       {/* Bottom nav */}
-      <div className="relative flex border-t border-[#1a1050] bg-[#0a0428]">
+      <div className="relative flex border-t border-[#a0ded6] bg-white">
         {navItems.map(({ id, Icon, label }) => (
           <button
             key={id}
             onClick={() => setActiveTab(id)}
             className={clsx(
               "flex-1 flex flex-col items-center gap-1 py-3 transition-colors",
-              activeTab === id ? "text-[#c080ff]" : "text-[#3a2a70]",
+              activeTab === id ? "text-[#176976]" : "text-[#126b82]",
             )}
           >
             <Icon size={22} />
