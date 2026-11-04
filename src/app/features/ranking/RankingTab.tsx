@@ -4,7 +4,7 @@ import { Flame, Trophy, Zap } from "lucide-react";
 import { clsx } from "clsx";
 import { MOCK_PLAYERS } from "../../data/mockPlayers";
 
-export function RankingTab({ userXp, userStreak }: { userXp: number; userStreak: number }) {
+export function RankingTab({ userName, userXp, userStreak }: { userName: string; userXp: number; userStreak: number }) {
   const [tab, setTab] = useState<"weekly" | "all">("weekly");
 
   const leaderboard = useMemo(() => {
@@ -15,17 +15,17 @@ export function RankingTab({ userXp, userStreak }: { userXp: number; userStreak:
         score: tab === "weekly" ? p.weeklyXp : p.xp,
         isUser: false,
       })),
-      { id: 0, name: "Você", score: userXpVal, streak: userStreak, emoji: "🧑‍💻", isUser: true, xp: userXp, weeklyXp: userXp },
+      { id: 0, name: userName, score: userXpVal, streak: userStreak, emoji: Array.from(userName.trim())[0] || "👤", isUser: true, xp: userXp, weeklyXp: userXp },
     ];
     return all.sort((a, b) => b.score - a.score);
-  }, [tab, userXp, userStreak]);
+  }, [tab, userName, userXp, userStreak]);
 
   const medals = ["🥇", "🥈", "🥉"];
 
   return (
-    <div className="flex-1 overflow-y-auto">
+    <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
       {/* Header */}
-      <div className="px-4 pt-4 pb-2">
+      <div className="px-3 pb-2 pt-4 sm:px-4">
         <div className="flex items-center gap-3 mb-4">
           <Trophy size={22} className="text-yellow-400" />
           <h2 className="text-xl font-black text-foreground">Ranking</h2>
@@ -48,7 +48,7 @@ export function RankingTab({ userXp, userStreak }: { userXp: number; userStreak:
       </div>
 
       {/* Leaderboard */}
-      <div className="px-4 pb-8 space-y-2">
+      <div className="space-y-2 px-3 pb-8 sm:px-4">
         {leaderboard.map((player, idx) => {
           const isUser = player.isUser;
           const rank = idx + 1;
@@ -59,7 +59,7 @@ export function RankingTab({ userXp, userStreak }: { userXp: number; userStreak:
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: idx * 0.04 }}
               className={clsx(
-                "flex items-center gap-3 rounded-2xl px-4 py-3 border transition-all",
+                "flex min-w-0 items-center gap-2 rounded-2xl border px-3 py-3 transition-all sm:gap-3 sm:px-4",
                 isUser
                   ? "border-primary/50 shadow-lg shadow-primary/15"
                   : "border-secondary/40",
@@ -81,8 +81,8 @@ export function RankingTab({ userXp, userStreak }: { userXp: number; userStreak:
 
               {/* Avatar */}
               <div className={clsx(
-                "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-xl",
-                isUser ? "bg-primary/30" : "bg-white",
+                "flex size-9 shrink-0 items-center justify-center rounded-xl text-xl sm:size-10",
+                isUser ? "bg-primary/30" : "bg-card",
               )}>
                 {player.emoji}
               </div>

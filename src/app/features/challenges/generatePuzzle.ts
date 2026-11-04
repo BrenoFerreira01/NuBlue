@@ -1,7 +1,19 @@
 import type { Difficulty, GridCell, Level } from "../../types/game";
+import { createSeededRandom, formatDateKey, getDailyPuzzleRound, getLocalDateKey } from "./dailyChallenge";
 
-function rand(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+type RandomSource = () => number;
+
+function rand(min: number, max: number, random: RandomSource): number {
+  return Math.floor(random() * (max - min + 1)) + min;
+}
+
+function shuffle<T>(items: T[], random: RandomSource): T[] {
+  const shuffled = [...items];
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(random() * (index + 1));
+    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+  }
+  return shuffled;
 }
 
 function applyOp(a: number, b: number, op: string): number | null {
@@ -22,7 +34,7 @@ function getRoundMeta(round: number): { subtitle: string; emoji: string; difficu
   return { subtitle: "Nível extremo", emoji: "🌪️", difficulty: "hard" };
 }
 
-export function generatePuzzle(round: number): Level {
+export function generatePuzzle(round: number, random: RandomSource = Math.random): Level {
   const ops =
     round <= 2 ? ["+"] :
     round <= 5 ? ["+", "−"] :
@@ -34,14 +46,14 @@ export function generatePuzzle(round: number): Level {
   const meta = getRoundMeta(round);
 
   for (let attempt = 0; attempt < 800; attempt++) {
-    const a = rand(1, maxNum);
-    const b = rand(1, maxNum);
-    const c = rand(1, maxNum);
-    const d = rand(1, maxNum);
-    const h1 = ops[rand(0, ops.length - 1)];
-    const h2 = ops[rand(0, ops.length - 1)];
-    const v1 = ops[rand(0, ops.length - 1)];
-    const v2 = ops[rand(0, ops.length - 1)];
+    const a = rand(1, maxNum, random);
+    const b = rand(1, maxNum, random);
+    const c = rand(1, maxNum, random);
+    const d = rand(1, maxNum, random);
+    const h1 = ops[rand(0, ops.length - 1, random)];
+    const h2 = ops[rand(0, ops.length - 1, random)];
+    const v1 = ops[rand(0, ops.length - 1, random)];
+    const v2 = ops[rand(0, ops.length - 1, random)];
     const rh1 = applyOp(a, b, h1);
     const rh2 = applyOp(c, d, h2);
     const rv1 = applyOp(a, c, v1);
@@ -51,7 +63,7 @@ export function generatePuzzle(round: number): Level {
     if (rh1 <= 0 || rh2 <= 0 || rv1 <= 0 || rv2 <= 0) continue;
     if (rh1 > 60 || rh2 > 60 || rv1 > 60 || rv2 > 60) continue;
 
-    const corners = [0, 1, 2, 3].sort(() => Math.random() - 0.5);
+    const corners = shuffle([0, 1, 2, 3], random);
     const blankPos = corners.slice(0, numBlanks);
     const vals = [a, b, c, d];
     const ids = ["p", "q", "r", "s"];
@@ -76,13 +88,15 @@ export function generatePuzzle(round: number): Level {
     const bankSet = new Set<number>(answerVals);
     let safety = 0;
     while (bankSet.size < 9 && safety < 200) {
-      bankSet.add(rand(1, Math.max(maxNum + 5, 12)));
+      bankSet.add(rand(1, Math.max(maxNum + 5, 12), random));
       safety++;
     }
-    const bank = [...bankSet].sort(() => Math.random() - 0.5);
+    const bank = shuffle([...bankSet], random);
 
     return {
       id: -(round * 1000 + attempt),
+      chapter: 0,
+      session: round,
       title: `Rodada ${round}`,
       subtitle: meta.subtitle,
       difficulty: meta.difficulty,
@@ -95,9 +109,11 @@ export function generatePuzzle(round: number): Level {
   }
 
   // Fallback: simple addition
-  const a = rand(1, 5), b = rand(1, 5), c = rand(1, 5), d = rand(1, 5);
+  const a = rand(1, 5, random), b = rand(1, 5, random), c = rand(1, 5, random), d = rand(1, 5, random);
   return {
     id: -round,
+    chapter: 0,
+    session: round,
     title: `Rodada ${round}`,
     subtitle: "Adições simples",
     difficulty: "easy",
@@ -110,7 +126,34 @@ export function generatePuzzle(round: number): Level {
       [{ type: "equals", isVertical: true }, null, { type: "equals", isVertical: true }, null, null],
       [{ type: "number", value: a + c }, null, { type: "number", value: b + d }, null, null],
     ],
-    bank: [...new Set([a, d, rand(1, 9), rand(1, 9), rand(1, 9), rand(1, 9)])].sort(() => Math.random() - 0.5),
+    bank: shuffle([...new Set([a, d, rand(1, 9, random), rand(1, 9, random), rand(1, 9, random), rand(1, 9, random)])], random),
     answers: { p: a, s: d },
+  };
+}
+
+export function generateDailyPuzzle(dateKey = getLocalDateKey()): Level {
+  const round = getDailyPuzzleRound(dateKey);
+  const puzzle = generatePuzzle(round, createSeededRandom(dateKey));
+  const [year, month, day] = dateKey.split("-").map(Number);
+  const stableId = -(year * 10_000 + month * 100 + day);
+
+  return {
+    ...puzzle,
+    id: stableId,
+    title: "Desafio diário",
+    subtitle: `${puzzle.subtitle} · ${formatDateKey(dateKey)}`,
+  };
+}
+
+export function generateLandingDailyPuzzle(dateKey = getLocalDateKey()): Level {
+  const puzzle = generatePuzzle(2, createSeededRandom(`landing-${dateKey}`));
+  const [year, month, day] = dateKey.split("-").map(Number);
+  const stableId = -((year - 2000) * 1_000_000 + month * 10_000 + day);
+
+  return {
+    ...puzzle,
+    id: stableId,
+    title: "Desafio diário",
+    subtitle: `${puzzle.subtitle} · ${formatDateKey(dateKey)}`,
   };
 }

@@ -1,5 +1,5 @@
 export type Screen = "main" | "puzzle" | "result";
-export type TabId = "home" | "challenges" | "ranking" | "profile";
+export type TabId = "home" | "challenges" | "ranking" | "profile" | "settings";
 export type Difficulty = "easy" | "medium" | "hard";
 export type CellStatus = "correct" | "wrong" | null;
 
@@ -12,6 +12,8 @@ export interface GridCell {
 
 export interface Level {
   id: number;
+  chapter: number;
+  session: number;
   title: string;
   subtitle: string;
   difficulty: Difficulty;
@@ -20,14 +22,6 @@ export interface Level {
   grid: (GridCell | null)[][];
   bank: number[];
   answers: Record<string, number>;
-}
-
-export interface LockedStub {
-  id: number;
-  title: string;
-  difficulty: Difficulty;
-  emoji: string;
-  isLocked: true;
 }
 
 export interface MockPlayer {

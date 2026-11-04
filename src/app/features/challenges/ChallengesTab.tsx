@@ -1,108 +1,134 @@
 import { motion } from "motion/react";
-import { Swords, Trophy } from "lucide-react";
-import { clsx } from "clsx";
+import { CalendarDays, CheckCircle2, CircleAlert, Flame, Swords, Trophy } from "lucide-react";
+import { formatDateKey, type DailyChallengeStatus } from "./dailyChallenge";
 
 export function ChallengesTab({
-  bestRound, onStartChallenge,
+  challengeDate,
+  dark,
+  status,
+  completedCount,
+  currentStreak,
+  bestStreak,
+  onStartChallenge,
 }: {
-  bestRound: number;
+  challengeDate: string;
+  dark: boolean;
+  status: DailyChallengeStatus | null;
+  completedCount: number;
+  currentStreak: number;
+  bestStreak: number;
   onStartChallenge: () => void;
 }) {
+  const isLocked = status === "completed" || status === "failed";
+
   return (
-    <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-      {/* Hero card */}
-      <div
-        className="rounded-2xl p-5 border border-accent/35 relative overflow-hidden"
+    <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-3 py-4 sm:px-4">
+      <section
+        className="relative overflow-hidden rounded-2xl border border-accent/35 p-5"
         style={{ background: "var(--gradient-brand-soft)" }}
       >
-        <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full opacity-10"
-          style={{ background: "var(--glow-accent)" }} />
-        <div className="flex items-center gap-3 mb-3">
-          <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center">
+        <div
+          className="absolute -right-6 -top-6 size-28 rounded-full opacity-10"
+          style={{ background: "var(--glow-accent)" }}
+          aria-hidden="true"
+        />
+        <div className="relative flex items-center gap-3">
+          <div className="flex size-10 items-center justify-center rounded-xl bg-accent/20">
             <Swords size={20} className="text-muted-foreground" />
           </div>
           <div>
-            <h2 className="font-black text-foreground text-lg">Desafio Diário</h2>
-            <p className="text-xs text-muted-foreground">Cruzadinhas progressivas</p>
-          </div>
-        </div>
-        <p className="text-sm text-muted-foreground leading-relaxed">
-          Resolva cruzadinhas matemáticas cada vez mais difíceis. A dificuldade aumenta suavemente a cada rodada — até você perder!
-        </p>
-      </div>
-
-      {/* Best score */}
-      <div
-        className="rounded-2xl p-4 border border-accent/45 flex items-center gap-4"
-        style={{ background: "var(--surface-glass-strong)" }}
-      >
-        <div className="w-12 h-12 rounded-xl bg-yellow-500/15 flex items-center justify-center flex-shrink-0">
-          <Trophy size={22} className="text-yellow-400" />
-        </div>
-        <div>
-          <p className="text-xs text-muted-foreground font-black uppercase tracking-wide">Melhor Sequência</p>
-          {bestRound > 0 ? (
-            <p className="text-2xl font-black text-foreground">
-              Rodada {bestRound}
-              <span className="text-sm text-muted-foreground font-bold ml-2">🏆 Recorde</span>
+            <h2 className="text-lg font-black text-foreground">Desafio diário</h2>
+            <p className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground">
+              <CalendarDays size={13} /> {formatDateKey(challengeDate)}
             </p>
-          ) : (
-            <p className="text-lg font-bold text-muted-foreground">Ainda sem recorde</p>
-          )}
-        </div>
-      </div>
-
-      {/* How it works */}
-      <div
-        className="rounded-2xl p-4 border border-accent/35"
-        style={{ background: "var(--surface-cyan)" }}
-      >
-        <p className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-3">Como funciona</p>
-        {[
-          { emoji: "🧩", text: "Cada rodada gera uma cruzadinha matemática única" },
-          { emoji: "📈", text: "A dificuldade aumenta sutilmente a cada rodada" },
-          { emoji: "❤️", text: "Você tem 3 tentativas por rodada" },
-          { emoji: "💀", text: "3 erros e o desafio termina" },
-          { emoji: "🏆", text: "Tente superar seu próprio recorde!" },
-        ].map(({ emoji, text }) => (
-          <div key={text} className="flex items-start gap-3 mb-2.5 last:mb-0">
-            <span className="text-base flex-shrink-0">{emoji}</span>
-            <p className="text-sm text-muted-foreground">{text}</p>
           </div>
-        ))}
-      </div>
-
-      {/* Difficulty progression */}
-      <div
-        className="rounded-2xl p-4 border border-accent/35"
-        style={{ background: "var(--surface-cyan)" }}
-      >
-        <p className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-3">Progressão de Dificuldade</p>
-        <div className="space-y-2">
-          {[
-            { range: "Rodadas 1–2", label: "Adição", color: "bg-emerald-500" },
-            { range: "Rodadas 3–5", label: "+ Subtração", color: "bg-yellow-500" },
-            { range: "Rodadas 6–9", label: "+ Multiplicação", color: "bg-orange-500" },
-            { range: "Rodadas 10+", label: "+ Divisão", color: "bg-red-500" },
-          ].map(({ range, label, color }) => (
-            <div key={range} className="flex items-center gap-3">
-              <div className={clsx("w-2.5 h-2.5 rounded-full flex-shrink-0", color)} />
-              <span className="text-xs text-muted-foreground w-28 font-bold">{range}</span>
-              <span className="text-xs text-muted-foreground">{label}</span>
-            </div>
-          ))}
         </div>
-      </div>
+        <p className="relative mt-4 text-sm leading-relaxed text-muted-foreground">
+          Uma cruzadinha nova a cada dia local, igual durante todo o dia. Você tem três vidas; o desafio seguinte chega à meia-noite.
+        </p>
+      </section>
 
-      {/* Start button */}
+      <section
+        className="grid grid-cols-2 gap-3 rounded-2xl border border-accent/45 p-4"
+        style={{ background: "var(--surface-glass-strong)" }}
+        aria-label="Seu histórico de desafios diários"
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-yellow-500/15">
+            <Trophy size={20} className="text-yellow-400" />
+          </div>
+          <div>
+            <p className="text-[11px] font-black uppercase tracking-wide text-muted-foreground">Resolvidos</p>
+            <p className="text-xl font-black text-foreground">{completedCount}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-orange-500/15">
+            <Flame size={20} className="fill-orange-400 text-orange-400" />
+          </div>
+          <div>
+            <p className="text-[11px] font-black uppercase tracking-wide text-muted-foreground">Maior sequência</p>
+            <p className="text-xl font-black text-foreground">{bestStreak} dias</p>
+          </div>
+        </div>
+        <p className="col-span-2 text-xs font-bold text-muted-foreground">
+          Sequência atual: {currentStreak} {currentStreak === 1 ? "dia" : "dias"}
+        </p>
+      </section>
+
+      <section
+        className="rounded-2xl border border-accent/35 p-4"
+        style={{ background: "var(--surface-cyan)" }}
+        aria-live="polite"
+      >
+        {status === "completed" ? (
+          <div className="flex items-start gap-3">
+            <CheckCircle2 size={21} className="mt-0.5 shrink-0 text-success" />
+            <div>
+              <p className="font-black text-foreground">Desafio concluído</p>
+              <p className="mt-1 text-sm text-muted-foreground">Sua resposta e seu XP já foram salvos. Volte amanhã para outra cruzadinha.</p>
+            </div>
+          </div>
+        ) : status === "failed" ? (
+          <div className="flex items-start gap-3">
+            <CircleAlert size={21} className="mt-0.5 shrink-0 text-muted-foreground" />
+            <div>
+              <p className="font-black text-foreground">Tentativas encerradas</p>
+              <p className="mt-1 text-sm text-muted-foreground">O desafio de hoje terminou. Uma nova cruzadinha fica disponível amanhã.</p>
+            </div>
+          </div>
+        ) : status === "in_progress" ? (
+          <div className="flex items-start gap-3">
+            <Swords size={21} className="mt-0.5 shrink-0 text-primary" />
+            <div>
+              <p className="font-black text-foreground">Desafio em andamento</p>
+              <p className="mt-1 text-sm text-muted-foreground">Suas respostas e vidas ficaram salvas. Continue de onde parou.</p>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-start gap-3">
+            <Swords size={21} className="mt-0.5 shrink-0 text-primary" />
+            <div>
+              <p className="font-black text-foreground">Pronto para jogar?</p>
+              <p className="mt-1 text-sm text-muted-foreground">Resolva a cruzadinha de hoje para ganhar XP e manter sua sequência diária.</p>
+            </div>
+          </div>
+        )}
+      </section>
+
       <motion.button
-        whileTap={{ scale: 0.97 }}
+        whileTap={isLocked ? undefined : { scale: 0.97 }}
         onClick={onStartChallenge}
-        className="w-full py-4 rounded-2xl font-black text-lg text-white border-b-4 border-foreground transition-all hover:brightness-110 flex items-center justify-center gap-2"
-        style={{ background: "var(--gradient-brand)" }}
+        disabled={isLocked}
+        className="flex w-full items-center justify-center gap-2 rounded-2xl border-b-4 border-foreground py-4 text-lg font-black text-white transition-all enabled:hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60 dark:border-[#9050cc]"
+        style={{
+          background: dark
+            ? "linear-gradient(135deg, #6040ff, #c080ff)"
+            : "var(--gradient-brand)",
+        }}
       >
         <Swords size={20} />
-        Iniciar Desafio
+        {status === "completed" ? "Concluído por hoje" : status === "failed" ? "Volte amanhã" : status === "in_progress" ? "Retomar desafio" : "Iniciar desafio"}
       </motion.button>
     </div>
   );

@@ -4,17 +4,21 @@ import { clsx } from "clsx";
 import { LEVELS } from "../../data/levels";
 
 export function ProfileTab({
-  xp, streak, completedLevels, bestRound, totalSolved,
+  userName, xp, streak, completedLevels, dailyChallengesCompleted, bestDailyStreak, totalSolved,
 }: {
+  userName: string;
   xp: number;
   streak: number;
   completedLevels: number[];
-  bestRound: number;
+  dailyChallengesCompleted: number;
+  bestDailyStreak: number;
   totalSolved: number;
 }) {
   const userLevel = Math.floor(xp / 50) + 1;
   const xpInLevel = xp % 50;
   const progressPct = (xpInLevel / 50) * 100;
+  const avatarInitial = Array.from(userName.trim())[0]?.toLocaleUpperCase("pt-BR") || "N";
+  const allLevelsCompleted = LEVELS.every((level) => completedLevels.includes(level.id));
 
   const achievements = [
     {
@@ -25,15 +29,15 @@ export function ProfileTab({
     },
     {
       emoji: "🎓",
-      name: "Cruzadinha Mestre",
-      desc: "Complete todos os níveis base",
-      unlocked: completedLevels.length >= 3,
+      name: "Mestre da trilha",
+      desc: "Complete as 15 sessões dos cinco capítulos",
+      unlocked: allLevelsCompleted,
     },
     {
       emoji: "⚔️",
       name: "Desafiador",
-      desc: "Alcance a Rodada 5 no Desafio",
-      unlocked: bestRound >= 5,
+      desc: "Conclua seu primeiro desafio diário",
+      unlocked: dailyChallengesCompleted >= 1,
     },
     {
       emoji: "🔥",
@@ -50,13 +54,13 @@ export function ProfileTab({
     {
       emoji: "🌪️",
       name: "Imparável",
-      desc: "Alcance a Rodada 10 no Desafio",
-      unlocked: bestRound >= 10,
+      desc: "Conclua desafios diários por 7 dias seguidos",
+      unlocked: bestDailyStreak >= 7,
     },
   ];
 
   return (
-    <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+    <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-3 py-4 sm:px-4">
       {/* Profile card */}
       <div
         className="rounded-2xl p-5 border border-accent/45 relative overflow-hidden"
@@ -64,15 +68,15 @@ export function ProfileTab({
       >
         <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full opacity-10"
           style={{ background: "var(--glow-accent)" }} />
-        <div className="flex items-center gap-4">
+        <div className="flex min-w-0 items-center gap-3 sm:gap-4">
           <div
-            className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0"
+            className="flex size-14 shrink-0 items-center justify-center rounded-2xl text-2xl font-black sm:size-16 sm:text-3xl"
             style={{ background: "var(--gradient-profile-avatar)" }}
           >
-            🧑‍💻
+            {avatarInitial}
           </div>
-          <div>
-            <h2 className="text-xl font-black text-foreground">Jogador</h2>
+          <div className="min-w-0 flex-1">
+            <h2 className="truncate text-xl font-black text-foreground sm:text-2xl" title={userName}>{userName}</h2>
             <div className="flex items-center gap-3 mt-1">
               <div className="flex items-center gap-1">
                 <Flame size={13} className="fill-orange-400 text-orange-400" />
@@ -92,10 +96,11 @@ export function ProfileTab({
       </div>
 
       {/* Stats row */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[
           { label: "Níveis", value: `${completedLevels.length}/${LEVELS.length}`, icon: "📚" },
-          { label: "Melhor Desafio", value: bestRound > 0 ? `Rd. ${bestRound}` : "—", icon: "⚔️" },
+          { label: "Desafios diários", value: String(dailyChallengesCompleted), icon: "⚔️" },
+          { label: "Maior sequência", value: bestDailyStreak > 0 ? `${bestDailyStreak} dias` : "—", icon: "🔥" },
           { label: "Resolvidas", value: String(totalSolved), icon: "✅" },
         ].map(({ label, value, icon }) => (
           <div
@@ -139,7 +144,7 @@ export function ProfileTab({
         <p className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-3 px-1">
           Conquistas
         </p>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {achievements.map((a) => (
             <motion.div
               key={a.name}
@@ -147,8 +152,8 @@ export function ProfileTab({
               animate={{ opacity: 1, scale: 1 }}
               className={clsx(
                 "rounded-2xl p-3 border transition-all",
-                a.unlocked
-                  ? "border-secondary/30 shadow-sm shadow-accent/10"
+                  a.unlocked
+                  ? "border-accent/35 shadow-sm shadow-accent/10"
                   : "border-secondary/60",
               )}
               style={{
@@ -168,8 +173,8 @@ export function ProfileTab({
               </p>
               {a.unlocked && (
                 <div className="mt-1.5 flex items-center gap-1">
-                  <Check size={11} className="text-emerald-400" strokeWidth={3} />
-                  <span className="text-xs text-emerald-400 font-bold">Conquistada</span>
+                  <Check size={11} className="text-success" strokeWidth={3} />
+                  <span className="text-xs font-bold text-success">Conquistada</span>
                 </div>
               )}
             </motion.div>
