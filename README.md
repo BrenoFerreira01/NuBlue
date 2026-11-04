@@ -26,10 +26,10 @@
 
 ## Tecnologias
 
-  - **Frontend:** a definir.
-  - **Backend:** a definir.
-  - **Banco de dados:** a definir.
-  - **Prototipação e design:** a definir.
+  - **Frontend:** React.js e Next.js.
+  - **Backend:** Next.js e Node.js.
+  - **Banco de dados:** PostgreeDB.
+  - **Prototipação e design:** Figma.
   - **Versionamento:** Git e GitHub.
 
 ## Etapas do projeto
