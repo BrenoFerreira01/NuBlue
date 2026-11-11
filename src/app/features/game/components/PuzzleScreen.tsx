@@ -20,7 +20,7 @@ interface NumberDrag {
 
 export function PuzzleScreen({
   level, fills, selectedBank, hearts, cellStatuses, hasChecked, canCheck,
-  isChallenge, badgeLabel, progressOverride, showHearts = true, showLevelMeta = true, backLabel, secondaryAction, dark, onThemeChange,
+  isChallenge, badgeLabel, progressOverride, showHearts = true, showLevelMeta = true, backLabel, secondaryAction, errorMessage, dark, onThemeChange,
   onCellClick, onBankClick, onDropNumber, onCheck, onBack,
 }: {
   level: Level;
@@ -37,6 +37,7 @@ export function PuzzleScreen({
   showLevelMeta?: boolean;
   backLabel?: string;
   secondaryAction?: { label: string; onClick: () => void };
+  errorMessage?: string | null;
   dark: boolean;
   onThemeChange: (dark: boolean) => void;
   onCellClick: (id: string) => void;
@@ -45,7 +46,7 @@ export function PuzzleScreen({
   onCheck: () => void;
   onBack: () => void;
 }) {
-  const inputIds = Object.keys(level.answers);
+  const inputIds = level.inputIds ?? Object.keys(level.answers ?? {});
   const chapter = CHAPTERS.find((item) => item.id === level.chapter);
   const filledCount = inputIds.filter((id) => fills[id] != null).length;
   const progress = inputIds.length > 0 ? filledCount / inputIds.length : 0;
@@ -201,17 +202,18 @@ export function PuzzleScreen({
 
       <div className="px-3 pb-3 sm:px-5">
         <p className="text-xs text-muted-foreground">
-          Arraste um número ou selecione-o e escolha um espaço vazio.
+          {level.instruction ?? "Arraste um número ou selecione-o e escolha um espaço vazio."}
         </p>
+        {errorMessage && <p className="mt-2 text-sm font-bold text-destructive" role="alert">{errorMessage}</p>}
       </div>
 
       {/* Grid */}
-      <div className="flex flex-1 items-center justify-center px-2 py-2 sm:px-4">
+      <div className="flex min-h-0 flex-1 items-center justify-center overflow-auto px-2 py-2 sm:px-4">
         <div
           className="relative max-w-full rounded-3xl p-3 sm:p-5"
           style={{ background: "var(--surface-glass-frosted)", backdropFilter: "blur(12px)" }}
         >
-          <div className="flex flex-col gap-1 sm:gap-1.5">
+          <div className="flex min-w-max flex-col gap-1 sm:gap-1.5">
             {level.grid.map((row, ri) => (
               <div key={ri} className="flex items-center gap-1 sm:gap-1.5">
                 {row.map((cell, ci) => (

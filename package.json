@@ -5,7 +5,11 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "dev": "vite"
+    "dev": "vite",
+    "api:dev": "pnpm --filter nublue-backend dev",
+    "api:start": "pnpm --filter nublue-backend start",
+    "db:migrate": "pnpm --filter nublue-backend migrate",
+    "db:seed": "pnpm --filter nublue-backend seed"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",

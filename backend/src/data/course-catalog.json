@@ -1,0 +1,7756 @@
+{
+  "version": 1,
+  "course": "Cruzadinhas Matemáticas",
+  "source": "planejamento_curso_cruzadinhas_matematicas.md",
+  "chapters": [
+    {
+      "id": 1,
+      "title": "Adição",
+      "description": "Some números e conecte os resultados."
+    },
+    {
+      "id": 2,
+      "title": "Subtração",
+      "description": "Encontre as diferenças em cada cruzamento."
+    },
+    {
+      "id": 3,
+      "title": "Multiplicação",
+      "description": "Use a tabuada para completar as equações."
+    },
+    {
+      "id": 4,
+      "title": "Divisão",
+      "description": "Divida em partes iguais e descubra os valores."
+    },
+    {
+      "id": 5,
+      "title": "Desafio final",
+      "description": "Combine as quatro operações em uma trilha final."
+    }
+  ],
+  "levels": [
+    {
+      "id": 1,
+      "chapter": 1,
+      "unit": 1,
+      "unitTitle": "O poder da soma",
+      "session": 1,
+      "title": "Primeiras somas",
+      "subtitle": "Junte os números e complete as cruzadinhas!",
+      "instruction": "Complete as somas com os números que faltam.",
+      "difficulty": "easy",
+      "xpReward": 10,
+      "emoji": "➕",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "inputId": "l01-e01"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 2
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 5
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 1
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "inputId": "l01-e02"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 4
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 3
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 2
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l01-e03"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l01-e01"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 0
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l01-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l01-e02"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 2
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l01-e03"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l01-e01",
+        "l01-e02",
+        "l01-e03"
+      ],
+      "bank": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "answerKey": {
+        "l01-e01": 3,
+        "l01-e02": 3,
+        "l01-e03": 5
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 1, Unidade 1, Level 1"
+    },
+    {
+      "id": 2,
+      "chapter": 1,
+      "unit": 1,
+      "unitTitle": "O poder da soma",
+      "session": 2,
+      "title": "Somando mais",
+      "subtitle": "Junte os números e complete as cruzadinhas!",
+      "instruction": "Encontre os números escondidos!",
+      "difficulty": "easy",
+      "xpReward": 20,
+      "emoji": "➕",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 4
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "inputId": "l02-e01"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 9
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l02-e02"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 6
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 10
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 7
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 5
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l02-e03"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l02-e02"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 1
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l02-e01"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l02-e02"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 8
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l02-e03"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l02-e01",
+        "l02-e02",
+        "l02-e03"
+      ],
+      "bank": [
+        4,
+        5,
+        6,
+        7,
+        9,
+        10,
+        12
+      ],
+      "answerKey": {
+        "l02-e01": 5,
+        "l02-e02": 4,
+        "l02-e03": 12
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 1, Unidade 1, Level 2"
+    },
+    {
+      "id": 3,
+      "chapter": 1,
+      "unit": 1,
+      "unitTitle": "O poder da soma",
+      "session": 3,
+      "title": "Exploradores da soma",
+      "subtitle": "Junte os números e complete as cruzadinhas!",
+      "instruction": "Resolva todas as somas para abrir o próximo caminho!",
+      "difficulty": "medium",
+      "xpReward": 30,
+      "emoji": "➕",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "inputId": "l03-e01"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 8
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 15
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 9
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "inputId": "l03-e02"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 17
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 12
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 6
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l03-e03"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l03-e01"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 1
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l03-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l03-e02"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 10
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l03-e03"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l03-e01",
+        "l03-e02",
+        "l03-e03"
+      ],
+      "bank": [
+        6,
+        7,
+        8,
+        9,
+        12,
+        15,
+        17,
+        18
+      ],
+      "answerKey": {
+        "l03-e01": 7,
+        "l03-e02": 8,
+        "l03-e03": 18
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 1, Unidade 1, Level 3"
+    },
+    {
+      "id": 4,
+      "chapter": 2,
+      "unit": 1,
+      "unitTitle": "O que sobrou?",
+      "session": 1,
+      "title": "Tirando os primeiros números",
+      "subtitle": "Descubra quanto sobra quando tiramos alguns números.",
+      "instruction": "Complete as subtrações!",
+      "difficulty": "easy",
+      "xpReward": 15,
+      "emoji": "➖",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 8
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "inputId": "l04-e01"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 3
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l04-e02"
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "value": 2
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 4
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 9
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "value": 4
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l04-e03"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l04-e01"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 1
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l04-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l04-e03"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 1
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l04-e02"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l04-e01",
+        "l04-e02",
+        "l04-e03"
+      ],
+      "bank": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        8
+      ],
+      "answerKey": {
+        "l04-e01": 5,
+        "l04-e02": 6,
+        "l04-e03": 5
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 2, Unidade 1, Level 1"
+    },
+    {
+      "id": 5,
+      "chapter": 2,
+      "unit": 1,
+      "unitTitle": "O que sobrou?",
+      "session": 2,
+      "title": "Diferenças maiores",
+      "subtitle": "Descubra quanto sobra quando tiramos alguns números.",
+      "instruction": "Encontre os números que desapareceram.",
+      "difficulty": "medium",
+      "xpReward": 25,
+      "emoji": "➖",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 15
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "inputId": "l05-e01"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 7
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l05-e02"
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "value": 6
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 5
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 18
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "value": 9
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l05-e03"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l05-e01"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 3
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l05-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l05-e03"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 2
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l05-e02"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l05-e01",
+        "l05-e02",
+        "l05-e03"
+      ],
+      "bank": [
+        5,
+        6,
+        7,
+        8,
+        9,
+        11,
+        15
+      ],
+      "answerKey": {
+        "l05-e01": 8,
+        "l05-e02": 11,
+        "l05-e03": 9
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 2, Unidade 1, Level 2"
+    },
+    {
+      "id": 6,
+      "chapter": 2,
+      "unit": 1,
+      "unitTitle": "O que sobrou?",
+      "session": 3,
+      "title": "Caçadores de diferenças",
+      "subtitle": "Descubra quanto sobra quando tiramos alguns números.",
+      "instruction": "Resolva as subtrações e complete o caminho.",
+      "difficulty": "hard",
+      "xpReward": 35,
+      "emoji": "➖",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 27
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "inputId": "l06-e01"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 12
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l06-e02"
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "value": 8
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 14
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 30
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "value": 17
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l06-e03"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l06-e01"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 7
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l06-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l06-e03"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 9
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l06-e02"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l06-e01",
+        "l06-e02",
+        "l06-e03"
+      ],
+      "bank": [
+        8,
+        12,
+        13,
+        14,
+        15,
+        17,
+        22
+      ],
+      "answerKey": {
+        "l06-e01": 15,
+        "l06-e02": 22,
+        "l06-e03": 13
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 2, Unidade 1, Level 3"
+    },
+    {
+      "id": 7,
+      "chapter": 2,
+      "unit": 2,
+      "unitTitle": "Soma e subtração juntas",
+      "session": 1,
+      "title": "Dois jeitos de calcular",
+      "subtitle": "Encontre as diferenças em cada cruzamento.",
+      "instruction": "Complete as equações com os números do banco.",
+      "difficulty": "easy",
+      "xpReward": 15,
+      "emoji": "➖",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 5
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "inputId": "l07-e01"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 12
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 14
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "inputId": "l07-e02"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 9
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l07-e03"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 4
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 11
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l07-e02"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 2
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l07-e01"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l07-e02"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 2
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l07-e03"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l07-e01",
+        "l07-e02",
+        "l07-e03"
+      ],
+      "bank": [
+        4,
+        5,
+        7,
+        9,
+        11,
+        12
+      ],
+      "answerKey": {
+        "l07-e01": 7,
+        "l07-e02": 5,
+        "l07-e03": 7
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 2, Unidade 2, Level 1"
+    },
+    {
+      "id": 8,
+      "chapter": 2,
+      "unit": 2,
+      "unitTitle": "Soma e subtração juntas",
+      "session": 2,
+      "title": "Detetives dos números",
+      "subtitle": "Encontre as diferenças em cada cruzamento.",
+      "instruction": "Complete as equações com os números do banco.",
+      "difficulty": "medium",
+      "xpReward": 25,
+      "emoji": "➖",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 18
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "inputId": "l08-e01"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 6
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 7
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 8
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l08-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l08-e03"
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "value": 9
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 8
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l08-e01"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 3
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l08-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l08-e02"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 2
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l08-e03"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l08-e01",
+        "l08-e02",
+        "l08-e03"
+      ],
+      "bank": [
+        6,
+        7,
+        8,
+        9,
+        12,
+        15,
+        17
+      ],
+      "answerKey": {
+        "l08-e01": 12,
+        "l08-e02": 15,
+        "l08-e03": 17
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 2, Unidade 2, Level 2"
+    },
+    {
+      "id": 9,
+      "chapter": 2,
+      "unit": 2,
+      "unitTitle": "Soma e subtração juntas",
+      "session": 3,
+      "title": "O desafio combinado",
+      "subtitle": "Encontre as diferenças em cada cruzamento.",
+      "instruction": "Complete as equações com os números do banco.",
+      "difficulty": "hard",
+      "xpReward": 35,
+      "emoji": "➖",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 16
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "inputId": "l09-e01"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 29
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 30
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "inputId": "l09-e02"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 12
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 9
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 14
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l09-e03"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l09-e01"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 5
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l09-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l09-e02"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 5
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l09-e03"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l09-e01",
+        "l09-e02",
+        "l09-e03"
+      ],
+      "bank": [
+        9,
+        12,
+        13,
+        14,
+        16,
+        18,
+        23
+      ],
+      "answerKey": {
+        "l09-e01": 13,
+        "l09-e02": 18,
+        "l09-e03": 23
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 2, Unidade 2, Level 3"
+    },
+    {
+      "id": 10,
+      "chapter": 2,
+      "unit": 3,
+      "unitTitle": "Mistura matemática",
+      "session": 1,
+      "title": "Mistura fácil",
+      "subtitle": "Encontre as diferenças em cada cruzamento.",
+      "instruction": "Complete as equações com os números do banco.",
+      "difficulty": "easy",
+      "xpReward": 15,
+      "emoji": "➖",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 20
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "inputId": "l10-e01"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 11
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 6
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 7
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l10-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l10-e03"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 8
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 19
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l10-e01"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 4
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l10-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l10-e03"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 2
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l10-e02"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l10-e01",
+        "l10-e02",
+        "l10-e03"
+      ],
+      "bank": [
+        6,
+        7,
+        8,
+        9,
+        11,
+        13,
+        19
+      ],
+      "answerKey": {
+        "l10-e01": 9,
+        "l10-e02": 13,
+        "l10-e03": 11
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 2, Unidade 3, Level 1"
+    },
+    {
+      "id": 11,
+      "chapter": 2,
+      "unit": 3,
+      "unitTitle": "Mistura matemática",
+      "session": 2,
+      "title": "Mistura intermediária",
+      "subtitle": "Encontre as diferenças em cada cruzamento.",
+      "instruction": "Complete as equações com os números do banco.",
+      "difficulty": "medium",
+      "xpReward": 25,
+      "emoji": "➖",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 28
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "value": 13
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l11-e01"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 17
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "inputId": "l11-e02"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 30
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 24
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "inputId": "l11-e03"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 8
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l11-e02"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 2
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l11-e01"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l11-e02"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 3
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l11-e03"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l11-e01",
+        "l11-e02",
+        "l11-e03"
+      ],
+      "bank": [
+        8,
+        13,
+        15,
+        16,
+        17,
+        24,
+        28
+      ],
+      "answerKey": {
+        "l11-e01": 15,
+        "l11-e02": 13,
+        "l11-e03": 16
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 2, Unidade 3, Level 2"
+    },
+    {
+      "id": 12,
+      "chapter": 2,
+      "unit": 3,
+      "unitTitle": "Mistura matemática",
+      "session": 3,
+      "title": "O grande desafio da diferença",
+      "subtitle": "Encontre as diferenças em cada cruzamento.",
+      "instruction": "Complete as equações com os números do banco.",
+      "difficulty": "hard",
+      "xpReward": 35,
+      "emoji": "➖",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 19
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 6
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l12-e01"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 30
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "value": 12
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l12-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l12-e03"
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "value": 17
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 9
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l12-e02"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 7
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l12-e01"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l12-e02"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 8
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l12-e03"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l12-e01",
+        "l12-e02",
+        "l12-e03"
+      ],
+      "bank": [
+        6,
+        9,
+        12,
+        17,
+        18,
+        25,
+        26
+      ],
+      "answerKey": {
+        "l12-e01": 25,
+        "l12-e02": 18,
+        "l12-e03": 26
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 2, Unidade 3, Level 3"
+    },
+    {
+      "id": 13,
+      "chapter": 3,
+      "unit": 1,
+      "unitTitle": "Grupos iguais",
+      "session": 1,
+      "title": "Primeiros grupos",
+      "subtitle": "Descubra como os grupos iguais ajudam a multiplicar!",
+      "instruction": "Complete as equações com os números do banco.",
+      "difficulty": "easy",
+      "xpReward": 20,
+      "emoji": "✖️",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 2
+          },
+          {
+            "type": "operator",
+            "value": "×"
+          },
+          {
+            "type": "number",
+            "inputId": "l13-e01"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 8
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l13-e02"
+          },
+          {
+            "type": "operator",
+            "value": "×"
+          },
+          {
+            "type": "number",
+            "value": 3
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 12
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 5
+          },
+          {
+            "type": "operator",
+            "value": "×"
+          },
+          {
+            "type": "number",
+            "value": 2
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l13-e03"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l13-e01"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 0
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l13-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l13-e02"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 6
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l13-e03"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l13-e01",
+        "l13-e02",
+        "l13-e03"
+      ],
+      "bank": [
+        2,
+        3,
+        4,
+        5,
+        8,
+        10
+      ],
+      "answerKey": {
+        "l13-e01": 4,
+        "l13-e02": 4,
+        "l13-e03": 10
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 3, Unidade 1, Level 1"
+    },
+    {
+      "id": 14,
+      "chapter": 3,
+      "unit": 1,
+      "unitTitle": "Grupos iguais",
+      "session": 2,
+      "title": "Explorando a tabuada",
+      "subtitle": "Descubra como os grupos iguais ajudam a multiplicar!",
+      "instruction": "Complete as equações com os números do banco.",
+      "difficulty": "medium",
+      "xpReward": 30,
+      "emoji": "✖️",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 4
+          },
+          {
+            "type": "operator",
+            "value": "×"
+          },
+          {
+            "type": "number",
+            "inputId": "l14-e01"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 28
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l14-e02"
+          },
+          {
+            "type": "operator",
+            "value": "×"
+          },
+          {
+            "type": "number",
+            "value": 6
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 36
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 8
+          },
+          {
+            "type": "operator",
+            "value": "×"
+          },
+          {
+            "type": "number",
+            "value": 7
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l14-e03"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l14-e02"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 1
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l14-e01"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l14-e02"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 50
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l14-e03"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l14-e01",
+        "l14-e02",
+        "l14-e03"
+      ],
+      "bank": [
+        4,
+        6,
+        7,
+        8,
+        28,
+        36,
+        56
+      ],
+      "answerKey": {
+        "l14-e01": 7,
+        "l14-e02": 6,
+        "l14-e03": 56
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 3, Unidade 1, Level 2"
+    },
+    {
+      "id": 15,
+      "chapter": 3,
+      "unit": 1,
+      "unitTitle": "Grupos iguais",
+      "session": 3,
+      "title": "Multiplicadores experientes",
+      "subtitle": "Descubra como os grupos iguais ajudam a multiplicar!",
+      "instruction": "Complete as equações com os números do banco.",
+      "difficulty": "hard",
+      "xpReward": 40,
+      "emoji": "✖️",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 9
+          },
+          {
+            "type": "operator",
+            "value": "×"
+          },
+          {
+            "type": "number",
+            "inputId": "l15-e01"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 72
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l15-e02"
+          },
+          {
+            "type": "operator",
+            "value": "×"
+          },
+          {
+            "type": "number",
+            "value": 8
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 64
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 12
+          },
+          {
+            "type": "operator",
+            "value": "×"
+          },
+          {
+            "type": "number",
+            "value": 6
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l15-e03"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l15-e01"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 0
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l15-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l15-e02"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 64
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l15-e03"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l15-e01",
+        "l15-e02",
+        "l15-e03"
+      ],
+      "bank": [
+        6,
+        8,
+        9,
+        12,
+        64,
+        72
+      ],
+      "answerKey": {
+        "l15-e01": 8,
+        "l15-e02": 8,
+        "l15-e03": 72
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 3, Unidade 1, Level 3"
+    },
+    {
+      "id": 16,
+      "chapter": 3,
+      "unit": 2,
+      "unitTitle": "Multiplicação e subtração",
+      "session": 1,
+      "title": "Primeiras combinações",
+      "subtitle": "Multiplique grupos e descubra o que sobra.",
+      "instruction": "Complete as equações com os números do banco.",
+      "difficulty": "easy",
+      "xpReward": 20,
+      "emoji": "✖️",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 3
+          },
+          {
+            "type": "operator",
+            "value": "×"
+          },
+          {
+            "type": "number",
+            "inputId": "l16-e01"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 18
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 20
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "inputId": "l16-e02"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 8
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l16-e03"
+          },
+          {
+            "type": "operator",
+            "value": "×"
+          },
+          {
+            "type": "number",
+            "value": 2
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 14
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l16-e01"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 6
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l16-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l16-e03"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 5
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l16-e02"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l16-e01",
+        "l16-e02",
+        "l16-e03"
+      ],
+      "bank": [
+        2,
+        3,
+        6,
+        7,
+        8,
+        12,
+        14
+      ],
+      "answerKey": {
+        "l16-e01": 6,
+        "l16-e02": 12,
+        "l16-e03": 7
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 3, Unidade 2, Level 1"
+    },
+    {
+      "id": 17,
+      "chapter": 3,
+      "unit": 2,
+      "unitTitle": "Multiplicação e subtração",
+      "session": 2,
+      "title": "Contas conectadas",
+      "subtitle": "Multiplique grupos e descubra o que sobra.",
+      "instruction": "Complete as equações com os números do banco.",
+      "difficulty": "medium",
+      "xpReward": 30,
+      "emoji": "✖️",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 7
+          },
+          {
+            "type": "operator",
+            "value": "×"
+          },
+          {
+            "type": "number",
+            "value": 6
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l17-e01"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 50
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "inputId": "l17-e02"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 22
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l17-e03"
+          },
+          {
+            "type": "operator",
+            "value": "×"
+          },
+          {
+            "type": "number",
+            "value": 4
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 36
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l17-e02"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 14
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l17-e01"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l17-e03"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 19
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l17-e02"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l17-e01",
+        "l17-e02",
+        "l17-e03"
+      ],
+      "bank": [
+        4,
+        6,
+        7,
+        9,
+        22,
+        28,
+        42
+      ],
+      "answerKey": {
+        "l17-e01": 42,
+        "l17-e02": 28,
+        "l17-e03": 9
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 3, Unidade 2, Level 2"
+    },
+    {
+      "id": 18,
+      "chapter": 3,
+      "unit": 2,
+      "unitTitle": "Multiplicação e subtração",
+      "session": 3,
+      "title": "Multiplicação avançada",
+      "subtitle": "Multiplique grupos e descubra o que sobra.",
+      "instruction": "Complete as equações com os números do banco.",
+      "difficulty": "hard",
+      "xpReward": 40,
+      "emoji": "✖️",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 9
+          },
+          {
+            "type": "operator",
+            "value": "×"
+          },
+          {
+            "type": "number",
+            "value": 8
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l18-e01"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 81
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "inputId": "l18-e02"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 45
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l18-e03"
+          },
+          {
+            "type": "operator",
+            "value": "×"
+          },
+          {
+            "type": "number",
+            "value": 7
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 49
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l18-e02"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 36
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l18-e01"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l18-e03"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 29
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l18-e02"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l18-e01",
+        "l18-e02",
+        "l18-e03"
+      ],
+      "bank": [
+        7,
+        8,
+        9,
+        36,
+        45,
+        49,
+        72
+      ],
+      "answerKey": {
+        "l18-e01": 72,
+        "l18-e02": 36,
+        "l18-e03": 7
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 3, Unidade 2, Level 3"
+    },
+    {
+      "id": 19,
+      "chapter": 3,
+      "unit": 3,
+      "unitTitle": "Três operadores",
+      "session": 1,
+      "title": "Mistura fácil",
+      "subtitle": "Use a tabuada para completar as equações.",
+      "instruction": "Complete as equações com os números do banco.",
+      "difficulty": "easy",
+      "xpReward": 20,
+      "emoji": "✖️",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 5
+          },
+          {
+            "type": "operator",
+            "value": "×"
+          },
+          {
+            "type": "number",
+            "inputId": "l19-e01"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 30
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 18
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 7
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l19-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 40
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "inputId": "l19-e03"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 16
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l19-e01"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 19
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l19-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l19-e03"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 1
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l19-e02"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l19-e01",
+        "l19-e02",
+        "l19-e03"
+      ],
+      "bank": [
+        5,
+        6,
+        7,
+        16,
+        18,
+        24,
+        25
+      ],
+      "answerKey": {
+        "l19-e01": 6,
+        "l19-e02": 25,
+        "l19-e03": 24
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 3, Unidade 3, Level 1"
+    },
+    {
+      "id": 20,
+      "chapter": 3,
+      "unit": 3,
+      "unitTitle": "Três operadores",
+      "session": 2,
+      "title": "Mistura intermediária",
+      "subtitle": "Use a tabuada para completar as equações.",
+      "instruction": "Complete as equações com os números do banco.",
+      "difficulty": "medium",
+      "xpReward": 30,
+      "emoji": "✖️",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 8
+          },
+          {
+            "type": "operator",
+            "value": "×"
+          },
+          {
+            "type": "number",
+            "value": 7
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l20-e01"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l20-e02"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 19
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 50
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 72
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "inputId": "l20-e03"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 28
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l20-e02"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 25
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l20-e01"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l20-e02"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 13
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l20-e03"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l20-e01",
+        "l20-e02",
+        "l20-e03"
+      ],
+      "bank": [
+        7,
+        8,
+        19,
+        28,
+        31,
+        44,
+        56
+      ],
+      "answerKey": {
+        "l20-e01": 56,
+        "l20-e02": 31,
+        "l20-e03": 44
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 3, Unidade 3, Level 2"
+    },
+    {
+      "id": 21,
+      "chapter": 3,
+      "unit": 3,
+      "unitTitle": "Três operadores",
+      "session": 3,
+      "title": "Desafio do multiplicador",
+      "subtitle": "Use a tabuada para completar as equações.",
+      "instruction": "Complete as equações com os números do banco.",
+      "difficulty": "hard",
+      "xpReward": 40,
+      "emoji": "✖️",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 12
+          },
+          {
+            "type": "operator",
+            "value": "×"
+          },
+          {
+            "type": "number",
+            "value": 6
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l21-e01"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 35
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "inputId": "l21-e02"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 68
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 100
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "inputId": "l21-e03"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 37
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l21-e02"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 39
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l21-e01"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l21-e02"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 30
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l21-e03"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l21-e01",
+        "l21-e02",
+        "l21-e03"
+      ],
+      "bank": [
+        6,
+        12,
+        33,
+        35,
+        37,
+        63,
+        72
+      ],
+      "answerKey": {
+        "l21-e01": 72,
+        "l21-e02": 33,
+        "l21-e03": 63
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 3, Unidade 3, Level 3"
+    },
+    {
+      "id": 22,
+      "chapter": 4,
+      "unit": 1,
+      "unitTitle": "Repartindo quantidades",
+      "session": 1,
+      "title": "Primeiras divisões",
+      "subtitle": "Divida em partes iguais e descubra os valores.",
+      "instruction": "Descubra quantas vezes cada número pode ser repartido igualmente.",
+      "difficulty": "easy",
+      "xpReward": 25,
+      "emoji": "➗",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 12
+          },
+          {
+            "type": "operator",
+            "value": "÷"
+          },
+          {
+            "type": "number",
+            "inputId": "l22-e01"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 3
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l22-e02"
+          },
+          {
+            "type": "operator",
+            "value": "÷"
+          },
+          {
+            "type": "number",
+            "value": 2
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 5
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 18
+          },
+          {
+            "type": "operator",
+            "value": "÷"
+          },
+          {
+            "type": "number",
+            "value": 3
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l22-e03"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l22-e01"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 6
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l22-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l22-e03"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 4
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l22-e02"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l22-e01",
+        "l22-e02",
+        "l22-e03"
+      ],
+      "bank": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        10,
+        12
+      ],
+      "answerKey": {
+        "l22-e01": 4,
+        "l22-e02": 10,
+        "l22-e03": 6
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 4, Unidade 1, Level 1"
+    },
+    {
+      "id": 23,
+      "chapter": 4,
+      "unit": 1,
+      "unitTitle": "Repartindo quantidades",
+      "session": 2,
+      "title": "Dividindo quantidades maiores",
+      "subtitle": "Divida em partes iguais e descubra os valores.",
+      "instruction": "Complete as equações com os números do banco.",
+      "difficulty": "medium",
+      "xpReward": 35,
+      "emoji": "➗",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 42
+          },
+          {
+            "type": "operator",
+            "value": "÷"
+          },
+          {
+            "type": "number",
+            "inputId": "l23-e01"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 6
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l23-e02"
+          },
+          {
+            "type": "operator",
+            "value": "÷"
+          },
+          {
+            "type": "number",
+            "value": 8
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 9
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 81
+          },
+          {
+            "type": "operator",
+            "value": "÷"
+          },
+          {
+            "type": "number",
+            "value": 9
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l23-e03"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l23-e01"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 65
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l23-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l23-e03"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 63
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l23-e02"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l23-e01",
+        "l23-e02",
+        "l23-e03"
+      ],
+      "bank": [
+        6,
+        7,
+        8,
+        9,
+        42,
+        72,
+        81
+      ],
+      "answerKey": {
+        "l23-e01": 7,
+        "l23-e02": 72,
+        "l23-e03": 9
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 4, Unidade 1, Level 2"
+    },
+    {
+      "id": 24,
+      "chapter": 4,
+      "unit": 1,
+      "unitTitle": "Repartindo quantidades",
+      "session": 3,
+      "title": "Mestres da divisão",
+      "subtitle": "Divida em partes iguais e descubra os valores.",
+      "instruction": "Complete as equações com os números do banco.",
+      "difficulty": "hard",
+      "xpReward": 45,
+      "emoji": "➗",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 96
+          },
+          {
+            "type": "operator",
+            "value": "÷"
+          },
+          {
+            "type": "number",
+            "inputId": "l24-e01"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 12
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l24-e02"
+          },
+          {
+            "type": "operator",
+            "value": "÷"
+          },
+          {
+            "type": "number",
+            "value": 7
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 8
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 144
+          },
+          {
+            "type": "operator",
+            "value": "÷"
+          },
+          {
+            "type": "number",
+            "value": 12
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l24-e03"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l24-e01"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 48
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l24-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l24-e03"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 44
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l24-e02"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l24-e01",
+        "l24-e02",
+        "l24-e03"
+      ],
+      "bank": [
+        7,
+        8,
+        12,
+        56,
+        96,
+        144
+      ],
+      "answerKey": {
+        "l24-e01": 8,
+        "l24-e02": 56,
+        "l24-e03": 12
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 4, Unidade 1, Level 3"
+    },
+    {
+      "id": 25,
+      "chapter": 4,
+      "unit": 2,
+      "unitTitle": "Divisão e multiplicação",
+      "session": 1,
+      "title": "Operações parceiras",
+      "subtitle": "Divida em partes iguais e descubra os valores.",
+      "instruction": "Complete as equações com os números do banco.",
+      "difficulty": "easy",
+      "xpReward": 25,
+      "emoji": "➗",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 24
+          },
+          {
+            "type": "operator",
+            "value": "÷"
+          },
+          {
+            "type": "number",
+            "inputId": "l25-e01"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 4
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 5
+          },
+          {
+            "type": "operator",
+            "value": "×"
+          },
+          {
+            "type": "number",
+            "inputId": "l25-e02"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 35
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l25-e03"
+          },
+          {
+            "type": "operator",
+            "value": "÷"
+          },
+          {
+            "type": "number",
+            "value": 3
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 8
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l25-e01"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 1
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l25-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l25-e02"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 17
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l25-e03"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l25-e01",
+        "l25-e02",
+        "l25-e03"
+      ],
+      "bank": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        24
+      ],
+      "answerKey": {
+        "l25-e01": 6,
+        "l25-e02": 7,
+        "l25-e03": 24
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 4, Unidade 2, Level 1"
+    },
+    {
+      "id": 26,
+      "chapter": 4,
+      "unit": 2,
+      "unitTitle": "Divisão e multiplicação",
+      "session": 2,
+      "title": "Exploradores de grupos",
+      "subtitle": "Divida em partes iguais e descubra os valores.",
+      "instruction": "Complete as equações com os números do banco.",
+      "difficulty": "medium",
+      "xpReward": 35,
+      "emoji": "➗",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 72
+          },
+          {
+            "type": "operator",
+            "value": "÷"
+          },
+          {
+            "type": "number",
+            "value": 8
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l26-e01"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 9
+          },
+          {
+            "type": "operator",
+            "value": "×"
+          },
+          {
+            "type": "number",
+            "inputId": "l26-e02"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 63
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l26-e03"
+          },
+          {
+            "type": "operator",
+            "value": "÷"
+          },
+          {
+            "type": "number",
+            "value": 6
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 11
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l26-e02"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 2
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l26-e01"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l26-e02"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 59
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l26-e03"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l26-e01",
+        "l26-e02",
+        "l26-e03"
+      ],
+      "bank": [
+        6,
+        7,
+        8,
+        9,
+        11,
+        63,
+        66
+      ],
+      "answerKey": {
+        "l26-e01": 9,
+        "l26-e02": 7,
+        "l26-e03": 66
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 4, Unidade 2, Level 2"
+    },
+    {
+      "id": 27,
+      "chapter": 4,
+      "unit": 2,
+      "unitTitle": "Divisão e multiplicação",
+      "session": 3,
+      "title": "O desafio das operações parceiras",
+      "subtitle": "Divida em partes iguais e descubra os valores.",
+      "instruction": "Complete as equações com os números do banco.",
+      "difficulty": "hard",
+      "xpReward": 45,
+      "emoji": "➗",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 100
+          },
+          {
+            "type": "operator",
+            "value": "÷"
+          },
+          {
+            "type": "number",
+            "inputId": "l27-e01"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 10
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 12
+          },
+          {
+            "type": "operator",
+            "value": "×"
+          },
+          {
+            "type": "number",
+            "value": 8
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l27-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l27-e03"
+          },
+          {
+            "type": "operator",
+            "value": "÷"
+          },
+          {
+            "type": "number",
+            "value": 9
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 12
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l27-e01"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 86
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l27-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l27-e02"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 12
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l27-e03"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l27-e01",
+        "l27-e02",
+        "l27-e03"
+      ],
+      "bank": [
+        8,
+        9,
+        10,
+        12,
+        96,
+        100,
+        108
+      ],
+      "answerKey": {
+        "l27-e01": 10,
+        "l27-e02": 96,
+        "l27-e03": 108
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 4, Unidade 2, Level 3"
+    },
+    {
+      "id": 28,
+      "chapter": 4,
+      "unit": 3,
+      "unitTitle": "Todas as operações",
+      "session": 1,
+      "title": "Revisão dos quatro operadores",
+      "subtitle": "Divida em partes iguais e descubra os valores.",
+      "instruction": "Complete as equações com os números do banco.",
+      "difficulty": "easy",
+      "xpReward": 25,
+      "emoji": "➗",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 20
+          },
+          {
+            "type": "operator",
+            "value": "÷"
+          },
+          {
+            "type": "number",
+            "value": 4
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l28-e01"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 7
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 8
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l28-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 18
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "value": 9
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l28-e03"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l28-e01"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 10
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l28-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l28-e03"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 6
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l28-e02"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l28-e01",
+        "l28-e02",
+        "l28-e03"
+      ],
+      "bank": [
+        4,
+        5,
+        7,
+        8,
+        9,
+        15,
+        18
+      ],
+      "answerKey": {
+        "l28-e01": 5,
+        "l28-e02": 15,
+        "l28-e03": 9
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 4, Unidade 3, Level 1"
+    },
+    {
+      "id": 29,
+      "chapter": 4,
+      "unit": 3,
+      "unitTitle": "Todas as operações",
+      "session": 2,
+      "title": "Desafio dos números cruzados",
+      "subtitle": "Divida em partes iguais e descubra os valores.",
+      "instruction": "Complete as equações com os números do banco.",
+      "difficulty": "medium",
+      "xpReward": 35,
+      "emoji": "➗",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 6
+          },
+          {
+            "type": "operator",
+            "value": "×"
+          },
+          {
+            "type": "number",
+            "value": 7
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l29-e01"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 50
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "value": 18
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l29-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 64
+          },
+          {
+            "type": "operator",
+            "value": "÷"
+          },
+          {
+            "type": "number",
+            "value": 8
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l29-e03"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l29-e02"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 10
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l29-e01"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l29-e03"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 24
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l29-e02"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l29-e01",
+        "l29-e02",
+        "l29-e03"
+      ],
+      "bank": [
+        6,
+        7,
+        8,
+        18,
+        32,
+        42,
+        50
+      ],
+      "answerKey": {
+        "l29-e01": 42,
+        "l29-e02": 32,
+        "l29-e03": 8
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 4, Unidade 3, Level 2"
+    },
+    {
+      "id": 30,
+      "chapter": 4,
+      "unit": 3,
+      "unitTitle": "Todas as operações",
+      "session": 3,
+      "title": "Grande cruzadinha matemática",
+      "subtitle": "Divida em partes iguais e descubra os valores.",
+      "instruction": "Complete as equações com os números do banco.",
+      "difficulty": "hard",
+      "xpReward": 45,
+      "emoji": "➗",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 12
+          },
+          {
+            "type": "operator",
+            "value": "×"
+          },
+          {
+            "type": "number",
+            "value": 8
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l30-e01"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 100
+          },
+          {
+            "type": "operator",
+            "value": "÷"
+          },
+          {
+            "type": "number",
+            "value": 4
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l30-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 37
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 26
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l30-e03"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 90
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "value": 44
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l30-e04"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l30-e02"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 71
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l30-e01"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l30-e02"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 38
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l30-e03"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l30-e04"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 17
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l30-e03"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l30-e01",
+        "l30-e02",
+        "l30-e03",
+        "l30-e04"
+      ],
+      "bank": [
+        4,
+        8,
+        12,
+        25,
+        26,
+        46,
+        63,
+        96
+      ],
+      "answerKey": {
+        "l30-e01": 96,
+        "l30-e02": 25,
+        "l30-e03": 63,
+        "l30-e04": 46
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 4, Unidade 3, Level 3"
+    },
+    {
+      "id": 31,
+      "chapter": 5,
+      "unit": 1,
+      "unitTitle": "Revisão das operações",
+      "session": 1,
+      "title": "Relembrando o básico",
+      "subtitle": "Combine as quatro operações em uma trilha final.",
+      "instruction": "Complete as equações com os números do banco.",
+      "difficulty": "easy",
+      "xpReward": 30,
+      "emoji": "🌟",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 8
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "inputId": "l31-e01"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 13
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 17
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "inputId": "l31-e02"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 10
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 4
+          },
+          {
+            "type": "operator",
+            "value": "×"
+          },
+          {
+            "type": "number",
+            "inputId": "l31-e03"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 16
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 20
+          },
+          {
+            "type": "operator",
+            "value": "÷"
+          },
+          {
+            "type": "number",
+            "inputId": "l31-e04"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 5
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l31-e01"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 2
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l31-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l31-e03"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 3
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l31-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l31-e03"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 0
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l31-e04"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l31-e01",
+        "l31-e02",
+        "l31-e03",
+        "l31-e04"
+      ],
+      "bank": [
+        4,
+        5,
+        7,
+        8,
+        10,
+        13,
+        16
+      ],
+      "answerKey": {
+        "l31-e01": 5,
+        "l31-e02": 7,
+        "l31-e03": 4,
+        "l31-e04": 4
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 5, Unidade 1, Level 1"
+    },
+    {
+      "id": 32,
+      "chapter": 5,
+      "unit": 1,
+      "unitTitle": "Revisão das operações",
+      "session": 2,
+      "title": "Quatro caminhos",
+      "subtitle": "Combine as quatro operações em uma trilha final.",
+      "instruction": "Complete as equações com os números do banco.",
+      "difficulty": "medium",
+      "xpReward": 40,
+      "emoji": "🌟",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "inputId": "l32-e01"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 15
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 27
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 35
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "inputId": "l32-e02"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 19
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 7
+          },
+          {
+            "type": "operator",
+            "value": "×"
+          },
+          {
+            "type": "number",
+            "inputId": "l32-e03"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 42
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 72
+          },
+          {
+            "type": "operator",
+            "value": "÷"
+          },
+          {
+            "type": "number",
+            "inputId": "l32-e04"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 9
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l32-e01"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 4
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l32-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l32-e03"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 10
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l32-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l32-e03"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 2
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l32-e04"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l32-e01",
+        "l32-e02",
+        "l32-e03",
+        "l32-e04"
+      ],
+      "bank": [
+        6,
+        7,
+        8,
+        9,
+        12,
+        15,
+        16,
+        19
+      ],
+      "answerKey": {
+        "l32-e01": 12,
+        "l32-e02": 16,
+        "l32-e03": 6,
+        "l32-e04": 8
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 5, Unidade 1, Level 2"
+    },
+    {
+      "id": 33,
+      "chapter": 5,
+      "unit": 1,
+      "unitTitle": "Revisão das operações",
+      "session": 3,
+      "title": "Revisão intermediária",
+      "subtitle": "Combine as quatro operações em uma trilha final.",
+      "instruction": "Complete as equações com os números do banco.",
+      "difficulty": "hard",
+      "xpReward": 50,
+      "emoji": "🌟",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 28
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "inputId": "l33-e01"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 50
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l33-e02"
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "value": 18
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 24
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 9
+          },
+          {
+            "type": "operator",
+            "value": "×"
+          },
+          {
+            "type": "number",
+            "inputId": "l33-e03"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 81
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 96
+          },
+          {
+            "type": "operator",
+            "value": "÷"
+          },
+          {
+            "type": "number",
+            "value": 12
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l33-e04"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l33-e01"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 20
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l33-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l33-e03"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 33
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l33-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l33-e04"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 1
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l33-e03"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l33-e01",
+        "l33-e02",
+        "l33-e03",
+        "l33-e04"
+      ],
+      "bank": [
+        8,
+        9,
+        12,
+        18,
+        22,
+        24,
+        28,
+        42
+      ],
+      "answerKey": {
+        "l33-e01": 22,
+        "l33-e02": 42,
+        "l33-e03": 9,
+        "l33-e04": 8
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 5, Unidade 1, Level 3"
+    },
+    {
+      "id": 34,
+      "chapter": 5,
+      "unit": 2,
+      "unitTitle": "Conexões matemáticas",
+      "session": 1,
+      "title": "Descobrindo conexões",
+      "subtitle": "Combine as quatro operações em uma trilha final.",
+      "instruction": "Complete as equações com os números do banco.",
+      "difficulty": "easy",
+      "xpReward": 30,
+      "emoji": "🌟",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 6
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "inputId": "l34-e01"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 14
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l34-e02"
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "value": 5
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 8
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 3
+          },
+          {
+            "type": "operator",
+            "value": "×"
+          },
+          {
+            "type": "number",
+            "inputId": "l34-e03"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 24
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l34-e04"
+          },
+          {
+            "type": "operator",
+            "value": "÷"
+          },
+          {
+            "type": "number",
+            "value": 4
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 6
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l34-e01"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 5
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l34-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l34-e03"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 5
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l34-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l34-e03"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 16
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l34-e04"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l34-e01",
+        "l34-e02",
+        "l34-e03",
+        "l34-e04"
+      ],
+      "bank": [
+        3,
+        4,
+        5,
+        6,
+        8,
+        13,
+        24
+      ],
+      "answerKey": {
+        "l34-e01": 8,
+        "l34-e02": 13,
+        "l34-e03": 8,
+        "l34-e04": 24
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 5, Unidade 2, Level 1"
+    },
+    {
+      "id": 35,
+      "chapter": 5,
+      "unit": 2,
+      "unitTitle": "Conexões matemáticas",
+      "session": 2,
+      "title": "A trilha das incógnitas",
+      "subtitle": "Combine as quatro operações em uma trilha final.",
+      "instruction": "Complete as equações com os números do banco.",
+      "difficulty": "medium",
+      "xpReward": 40,
+      "emoji": "🌟",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 19
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "inputId": "l35-e01"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 40
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 60
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "inputId": "l35-e02"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 27
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 8
+          },
+          {
+            "type": "operator",
+            "value": "×"
+          },
+          {
+            "type": "number",
+            "inputId": "l35-e03"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 64
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 108
+          },
+          {
+            "type": "operator",
+            "value": "÷"
+          },
+          {
+            "type": "number",
+            "inputId": "l35-e04"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 12
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l35-e01"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 12
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l35-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l35-e03"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 25
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l35-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l35-e03"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 1
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l35-e04"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l35-e01",
+        "l35-e02",
+        "l35-e03",
+        "l35-e04"
+      ],
+      "bank": [
+        8,
+        9,
+        12,
+        19,
+        21,
+        27,
+        33,
+        40
+      ],
+      "answerKey": {
+        "l35-e01": 21,
+        "l35-e02": 33,
+        "l35-e03": 8,
+        "l35-e04": 9
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 5, Unidade 2, Level 2"
+    },
+    {
+      "id": 36,
+      "chapter": 5,
+      "unit": 2,
+      "unitTitle": "Conexões matemáticas",
+      "session": 3,
+      "title": "Conexões avançadas",
+      "subtitle": "Combine as quatro operações em uma trilha final.",
+      "instruction": "Complete as equações com os números do banco.",
+      "difficulty": "hard",
+      "xpReward": 50,
+      "emoji": "🌟",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 45
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "inputId": "l36-e01"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 78
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l36-e02"
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "value": 26
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 35
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 12
+          },
+          {
+            "type": "operator",
+            "value": "×"
+          },
+          {
+            "type": "number",
+            "inputId": "l36-e03"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 96
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l36-e04"
+          },
+          {
+            "type": "operator",
+            "value": "÷"
+          },
+          {
+            "type": "number",
+            "value": 7
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 11
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l36-e01"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 28
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l36-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l36-e03"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 53
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l36-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l36-e03"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 69
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l36-e04"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l36-e01",
+        "l36-e02",
+        "l36-e03",
+        "l36-e04"
+      ],
+      "bank": [
+        7,
+        8,
+        11,
+        12,
+        26,
+        33,
+        61,
+        77
+      ],
+      "answerKey": {
+        "l36-e01": 33,
+        "l36-e02": 61,
+        "l36-e03": 8,
+        "l36-e04": 77
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 5, Unidade 2, Level 3"
+    },
+    {
+      "id": 37,
+      "chapter": 5,
+      "unit": 3,
+      "unitTitle": "A grande cruzadinha",
+      "session": 1,
+      "title": "Desafio final fácil",
+      "subtitle": "Combine as quatro operações em uma trilha final.",
+      "instruction": "Complete as equações com os números do banco.",
+      "difficulty": "easy",
+      "xpReward": 30,
+      "emoji": "🌟",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 13
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "inputId": "l37-e01"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 25
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 40
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "inputId": "l37-e02"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 17
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 6
+          },
+          {
+            "type": "operator",
+            "value": "×"
+          },
+          {
+            "type": "number",
+            "inputId": "l37-e03"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 54
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 56
+          },
+          {
+            "type": "operator",
+            "value": "÷"
+          },
+          {
+            "type": "number",
+            "inputId": "l37-e04"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 8
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l37-e01"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 11
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l37-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l37-e03"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 14
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l37-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l37-e04"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 2
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l37-e03"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l37-e01",
+        "l37-e02",
+        "l37-e03",
+        "l37-e04"
+      ],
+      "bank": [
+        6,
+        7,
+        8,
+        9,
+        12,
+        13,
+        17,
+        23
+      ],
+      "answerKey": {
+        "l37-e01": 12,
+        "l37-e02": 23,
+        "l37-e03": 9,
+        "l37-e04": 7
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 5, Unidade 3, Level 1"
+    },
+    {
+      "id": 38,
+      "chapter": 5,
+      "unit": 3,
+      "unitTitle": "A grande cruzadinha",
+      "session": 2,
+      "title": "Desafio final intermediário",
+      "subtitle": "Combine as quatro operações em uma trilha final.",
+      "instruction": "Complete as equações com os números do banco.",
+      "difficulty": "medium",
+      "xpReward": 40,
+      "emoji": "🌟",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "inputId": "l38-e01"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 38
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 70
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 95
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "inputId": "l38-e02"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 47
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 11
+          },
+          {
+            "type": "operator",
+            "value": "×"
+          },
+          {
+            "type": "number",
+            "inputId": "l38-e03"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 88
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 144
+          },
+          {
+            "type": "operator",
+            "value": "÷"
+          },
+          {
+            "type": "number",
+            "inputId": "l38-e04"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 12
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l38-e01"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 16
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l38-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l38-e03"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 40
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l38-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l38-e03"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 4
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l38-e04"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l38-e01",
+        "l38-e02",
+        "l38-e03",
+        "l38-e04"
+      ],
+      "bank": [
+        8,
+        11,
+        12,
+        32,
+        38,
+        47,
+        48,
+        70
+      ],
+      "answerKey": {
+        "l38-e01": 32,
+        "l38-e02": 48,
+        "l38-e03": 8,
+        "l38-e04": 12
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 5, Unidade 3, Level 2"
+    },
+    {
+      "id": 39,
+      "chapter": 5,
+      "unit": 3,
+      "unitTitle": "A grande cruzadinha",
+      "session": 3,
+      "title": "A cruzadinha lendária",
+      "subtitle": "Combine as quatro operações em uma trilha final.",
+      "instruction": "Preencha todas as células. Cada número certo aproxima você da vitória!",
+      "difficulty": "hard",
+      "xpReward": 50,
+      "emoji": "🌟",
+      "grid": [
+        [
+          {
+            "type": "number",
+            "value": 125
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "inputId": "l39-e01"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 200
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l39-e02"
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "value": 47
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 68
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 12
+          },
+          {
+            "type": "operator",
+            "value": "×"
+          },
+          {
+            "type": "number",
+            "inputId": "l39-e03"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 144
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 180
+          },
+          {
+            "type": "operator",
+            "value": "÷"
+          },
+          {
+            "type": "number",
+            "inputId": "l39-e04"
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "value": 15
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 99
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 101
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l39-e05"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "value": 250
+          },
+          {
+            "type": "operator",
+            "value": "−"
+          },
+          {
+            "type": "number",
+            "value": 125
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l39-e06"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l39-e01"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 40
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l39-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l39-e03"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 103
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l39-e02"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l39-e03"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 0
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l39-e04"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l39-e04"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 188
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l39-e05"
+          }
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          {
+            "type": "number",
+            "inputId": "l39-e06"
+          },
+          {
+            "type": "operator",
+            "value": "+"
+          },
+          {
+            "type": "number",
+            "value": 75
+          },
+          {
+            "type": "equals"
+          },
+          {
+            "type": "number",
+            "inputId": "l39-e05"
+          }
+        ]
+      ],
+      "inputIds": [
+        "l39-e01",
+        "l39-e02",
+        "l39-e03",
+        "l39-e04",
+        "l39-e05",
+        "l39-e06"
+      ],
+      "bank": [
+        12,
+        15,
+        47,
+        68,
+        75,
+        99,
+        115,
+        125,
+        200
+      ],
+      "answerKey": {
+        "l39-e01": 75,
+        "l39-e02": 115,
+        "l39-e03": 12,
+        "l39-e04": 12,
+        "l39-e05": 200,
+        "l39-e06": 125
+      },
+      "isBonus": false,
+      "source": "planejamento_curso_cruzadinhas_matematicas.md — Capítulo 5, Unidade 3, Level 3"
+    }
+  ],
+  "bonus": {
+    "id": 40,
+    "chapter": 5,
+    "unit": 3,
+    "session": 4,
+    "title": "Desafio de referência — Muito difícil",
+    "subtitle": "Uma cruzadinha longa com 18 equações interligadas e quatro operadores.",
+    "instruction": "Use todas as operações e confira cada cruzamento.",
+    "difficulty": "very_hard",
+    "xpReward": 50,
+    "emoji": "🧠",
+    "grid": [
+      [
+        {
+          "type": "number",
+          "value": 17
+        },
+        {
+          "type": "operator",
+          "value": "−"
+        },
+        {
+          "type": "number",
+          "inputId": "a"
+        },
+        {
+          "type": "equals"
+        },
+        {
+          "type": "number",
+          "inputId": "b"
+        },
+        null,
+        {
+          "type": "number",
+          "inputId": "c"
+        },
+        {
+          "type": "operator",
+          "value": "+"
+        },
+        {
+          "type": "number",
+          "inputId": "d"
+        },
+        {
+          "type": "equals"
+        },
+        {
+          "type": "number",
+          "value": 11
+        }
+      ],
+      [
+        null,
+        null,
+        {
+          "type": "operator",
+          "value": "−",
+          "isVertical": true
+        },
+        null,
+        {
+          "type": "operator",
+          "value": "×",
+          "isVertical": true
+        },
+        null,
+        {
+          "type": "operator",
+          "value": "+",
+          "isVertical": true
+        },
+        null,
+        {
+          "type": "operator",
+          "value": "+",
+          "isVertical": true
+        },
+        null,
+        null
+      ],
+      [
+        null,
+        null,
+        {
+          "type": "number",
+          "inputId": "e"
+        },
+        {
+          "type": "operator",
+          "value": "÷"
+        },
+        {
+          "type": "number",
+          "inputId": "f"
+        },
+        {
+          "type": "equals"
+        },
+        {
+          "type": "number",
+          "inputId": "g"
+        },
+        null,
+        {
+          "type": "number",
+          "value": 6
+        },
+        null,
+        null
+      ],
+      [
+        null,
+        null,
+        {
+          "type": "equals",
+          "isVertical": true
+        },
+        null,
+        {
+          "type": "equals",
+          "isVertical": true
+        },
+        null,
+        {
+          "type": "equals",
+          "isVertical": true
+        },
+        null,
+        {
+          "type": "equals",
+          "isVertical": true
+        },
+        null,
+        null
+      ],
+      [
+        {
+          "type": "number",
+          "value": 2
+        },
+        {
+          "type": "operator",
+          "value": "×"
+        },
+        {
+          "type": "number",
+          "inputId": "h"
+        },
+        {
+          "type": "equals"
+        },
+        {
+          "type": "number",
+          "value": 11
+        },
+        null,
+        {
+          "type": "number",
+          "inputId": "j"
+        },
+        {
+          "type": "operator",
+          "value": "+"
+        },
+        {
+          "type": "number",
+          "inputId": "k"
+        },
+        {
+          "type": "equals"
+        },
+        {
+          "type": "number",
+          "inputId": "l"
+        }
+      ],
+      [
+        {
+          "type": "operator",
+          "value": "+",
+          "isVertical": true
+        },
+        null,
+        null,
+        null,
+        {
+          "type": "operator",
+          "value": "+",
+          "isVertical": true
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        {
+          "type": "operator",
+          "value": "×",
+          "isVertical": true
+        }
+      ],
+      [
+        {
+          "type": "number",
+          "inputId": "m"
+        },
+        {
+          "type": "operator",
+          "value": "+"
+        },
+        {
+          "type": "number",
+          "inputId": "n"
+        },
+        {
+          "type": "equals"
+        },
+        {
+          "type": "number",
+          "inputId": "s"
+        },
+        null,
+        null,
+        null,
+        {
+          "type": "number",
+          "inputId": "p"
+        },
+        null,
+        {
+          "type": "number",
+          "value": 1
+        }
+      ],
+      [
+        {
+          "type": "equals",
+          "isVertical": true
+        },
+        null,
+        {
+          "type": "operator",
+          "value": "+",
+          "isVertical": true
+        },
+        null,
+        {
+          "type": "equals",
+          "isVertical": true
+        },
+        null,
+        null,
+        null,
+        {
+          "type": "operator",
+          "value": "+",
+          "isVertical": true
+        },
+        null,
+        {
+          "type": "equals",
+          "isVertical": true
+        }
+      ],
+      [
+        {
+          "type": "number",
+          "inputId": "q"
+        },
+        {
+          "type": "operator",
+          "value": "+"
+        },
+        {
+          "type": "number",
+          "inputId": "r"
+        },
+        {
+          "type": "equals"
+        },
+        {
+          "type": "number",
+          "inputId": "w"
+        },
+        null,
+        {
+          "type": "number",
+          "value": 18
+        },
+        {
+          "type": "operator",
+          "value": "+"
+        },
+        {
+          "type": "number",
+          "inputId": "t"
+        },
+        {
+          "type": "equals"
+        },
+        {
+          "type": "number",
+          "inputId": "u"
+        }
+      ],
+      [
+        null,
+        null,
+        {
+          "type": "equals",
+          "isVertical": true
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        {
+          "type": "equals",
+          "isVertical": true
+        },
+        null,
+        null
+      ],
+      [
+        {
+          "type": "number",
+          "inputId": "v"
+        },
+        {
+          "type": "operator",
+          "value": "+"
+        },
+        {
+          "type": "number",
+          "value": 7
+        },
+        {
+          "type": "equals"
+        },
+        {
+          "type": "number",
+          "inputId": "w"
+        },
+        null,
+        null,
+        null,
+        {
+          "type": "number",
+          "value": 14
+        },
+        null,
+        null
+      ]
+    ],
+    "inputIds": [
+      "a",
+      "b",
+      "c",
+      "d",
+      "e",
+      "f",
+      "g",
+      "h",
+      "i",
+      "j",
+      "k",
+      "l",
+      "m",
+      "n",
+      "p",
+      "q",
+      "r",
+      "s",
+      "t",
+      "u",
+      "v",
+      "w"
+    ],
+    "bank": [
+      8,
+      15,
+      22,
+      1,
+      10,
+      10,
+      1,
+      5,
+      9,
+      22,
+      10,
+      6,
+      12,
+      1,
+      18,
+      7,
+      4,
+      29,
+      4,
+      22,
+      8,
+      5
+    ],
+    "answerKey": {
+      "a": 9,
+      "b": 8,
+      "c": 10,
+      "d": 1,
+      "e": 5,
+      "f": 1,
+      "g": 5,
+      "h": 4,
+      "i": 8,
+      "j": 15,
+      "k": 7,
+      "l": 22,
+      "m": 10,
+      "n": 1,
+      "p": 10,
+      "q": 12,
+      "r": 6,
+      "s": 18,
+      "t": 4,
+      "u": 22,
+      "v": 22,
+      "w": 29
+    },
+    "isBonus": true,
+    "source": "imagem de referência enviada pelo usuário"
+  }
+}

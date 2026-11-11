@@ -118,10 +118,12 @@ export const DIFF_LABEL: Record<Difficulty, string> = {
   easy: "Fácil",
   medium: "Médio",
   hard: "Difícil",
+  very_hard: "Muito difícil",
 };
 
 export const DIFF_CHIP: Record<Difficulty, string> = {
   easy: "bg-success/15 text-success-foreground dark:bg-emerald-500/20 dark:text-emerald-400",
   medium: "bg-warning text-warning-foreground dark:bg-amber-500/20 dark:text-amber-400",
   hard: "bg-destructive/10 text-destructive dark:bg-red-500/20 dark:text-red-400",
+  very_hard: "bg-purple-500/15 text-purple-800 dark:bg-purple-500/25 dark:text-purple-300",
 };

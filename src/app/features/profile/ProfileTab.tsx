@@ -1,10 +1,10 @@
 import { motion } from "motion/react";
 import { Check, Flame, Star, Zap } from "lucide-react";
 import { clsx } from "clsx";
-import { LEVELS } from "../../data/levels";
 
 export function ProfileTab({
   userName, xp, streak, completedLevels, dailyChallengesCompleted, bestDailyStreak, totalSolved,
+  totalLevels,
 }: {
   userName: string;
   xp: number;
@@ -13,12 +13,13 @@ export function ProfileTab({
   dailyChallengesCompleted: number;
   bestDailyStreak: number;
   totalSolved: number;
+  totalLevels: number;
 }) {
   const userLevel = Math.floor(xp / 50) + 1;
   const xpInLevel = xp % 50;
   const progressPct = (xpInLevel / 50) * 100;
   const avatarInitial = Array.from(userName.trim())[0]?.toLocaleUpperCase("pt-BR") || "N";
-  const allLevelsCompleted = LEVELS.every((level) => completedLevels.includes(level.id));
+  const allLevelsCompleted = completedLevels.length >= totalLevels;
 
   const achievements = [
     {
@@ -30,7 +31,7 @@ export function ProfileTab({
     {
       emoji: "🎓",
       name: "Mestre da trilha",
-      desc: "Complete as 15 sessões dos cinco capítulos",
+      desc: `Complete os ${totalLevels} níveis dos cinco capítulos`,
       unlocked: allLevelsCompleted,
     },
     {
@@ -98,7 +99,7 @@ export function ProfileTab({
       {/* Stats row */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[
-          { label: "Níveis", value: `${completedLevels.length}/${LEVELS.length}`, icon: "📚" },
+          { label: "Níveis", value: `${Math.min(completedLevels.length, totalLevels)}/${totalLevels}`, icon: "📚" },
           { label: "Desafios diários", value: String(dailyChallengesCompleted), icon: "⚔️" },
           { label: "Maior sequência", value: bestDailyStreak > 0 ? `${bestDailyStreak} dias` : "—", icon: "🔥" },
           { label: "Resolvidas", value: String(totalSolved), icon: "✅" },

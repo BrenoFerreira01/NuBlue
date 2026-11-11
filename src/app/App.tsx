@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
+import { api, type CourseCatalog, type StudentAccount } from "./api/client";
+import type { Level } from "./types/game";
 import { LEVELS } from "./data/levels";
 import { LandingPage } from "./features/landing/LandingPage";
 import { DiagnosticTest } from "./features/onboarding/DiagnosticTest";
@@ -9,16 +11,16 @@ import { ResultScreen } from "./features/game/components/ResultScreen";
 import { useGameController } from "./features/game/useGameController";
 
 export default function App() {
-  const game = useGameController();
+  const [student, setStudent] = useState<StudentAccount | null>(null);
+  const [courseCatalog, setCourseCatalog] = useState<CourseCatalog | null>(null);
+  const [bonusLevel, setBonusLevel] = useState<Level | null>(null);
+  const game = useGameController({ levels: courseCatalog?.levels ?? LEVELS, authenticated: Boolean(student) });
   const [view, setView] = useState<"landing" | "diagnostic" | "game">("landing");
   const [dark, setDark] = useState(() => {
     if (typeof window === "undefined") return false;
     return window.localStorage.getItem("nublue-theme") === "dark";
   });
-  const [userName, setUserName] = useState(() => {
-    if (typeof window === "undefined") return "Jogador";
-    return window.localStorage.getItem("nublue-user-name")?.trim() || "Jogador";
-  });
+  const [userName, setUserName] = useState("Jogador");
   const [chapterId, setChapterId] = useState(() => {
     if (typeof window === "undefined") return 1;
     const savedChapter = Number(window.localStorage.getItem("nublue-chapter"));
@@ -30,6 +32,36 @@ export default function App() {
     window.localStorage.setItem("nublue-theme", dark ? "dark" : "light");
   }, [dark]);
 
+  useEffect(() => {
+    let active = true;
+    api.catalog().then((catalog) => {
+      if (active) setCourseCatalog(catalog);
+    }).catch(() => undefined);
+    api.me().then(async ({ student: currentStudent }) => {
+      if (!active) return;
+      const catalog = await api.catalog();
+      if (!active) return;
+      setCourseCatalog(catalog);
+      setStudent(currentStudent);
+      setUserName(currentStudent.nickname);
+      setView("game");
+    }).catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!student || game.completedLevels.length < 39 || bonusLevel) return;
+    let active = true;
+    api.bonusLevel().then(({ level }) => {
+      if (active) setBonusLevel(level);
+    }).catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, [student, game.completedLevels.length, bonusLevel]);
+
   const enterGame = () => {
     game.setActiveTab("home");
     setView("game");
@@ -39,9 +71,30 @@ export default function App() {
     const normalizedName = name.trim().replace(/\s+/g, " ");
     if (normalizedName) {
       setUserName(normalizedName);
-      window.localStorage.setItem("nublue-user-name", normalizedName);
     }
     setView("diagnostic");
+  };
+
+  const loadCatalog = async () => {
+    const catalog = await api.catalog();
+    setCourseCatalog(catalog);
+    return catalog;
+  };
+
+  const login = async (nickname: string, password: string) => {
+    const { student: signedInStudent } = await api.login(nickname, password);
+    await loadCatalog();
+    setStudent(signedInStudent);
+    setUserName(signedInStudent.nickname);
+    enterGame();
+  };
+
+  const signup = async (nickname: string, password: string) => {
+    const { student: newStudent } = await api.register(nickname, password);
+    await loadCatalog();
+    setStudent(newStudent);
+    setUserName(newStudent.nickname);
+    startDiagnostic(newStudent.nickname);
   };
 
   const changeChapter = (nextChapter: number) => {
@@ -60,7 +113,15 @@ export default function App() {
     finishDiagnostic("easy");
   };
 
-  const returnToLanding = () => {
+  const returnToLanding = async () => {
+    try {
+      if (student) await api.logout();
+    } catch {
+      // Clear the local session even when the server cannot be reached.
+    } finally {
+      setStudent(null);
+      setBonusLevel(null);
+    }
     game.setActiveTab("home");
     setView("landing");
   };
@@ -79,8 +140,8 @@ export default function App() {
             <LandingPage
               dark={dark}
               onThemeChange={setDark}
-              onLogin={enterGame}
-              onSignup={startDiagnostic}
+              onLogin={login}
+              onSignup={signup}
               dailyChallengeDate={game.today}
             />
           </motion.div>
@@ -115,7 +176,8 @@ export default function App() {
             <MainScreen
               activeTab={game.activeTab}
               setActiveTab={game.setActiveTab}
-              levels={LEVELS}
+              levels={courseCatalog?.levels ?? LEVELS}
+              bonusLevel={bonusLevel ?? undefined}
               completedLevels={game.completedLevels}
               xp={game.totalXp}
               streak={game.streak}
@@ -135,6 +197,11 @@ export default function App() {
               difficulty={game.difficulty}
               onDifficultyChange={game.setDifficulty}
               onReturnToLanding={returnToLanding}
+              leaderboardOptIn={student?.leaderboardOptIn ?? false}
+              onLeaderboardOptInChange={async (enabled) => {
+                const result = await api.setLeaderboardVisibility(enabled);
+                setStudent((current) => current ? { ...current, ...result } : current);
+              }}
             />
           </motion.div>
         )}
@@ -149,6 +216,7 @@ export default function App() {
             cellStatuses={game.cellStatuses}
             hasChecked={game.hasChecked}
             canCheck={game.canCheck}
+            errorMessage={game.errorMessage}
             isChallenge={game.isChallenge}
             dark={dark}
             onThemeChange={setDark}
@@ -164,7 +232,7 @@ export default function App() {
           <ResultScreen
             key="result"
             isCorrect={game.isCorrect}
-            xpEarned={game.isCorrect ? game.currentLevel.xpReward : 0}
+            xpEarned={game.isCorrect ? game.xpEarned : 0}
             isChallenge={game.isChallenge}
             dark={dark}
             onThemeChange={setDark}

@@ -1,12 +1,14 @@
 import { useState } from "react";
 import type { LucideIcon } from "lucide-react";
-import { Bell, ChevronRight, LogOut, Shield } from "lucide-react";
+import { Bell, ChevronRight, LogOut, Shield, Trophy } from "lucide-react";
 import type { Difficulty } from "../../types/game";
 
 interface Props {
   difficulty: Difficulty;
   onDifficultyChange: (difficulty: Difficulty) => void;
   onReturnToLanding: () => void;
+  leaderboardOptIn: boolean;
+  onLeaderboardOptInChange: (enabled: boolean) => Promise<void>;
 }
 
 const DIFFICULTY_OPTIONS: [Difficulty, string, string][] = [
@@ -15,7 +17,10 @@ const DIFFICULTY_OPTIONS: [Difficulty, string, string][] = [
   ["hard", "Avançado", "Operações complexas"],
 ];
 
-export function SettingsTab({ difficulty, onDifficultyChange, onReturnToLanding }: Props) {
+export function SettingsTab({
+  difficulty, onDifficultyChange, onReturnToLanding, leaderboardOptIn, onLeaderboardOptInChange,
+}: Props) {
+  const [visibilityError, setVisibilityError] = useState<string | null>(null);
   const [reminders, setReminders] = useState(() => {
     if (typeof window === "undefined") return true;
     return window.localStorage.getItem("nublue-daily-reminders") !== "off";
@@ -66,8 +71,31 @@ export function SettingsTab({ difficulty, onDifficultyChange, onReturnToLanding 
             Icon={Bell}
             title="Lembretes diários"
             description="Sua preferência fica salva neste dispositivo."
-            action={<Toggle on={reminders} setOn={updateReminders} />}
+            action={<Toggle label="Lembretes diários" on={reminders} setOn={updateReminders} />}
           />
+        </section>
+
+        <section className="overflow-hidden rounded-[26px] border border-border bg-card">
+          <SettingRow
+            Icon={Trophy}
+            title="Aparecer no ranking"
+            description="Seu apelido ficará visível para outros estudantes."
+            action={(
+              <Toggle
+                label="Aparecer no ranking"
+                on={leaderboardOptIn}
+                setOn={async (enabled) => {
+                  setVisibilityError(null);
+                  try {
+                    await onLeaderboardOptInChange(enabled);
+                  } catch {
+                    setVisibilityError("Não foi possível salvar essa preferência.");
+                  }
+                }}
+              />
+            )}
+          />
+          {visibilityError && <p className="px-5 pb-4 text-sm font-bold text-destructive" role="alert">{visibilityError}</p>}
         </section>
 
         <button
@@ -111,13 +139,17 @@ function SettingRow({
   );
 }
 
-function Toggle({ on, setOn }: { on: boolean; setOn: (on: boolean) => void }) {
+function Toggle({ label, on, setOn }: {
+  label: string;
+  on: boolean;
+  setOn: (on: boolean) => void | Promise<void>;
+}) {
   return (
     <button
       type="button"
       onClick={() => setOn(!on)}
       aria-pressed={on}
-      aria-label="Lembretes diários"
+      aria-label={label}
       className={`relative h-7 w-12 shrink-0 rounded-full transition ${on ? "bg-primary" : "bg-muted"}`}
     >
       <span className={`absolute top-1 size-5 rounded-full bg-white transition ${on ? "left-6" : "left-1"}`} />

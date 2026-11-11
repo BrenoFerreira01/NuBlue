@@ -23,6 +23,7 @@ export function MainScreen({
   activeTab,
   setActiveTab,
   levels,
+  bonusLevel,
   completedLevels,
   xp,
   streak,
@@ -42,10 +43,13 @@ export function MainScreen({
   difficulty,
   onDifficultyChange,
   onReturnToLanding,
+  leaderboardOptIn,
+  onLeaderboardOptInChange,
 }: {
   activeTab: TabId;
   setActiveTab: (tab: TabId) => void;
   levels: Level[];
+  bonusLevel?: Level;
   completedLevels: number[];
   xp: number;
   streak: number;
@@ -65,6 +69,8 @@ export function MainScreen({
   difficulty: Difficulty;
   onDifficultyChange: (difficulty: Difficulty) => void;
   onReturnToLanding: () => void;
+  leaderboardOptIn: boolean;
+  onLeaderboardOptInChange: (enabled: boolean) => Promise<void>;
 }) {
   return (
     <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-background">
@@ -109,6 +115,7 @@ export function MainScreen({
               >
                 <SkillPathTab
                   levels={levels}
+                  bonusLevel={bonusLevel}
                   completedLevels={completedLevels}
                   chapterId={chapterId}
                   onChapterChange={onChapterChange}
@@ -145,7 +152,7 @@ export function MainScreen({
                 transition={{ duration: 0.18 }}
                 className="flex min-h-0 flex-1 flex-col overflow-hidden"
               >
-                <RankingTab userName={userName} userXp={xp} userStreak={streak} />
+                <RankingTab />
               </motion.div>
             )}
             {activeTab === "profile" && (
@@ -165,6 +172,7 @@ export function MainScreen({
                   dailyChallengesCompleted={dailyChallengesCompleted}
                   bestDailyStreak={bestDailyStreak}
                   totalSolved={totalSolved}
+                  totalLevels={levels.filter((level) => !level.isBonus).length}
                 />
               </motion.div>
             )}
@@ -181,6 +189,8 @@ export function MainScreen({
                   difficulty={difficulty}
                   onDifficultyChange={onDifficultyChange}
                   onReturnToLanding={onReturnToLanding}
+                  leaderboardOptIn={leaderboardOptIn}
+                  onLeaderboardOptInChange={onLeaderboardOptInChange}
                 />
               </motion.div>
             )}

@@ -36,9 +36,10 @@ export function DiagnosticTest({ dark, onThemeChange, onBack, onSkip, onFinish }
   const [cellStatuses, setCellStatuses] = useState<Record<string, CellStatus>>({});
   const [hasChecked, setHasChecked] = useState(false);
   const answerTimeout = useRef<number | null>(null);
-  const canCheck = Object.keys(level.answers).every((id) => fills[id] != null);
-  const filledCount = Object.keys(level.answers).filter((id) => fills[id] != null).length;
-  const crosswordProgress = Object.keys(level.answers).length > 0 ? filledCount / Object.keys(level.answers).length : 0;
+  const answerKey = level.answers ?? {};
+  const canCheck = Object.keys(answerKey).every((id) => fills[id] != null);
+  const filledCount = Object.keys(answerKey).filter((id) => fills[id] != null).length;
+  const crosswordProgress = Object.keys(answerKey).length > 0 ? filledCount / Object.keys(answerKey).length : 0;
 
   useEffect(() => () => {
     if (answerTimeout.current !== null) window.clearTimeout(answerTimeout.current);
@@ -52,7 +53,7 @@ export function DiagnosticTest({ dark, onThemeChange, onBack, onSkip, onFinish }
   };
 
   const handleDropNumber = (inputId: string, number: number) => {
-    if (hasChecked || !(inputId in level.answers)) return;
+    if (hasChecked || !(inputId in answerKey)) return;
     setFills((previous) => ({ ...previous, [inputId]: number }));
     setSelectedBank(null);
   };
@@ -67,7 +68,7 @@ export function DiagnosticTest({ dark, onThemeChange, onBack, onSkip, onFinish }
 
     const statuses: Record<string, CellStatus> = {};
     let allCorrect = true;
-    for (const [id, answer] of Object.entries(level.answers)) {
+    for (const [id, answer] of Object.entries(answerKey)) {
       const correct = fills[id] === answer;
       statuses[id] = correct ? "correct" : "wrong";
       if (!correct) allCorrect = false;
