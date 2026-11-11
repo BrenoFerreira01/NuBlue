@@ -176,6 +176,8 @@ Rotas atualmente implementadas no serviço. Todas usam o prefixo `/api`:
 - [x] Persistir conclusão, XP, streak e resumo de progresso.
 - [x] Calcular streaks e datas de desafio em UTC.
 - [x] Integrar `useGameController.ts` ao endpoint; a API é fonte de verdade para conta autenticada e o jogo local continua para visitantes.
+- [x] Reutilizar a chave idempotente após falha de rede para a mesma resposta; respostas alteradas geram uma chave nova.
+- [x] Não exibir progresso do `localStorage` durante o carregamento da conta autenticada; limpar o modo diário ao sair para que uma lição comum não seja enviada como desafio.
 - [~] Desbloqueio é refletido pelas conclusões recebidas, com regra local da trilha e bloqueio de tentativa no servidor; falta endpoint dedicado de disponibilidade.
 - [x] Não importar progresso legado para contas; fluxo local continua separado.
 
@@ -261,7 +263,7 @@ Os itens abaixo registram a execução nesta worktree. A implementação permane
 ### Task 4: Integração da interface existente
 
 - **Implementado localmente:** integrar auth, catálogo, tentativas, progresso e ranking ao frontend React/Vite.
-- **Implementado localmente:** para contas, gabarito e XP vêm do servidor; visitantes continuam com fluxo local.
+- **Implementado localmente:** para contas, gabarito e XP vêm do servidor; visitantes continuam com fluxo local. Retry após erro de rede preserva a chave idempotente da mesma submissão, e o progresso local não aparece durante a sincronização da conta.
 - **Parcial:** erros de formulário/API são exibidos; estado de sessão expirada e carregamento inicial ainda precisam de revisão.
 
 ### Task 5: Desafios e ranking
