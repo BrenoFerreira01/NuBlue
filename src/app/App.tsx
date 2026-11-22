@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { api, type CourseCatalog, type StudentAccount } from "./api/client";
+import { onSessionExpired } from "./api/sessionEvents";
 import type { Level } from "./types/game";
 import { LEVELS } from "./data/levels";
 import { LandingPage } from "./features/landing/LandingPage";
@@ -12,6 +13,9 @@ import { useGameController } from "./features/game/useGameController";
 
 export default function App() {
   const [student, setStudent] = useState<StudentAccount | null>(null);
+  const studentRef = useRef<StudentAccount | null>(null);
+  studentRef.current = student;
+  const [sessionNotice, setSessionNotice] = useState<string | null>(null);
   const [courseCatalog, setCourseCatalog] = useState<CourseCatalog | null>(null);
   const [bonusLevel, setBonusLevel] = useState<Level | null>(null);
   const game = useGameController({ levels: courseCatalog?.levels ?? LEVELS, authenticated: Boolean(student) });
@@ -51,8 +55,26 @@ export default function App() {
     };
   }, []);
 
+  const resetSessionRef = useRef(game.resetSession);
+  resetSessionRef.current = game.resetSession;
+  const leaveAccount = () => {
+    // Cleared synchronously so 401s from requests still in flight are not reported as an expiry.
+    studentRef.current = null;
+    setStudent(null);
+    setBonusLevel(null);
+    resetSessionRef.current();
+    setView("landing");
+  };
+
+  useEffect(() => onSessionExpired(() => {
+    // Only react while an account is active; in-flight requests may report the same expiry.
+    if (!studentRef.current) return;
+    leaveAccount();
+    setSessionNotice("Sua sessão expirou. Entre novamente para continuar.");
+  }), []);
+
   useEffect(() => {
-    if (!student || game.completedLevels.length < 39 || bonusLevel) return;
+    if (!student || !game.levelAvailability?.bonusAvailable || bonusLevel) return;
     let active = true;
     api.bonusLevel().then(({ level }) => {
       if (active) setBonusLevel(level);
@@ -60,7 +82,7 @@ export default function App() {
     return () => {
       active = false;
     };
-  }, [student, game.completedLevels.length, bonusLevel]);
+  }, [student, game.levelAvailability?.bonusAvailable, bonusLevel]);
 
   const enterGame = () => {
     game.setActiveTab("home");
@@ -83,6 +105,7 @@ export default function App() {
 
   const login = async (nickname: string, password: string) => {
     const { student: signedInStudent } = await api.login(nickname, password);
+    setSessionNotice(null);
     await loadCatalog();
     setStudent(signedInStudent);
     setUserName(signedInStudent.nickname);
@@ -91,6 +114,7 @@ export default function App() {
 
   const signup = async (nickname: string, password: string) => {
     const { student: newStudent } = await api.register(nickname, password);
+    setSessionNotice(null);
     await loadCatalog();
     setStudent(newStudent);
     setUserName(newStudent.nickname);
@@ -119,15 +143,33 @@ export default function App() {
     } catch {
       // Clear the local session even when the server cannot be reached.
     } finally {
-      setStudent(null);
-      setBonusLevel(null);
+      leaveAccount();
     }
-    game.setActiveTab("home");
-    setView("landing");
+  };
+
+  const deleteAccount = async () => {
+    await api.deleteAccount();
+    leaveAccount();
   };
 
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors">
+      {view === "landing" && sessionNotice && (
+        <div
+          role="status"
+          className="fixed inset-x-3 top-3 z-50 mx-auto flex max-w-md items-center justify-between gap-3 rounded-2xl border border-amber-500/30 bg-card px-4 py-3 text-sm font-bold text-foreground shadow-lg"
+        >
+          <span>{sessionNotice}</span>
+          <button
+            type="button"
+            onClick={() => setSessionNotice(null)}
+            className="shrink-0 rounded-lg px-2 py-1 text-muted-foreground hover:bg-secondary"
+            aria-label="Fechar aviso"
+          >
+            ✕
+          </button>
+        </div>
+      )}
       <AnimatePresence mode="wait">
         {view === "landing" && (
           <motion.div
@@ -179,6 +221,7 @@ export default function App() {
               levels={courseCatalog?.levels ?? LEVELS}
               bonusLevel={bonusLevel ?? undefined}
               completedLevels={game.completedLevels}
+              levelAvailability={student ? game.levelAvailability ?? { levels: [], bonusAvailable: false } : undefined}
               xp={game.totalXp}
               streak={game.streak}
               dailyChallengeStatus={game.dailyChallengeStatus}
@@ -197,6 +240,7 @@ export default function App() {
               difficulty={game.difficulty}
               onDifficultyChange={game.setDifficulty}
               onReturnToLanding={returnToLanding}
+              onDeleteAccount={student ? deleteAccount : undefined}
               leaderboardOptIn={student?.leaderboardOptIn ?? false}
               onLeaderboardOptInChange={async (enabled) => {
                 const result = await api.setLeaderboardVisibility(enabled);

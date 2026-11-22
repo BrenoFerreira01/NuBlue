@@ -198,8 +198,15 @@ importers:
       pg:
         specifier: 8.16.3
         version: 8.16.3
+    devDependencies:
+      '@electric-sql/pglite':
+        specifier: 0.5.16
+        version: 0.5.16
 
 packages:
+
+  '@electric-sql/pglite@0.5.16':
+    resolution: {integrity: sha512-Nj8KcIsJL748W408U2N8q4+9IlONdpRIU8MJypIAAINMJ5nqKyqpX7Mgg/5XKkXiAib3AoZGR6hnJFlrlLBrcg==}
 
   '@babel/code-frame@7.29.7':
     resolution: {integrity: sha512-Aup7aUOfpbAUg2ROOJN6Iw5f9DMBlzu0mIkm/malLQFN/YQgO48wCj0Kxa3sEHJvPVFg7siR+qRInwXd2qhQKw==}
@@ -2404,6 +2411,8 @@ packages:
     engines: {node: '>= 6'}
 
 snapshots:
+
+  '@electric-sql/pglite@0.5.16': {}
 
   '@babel/code-frame@7.29.7':
     dependencies:

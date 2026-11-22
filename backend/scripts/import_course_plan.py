@@ -274,7 +274,7 @@ def main():
         raise ValueError(f"Expected the course plan's 39 levels, parsed {len(levels)}")
 
     output = {
-        "version": 1,
+        "version": 2,
         "course": "Cruzadinhas Matemáticas",
         "source": "planejamento_curso_cruzadinhas_matematicas.md",
         "chapters": [
@@ -282,10 +282,12 @@ def main():
             for index, title in enumerate(["Adição", "Subtração", "Multiplicação", "Divisão", "Desafio final"], start=1)
         ],
         "levels": levels,
-        "bonus": make_bonus(),
+        # make_bonus() is disabled: its grid has colliding cells (4 equations do not
+        # hold and input "i" is hidden). Re-enable once the reference grid is fixed.
+        "bonus": None,
     }
     Path(sys.argv[2]).write_text(json.dumps(output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"Wrote {len(levels)} course levels and one bonus benchmark")
+    print(f"Wrote {len(levels)} course levels (bonus disabled)")
 
 
 if __name__ == "__main__":

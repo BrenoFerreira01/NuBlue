@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { BookOpen, Check, ChevronDown, Lock } from "lucide-react";
 import { clsx } from "clsx";
 import type { Level } from "../../types/game";
+import type { LevelAvailability } from "../../api/client";
 import { CHAPTERS, DIFF_CHIP, DIFF_LABEL } from "../../data/levels";
 import {
   DropdownMenu,
@@ -15,6 +16,7 @@ export function SkillPathTab({
   levels,
   bonusLevel,
   completedLevels,
+  levelAvailability,
   chapterId,
   onChapterChange,
   onStartLevel,
@@ -22,16 +24,24 @@ export function SkillPathTab({
   levels: Level[];
   bonusLevel?: Level;
   completedLevels: number[];
+  levelAvailability?: LevelAvailability;
   chapterId: number;
   onChapterChange: (chapterId: number) => void;
   onStartLevel: (level: Level) => void;
 }) {
   const chapter = CHAPTERS.find((item) => item.id === chapterId) ?? CHAPTERS[0];
   const chapterLevels = levels.filter((level) => level.chapter === chapter.id);
-  const completedInChapter = chapterLevels.filter((level) => completedLevels.includes(level.id)).length;
+  const availabilityByLevel = levelAvailability
+    ? new Map(levelAvailability.levels.map((level) => [level.id, level.status] as const))
+    : null;
+  const completedInChapter = availabilityByLevel
+    ? chapterLevels.filter((level) => availabilityByLevel.get(level.id) === "completed").length
+    : chapterLevels.filter((level) => completedLevels.includes(level.id)).length;
   const progress = chapterLevels.length ? (completedInChapter / chapterLevels.length) * 100 : 0;
   const showBonus = chapter.id === 5 && Boolean(bonusLevel) &&
-    levels.filter((level) => !level.isBonus).every((level) => completedLevels.includes(level.id));
+    (levelAvailability
+      ? levelAvailability.bonusAvailable
+      : levels.filter((level) => !level.isBonus).every((level) => completedLevels.includes(level.id)));
 
   return (
     <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
@@ -109,9 +119,16 @@ export function SkillPathTab({
           <div className="flex flex-col gap-6">
             {chapterLevels.map((level, index) => {
               const previousLevel = chapterLevels[index - 1];
-              const locked = Boolean(previousLevel && !completedLevels.includes(previousLevel.id));
-              const completed = completedLevels.includes(level.id);
-              const current = !completed && !locked;
+              const remoteStatus = availabilityByLevel?.get(level.id);
+              const completed = availabilityByLevel
+                ? remoteStatus === "completed"
+                : completedLevels.includes(level.id);
+              const locked = availabilityByLevel
+                ? remoteStatus !== "available" && remoteStatus !== "completed"
+                : Boolean(previousLevel && !completedLevels.includes(previousLevel.id));
+              const current = availabilityByLevel
+                ? remoteStatus === "available"
+                : !completed && !locked;
               const alignRight = index % 2 === 1;
               const startsUnit = level.unit !== previousLevel?.unit;
 

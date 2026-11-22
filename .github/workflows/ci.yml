@@ -33,3 +33,37 @@ jobs:
 
       - name: Build application
         run: npm run build
+
+      - name: Run frontend unit tests
+        run: npm test
+
+  backend:
+    name: Backend
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check syntax
+        run: find src test -name '*.js' -print0 | xargs -0 -n1 node --check
+
+      - name: Validate course catalog
+        run: npm run validate:catalog
+
+      - name: Run API tests against PostgreSQL (PGlite)
+        run: npm test

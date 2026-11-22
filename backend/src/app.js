@@ -5,6 +5,8 @@ import { fileURLToPath } from "node:url";
 import { createServer } from "node:http";
 import { withTransaction } from "./db/pool.js";
 import { env } from "./config/env.js";
+import { ApiError } from "./errors.js";
+import { createRateLimiter } from "./rate-limit.js";
 
 const scrypt = promisify(scryptCallback);
 const catalogPath = fileURLToPath(new URL("./data/course-catalog.json", import.meta.url));
@@ -12,15 +14,11 @@ const catalog = JSON.parse(await readFile(catalogPath, "utf8"));
 const sessionCookieName = "nublue_session";
 const sessionDurationSeconds = env.sessionDays * 24 * 60 * 60;
 const maxBodyBytes = 64 * 1024;
-const authAttempts = new Map();
-
-class ApiError extends Error {
-  constructor(status, code, message = code) {
-    super(message);
-    this.status = status;
-    this.code = code;
-  }
-}
+const authLimiter = createRateLimiter({ windowMs: 15 * 60_000, max: 8 });
+// Course and daily-challenge submissions share one bucket per account.
+const attemptLimiter = createRateLimiter({ windowMs: 60_000, max: 30 });
+// Drafts are autosaved with a 300 ms debounce while the student plays.
+const draftLimiter = createRateLimiter({ windowMs: 60_000, max: 120 });
 
 function json(response, status, data) {
   response.writeHead(status, {
@@ -113,17 +111,7 @@ async function verifyPassword(password, encoded) {
 
 function limitAuthAttempts(request, nicknameKey) {
   const ip = request.socket.remoteAddress ?? "unknown";
-  const key = `${ip}:auth:${nicknameKey}`;
-  const now = Date.now();
-  const recent = (authAttempts.get(key) ?? []).filter((timestamp) => now - timestamp < 15 * 60_000);
-  if (recent.length >= 8) throw new ApiError(429, "too_many_attempts", "Tente novamente mais tarde.");
-  recent.push(now);
-  authAttempts.set(key, recent);
-  if (authAttempts.size > 10_000) {
-    for (const [entryKey, timestamps] of authAttempts) {
-      if (timestamps.every((timestamp) => now - timestamp >= 15 * 60_000)) authAttempts.delete(entryKey);
-    }
-  }
+  authLimiter.hit(`${ip}:auth:${nicknameKey}`);
 }
 
 async function readJson(request) {
@@ -255,6 +243,46 @@ async function getProgress(pool, studentId, dateKey = utcDateKey()) {
   };
 }
 
+async function getLevelAvailability(pool, studentId) {
+  const { rows } = await pool.query(
+    `SELECT cl.id, cl.public_data->>'chapter' AS chapter,
+            (lc.level_id IS NOT NULL) AS completed
+     FROM course_levels cl
+     LEFT JOIN level_completions lc
+       ON lc.level_id = cl.id AND lc.student_id = $1
+     WHERE cl.is_bonus = false
+     ORDER BY cl.id`,
+    [studentId],
+  );
+
+  if (rows.length !== catalog.levels.length) throw new ApiError(503, "course_not_seeded");
+
+  const completedIds = new Set();
+  const previousByChapter = new Map();
+  const levels = rows.map((row) => {
+    const id = Number(row.id);
+    const chapter = Number(row.chapter);
+    if (!Number.isInteger(id) || !Number.isInteger(chapter) || chapter < 1) {
+      throw new ApiError(503, "course_not_seeded");
+    }
+    if (row.completed) completedIds.add(id);
+
+    const previousId = previousByChapter.get(chapter);
+    const status = row.completed
+      ? "completed"
+      : previousId === undefined || completedIds.has(previousId)
+        ? "available"
+        : "locked";
+    previousByChapter.set(chapter, id);
+    return { id, status };
+  });
+
+  return {
+    levels,
+    bonusAvailable: Boolean(catalog.bonus) && completedIds.size === catalog.levels.length,
+  };
+}
+
 async function getStudentPayload(pool, student) {
   const progress = await getProgress(pool, student.id);
   return {
@@ -328,7 +356,7 @@ async function handleCourseAttempt(pool, student, body, request) {
 
   const result = await withTransaction(pool, async (client) => {
     const level = await getCourseLevel(client, levelId);
-    if (!level) throw new ApiError(404, "level_not_found");
+    if (!level || (level.is_bonus && !catalog.bonus)) throw new ApiError(404, "level_not_found");
     await assertLevelUnlocked(client, student.id, level);
 
     const existing = await client.query(
@@ -569,6 +597,7 @@ export function createApiServer(pool) {
 
       if (request.method === "GET" && path === "/api/catalog/bonus/very-hard") {
         const student = await requireStudent(pool, request);
+        if (!catalog.bonus) throw new ApiError(503, "bonus_unavailable");
         const completed = await pool.query(
           `SELECT count(*)::integer AS count
            FROM level_completions lc
@@ -651,6 +680,12 @@ export function createApiServer(pool) {
         return;
       }
 
+      if (request.method === "GET" && path === "/api/progress/availability") {
+        const student = await requireStudent(pool, request);
+        json(response, 200, await getLevelAvailability(pool, student.id));
+        return;
+      }
+
       if (request.method === "DELETE" && path === "/api/me") {
         const student = await requireStudent(pool, request);
         await pool.query("DELETE FROM students WHERE id = $1", [student.id]);
@@ -674,6 +709,7 @@ export function createApiServer(pool) {
 
       if (request.method === "POST" && path === "/api/attempts") {
         const student = await requireStudent(pool, request);
+        attemptLimiter.hit(student.id);
         const body = requireObject(await readJson(request));
         json(response, 200, await handleCourseAttempt(pool, student, body, request));
         return;
@@ -687,6 +723,7 @@ export function createApiServer(pool) {
 
       if (request.method === "POST" && path === "/api/daily-challenge/draft") {
         const student = await requireStudent(pool, request);
+        draftLimiter.hit(student.id);
         const body = requireObject(await readJson(request));
         const answers = normalizeAnswers(body.answers);
         const dateKey = utcDateKey();
@@ -707,6 +744,7 @@ export function createApiServer(pool) {
 
       if (request.method === "POST" && path === "/api/daily-challenge/attempt") {
         const student = await requireStudent(pool, request);
+        attemptLimiter.hit(student.id);
         const body = requireObject(await readJson(request));
         json(response, 200, await handleDailyAttempt(pool, student, body, request));
         return;

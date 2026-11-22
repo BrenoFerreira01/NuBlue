@@ -1,4 +1,5 @@
 import type { Level } from "../types/game";
+import { isSessionExpiry, notifySessionExpired } from "./sessionEvents";
 
 const apiBaseUrl = (import.meta.env.VITE_API_URL ?? "http://localhost:4000").replace(/\/$/, "");
 const errorMessages: Record<string, string> = {
@@ -36,6 +37,11 @@ export interface RemoteProgress {
   completedLevels: number[];
 }
 
+export interface LevelAvailability {
+  levels: Array<{ id: number; status: "locked" | "available" | "completed" }>;
+  bonusAvailable: boolean;
+}
+
 export interface CourseCatalog {
   chapters: { id: number; title: string; description: string }[];
   levels: Level[];
@@ -62,6 +68,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 
   const payload = response.status === 204 ? null : await response.json().catch(() => null);
   if (!response.ok) {
+    if (isSessionExpiry(path, response.status, payload?.error)) notifySessionExpired();
     throw new ApiClientError(
       response.status,
       payload?.error ?? "request_failed",
@@ -80,11 +87,13 @@ export const api = {
   bonusLevel: () => request<{ level: Level }>("/api/catalog/bonus/very-hard"),
   me: () => request<{ student: StudentAccount; progress: RemoteProgress }>("/api/me"),
   progress: () => request<RemoteProgress>("/api/progress"),
+  availability: () => request<LevelAvailability>("/api/progress/availability"),
   register: (nickname: string, password: string) =>
     request<{ student: StudentAccount }>("/api/auth/register", post({ nickname, password })),
   login: (nickname: string, password: string) =>
     request<{ student: StudentAccount }>("/api/auth/login", post({ nickname, password })),
   logout: () => request<{ ok: true }>("/api/auth/logout", post()),
+  deleteAccount: () => request<{ ok: true }>("/api/me", { method: "DELETE" }),
   attempt: (levelId: number, answers: Record<string, number>, idempotencyKey: string) =>
     request<{ correct: boolean; xpAwarded: number; progress: RemoteProgress }>(
       "/api/attempts",

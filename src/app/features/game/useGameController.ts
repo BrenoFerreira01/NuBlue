@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { CellStatus, Difficulty, Level, Screen, TabId } from "../../types/game";
-import { api, type RemoteProgress } from "../../api/client";
+import { api, type LevelAvailability, type RemoteProgress } from "../../api/client";
 import { LEVELS } from "../../data/levels";
 import { generateDailyPuzzle } from "../challenges/generatePuzzle";
 import { getLocalDateKey, getPreviousDateKey, type DailyChallengeStatus } from "../challenges/dailyChallenge";
@@ -131,6 +131,8 @@ export function useGameController({
 
   const [progress, setProgress] = useState<SavedProgress>(readSavedProgress);
   const [remoteProgressReady, setRemoteProgressReady] = useState(false);
+  const [levelAvailability, setLevelAvailability] = useState<LevelAvailability | null>(null);
+  const availabilityRequest = useRef(0);
   const visibleProgress = authenticated && !remoteProgressReady ? EMPTY_PROGRESS : progress;
   const { completedLevels, totalXp, streak, totalSolved } = visibleProgress;
   const [today, setToday] = useState(getLocalDateKey);
@@ -177,6 +179,20 @@ export function useGameController({
   const dailyDraftTimer = useRef<number | null>(null);
   const attemptRequest = useRef<{ fingerprint: string; idempotencyKey: string } | null>(null);
 
+  const refreshLevelAvailability = useCallback(async (attempt = 0) => {
+    const requestId = ++availabilityRequest.current;
+    try {
+      const availability = await api.availability();
+      if (availabilityRequest.current === requestId) setLevelAvailability(availability);
+    } catch {
+      // Keep the last known state; the trail stays locked only until a first successful load.
+      if (availabilityRequest.current !== requestId || attempt >= 3) return;
+      window.setTimeout(() => {
+        if (availabilityRequest.current === requestId) void refreshLevelAvailability(attempt + 1);
+      }, 2_000 * 2 ** attempt);
+    }
+  }, []);
+
   function idempotencyKeyFor(
     challenge: boolean,
     levelId: number,
@@ -214,17 +230,22 @@ export function useGameController({
 
   useEffect(() => {
     if (!authenticated) {
+      availabilityRequest.current += 1;
+      setLevelAvailability(null);
       setRemoteProgressReady(false);
       setProgress(readSavedProgress());
       return;
     }
 
     let active = true;
+    setRemoteProgressReady(false);
+    setLevelAvailability(null);
     api.progress().then((remote) => {
       if (!active) return;
       setProgress((current) => applyRemoteProgress(EMPTY_PROGRESS, remote));
       setRemoteProgressReady(true);
     }).catch(() => undefined);
+    void refreshLevelAvailability();
     api.dailyChallenge().then((challenge) => {
       if (!active) return;
       setToday(challenge.date);
@@ -237,10 +258,14 @@ export function useGameController({
         lastDailyChallengeDate: challenge.date,
       }));
     }).catch(() => undefined);
+    const refreshOnFocus = () => void refreshLevelAvailability();
+    window.addEventListener("focus", refreshOnFocus);
     return () => {
       active = false;
+      availabilityRequest.current += 1;
+      window.removeEventListener("focus", refreshOnFocus);
     };
-  }, [authenticated]);
+  }, [authenticated, refreshLevelAvailability]);
 
   function startLevel(level: Level, dailyChallenge = false) {
     if (dailyDraftTimer.current !== null) window.clearTimeout(dailyDraftTimer.current);
@@ -387,6 +412,7 @@ export function useGameController({
         }));
 
         if (correct) {
+          if (!isChallenge) void refreshLevelAvailability();
           setTimeout(() => setScreen("result"), 1300);
           return;
         }
@@ -508,6 +534,16 @@ export function useGameController({
     setScreen("main");
   }
 
+  // Leaves any open puzzle without saving it, so the next person on this device starts at home.
+  function resetSession() {
+    if (dailyDraftTimer.current !== null) window.clearTimeout(dailyDraftTimer.current);
+    dailyDraftTimer.current = null;
+    setIsChallenge(false);
+    setActiveChallengeDate(null);
+    setActiveTab("home");
+    setScreen("main");
+  }
+
   function handleResultContinue() {
     setIsChallenge(false);
     setActiveChallengeDate(null);
@@ -521,9 +557,11 @@ export function useGameController({
     screen,
     activeTab,
     setActiveTab,
+    resetSession,
     difficulty,
     setDifficulty,
     completedLevels,
+    levelAvailability,
     totalXp,
     streak,
     totalSolved,

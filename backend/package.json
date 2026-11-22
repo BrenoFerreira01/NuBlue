@@ -10,9 +10,14 @@
     "dev": "node --env-file=.env --watch src/server.js",
     "start": "node --env-file=.env src/server.js",
     "migrate": "node --env-file=.env src/db/migrate.js",
-    "seed": "node --env-file=.env src/db/seed-course.js"
+    "seed": "node --env-file=.env src/db/seed-course.js",
+    "test": "node --test \"test/**/*.test.js\"",
+    "validate:catalog": "node src/catalog/validate-cli.js"
   },
   "dependencies": {
     "pg": "8.16.3"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.16"
   }
 }

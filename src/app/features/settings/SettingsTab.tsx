@@ -1,12 +1,24 @@
 import { useState } from "react";
 import type { LucideIcon } from "lucide-react";
-import { Bell, ChevronRight, LogOut, Shield, Trophy } from "lucide-react";
+import { Bell, ChevronRight, LogOut, Shield, Trash2, Trophy } from "lucide-react";
 import type { Difficulty } from "../../types/game";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../../components/ui/alert-dialog";
 
 interface Props {
   difficulty: Difficulty;
   onDifficultyChange: (difficulty: Difficulty) => void;
   onReturnToLanding: () => void;
+  onDeleteAccount?: () => Promise<void>;
   leaderboardOptIn: boolean;
   onLeaderboardOptInChange: (enabled: boolean) => Promise<void>;
 }
@@ -18,7 +30,7 @@ const DIFFICULTY_OPTIONS: [Difficulty, string, string][] = [
 ];
 
 export function SettingsTab({
-  difficulty, onDifficultyChange, onReturnToLanding, leaderboardOptIn, onLeaderboardOptInChange,
+  difficulty, onDifficultyChange, onReturnToLanding, onDeleteAccount, leaderboardOptIn, onLeaderboardOptInChange,
 }: Props) {
   const [visibilityError, setVisibilityError] = useState<string | null>(null);
   const [reminders, setReminders] = useState(() => {
@@ -109,8 +121,71 @@ export function SettingsTab({
           </span>
           <ChevronRight size={19} />
         </button>
+
+        {onDeleteAccount && <DeleteAccountButton onDeleteAccount={onDeleteAccount} />}
       </div>
     </div>
+  );
+}
+
+function DeleteAccountButton({ onDeleteAccount }: { onDeleteAccount: () => Promise<void> }) {
+  const [open, setOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  return (
+    <AlertDialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (deleting) return;
+        setOpen(nextOpen);
+        setError(null);
+      }}
+    >
+      <AlertDialogTrigger asChild>
+        <button
+          type="button"
+          className="flex w-full items-center justify-between rounded-[24px] border border-border bg-card p-5 font-black text-muted-foreground hover:text-red-500"
+        >
+          <span className="flex items-center gap-3">
+            <Trash2 size={20} />
+            Excluir conta
+          </span>
+          <ChevronRight size={19} />
+        </button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Excluir sua conta?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Seu apelido, progresso, XP, sequências e posição no ranking serão apagados para sempre.
+            Essa ação não pode ser desfeita.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        {error && <p className="text-sm font-bold text-destructive" role="alert">{error}</p>}
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={deleting}>Cancelar</AlertDialogCancel>
+          <AlertDialogAction
+            disabled={deleting}
+            className="bg-destructive text-white hover:bg-destructive/90"
+            onClick={async (event) => {
+              // Keep the dialog open until the server confirms, so errors stay visible.
+              event.preventDefault();
+              setDeleting(true);
+              setError(null);
+              try {
+                await onDeleteAccount();
+              } catch (deleteError) {
+                setError(deleteError instanceof Error ? deleteError.message : "Não foi possível excluir a conta.");
+                setDeleting(false);
+              }
+            }}
+          >
+            {deleting ? "Excluindo…" : "Excluir para sempre"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
 
