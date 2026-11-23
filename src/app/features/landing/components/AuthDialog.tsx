@@ -1,4 +1,4 @@
-import type { FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { Brand } from "../../../components/Brand";
 import { DialogDescription, DialogHeader, DialogTitle } from "../../../components/ui/dialog";
 
@@ -6,18 +6,31 @@ export type AuthMode = "login" | "signup";
 
 interface Props {
   mode: AuthMode;
-  onSubmit: (name?: string) => void;
+  onSubmit: (nickname: string, password: string) => Promise<void>;
   onSwitchMode: () => void;
 }
 
 export function AuthDialog({ mode, onSubmit, onSwitchMode }: Props) {
   const isSignup = mode === "signup";
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const name = formData.get("name");
-    onSubmit(typeof name === "string" ? name.trim() : undefined);
+    const nickname = formData.get("nickname");
+    const password = formData.get("password");
+    if (typeof nickname !== "string" || typeof password !== "string") return;
+
+    setError(null);
+    setIsSubmitting(true);
+    try {
+      await onSubmit(nickname.trim(), password);
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : "Não foi possível entrar agora.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -35,26 +48,15 @@ export function AuthDialog({ mode, onSubmit, onSwitchMode }: Props) {
       </DialogHeader>
 
       <form className="mt-7 space-y-4" onSubmit={handleSubmit}>
-        {isSignup && (
-          <input
-            required
-            aria-label="Nome"
-            name="name"
-            type="text"
-            autoComplete="name"
-            maxLength={48}
-            pattern=".*\S.*"
-            placeholder="Seu nome"
-            className="w-full rounded-2xl border border-border bg-secondary px-4 py-4 font-bold text-foreground outline-none transition placeholder:text-[var(--input-placeholder-color)] focus:ring-2 focus:ring-primary"
-          />
-        )}
         <input
           required
-          aria-label="E-mail"
-          name="email"
-          type="email"
-          autoComplete="email"
-          placeholder="seu@email.com"
+          aria-label="Apelido"
+          name="nickname"
+          type="text"
+          autoComplete="nickname"
+          minLength={3}
+          maxLength={24}
+          placeholder="Seu apelido"
           className="w-full rounded-2xl border border-border bg-secondary px-4 py-4 font-bold text-foreground outline-none transition placeholder:text-[var(--input-placeholder-color)] focus:ring-2 focus:ring-primary"
         />
         <input
@@ -62,21 +64,25 @@ export function AuthDialog({ mode, onSubmit, onSwitchMode }: Props) {
           aria-label="Senha"
           name="password"
           type="password"
-          minLength={4}
+          minLength={8}
+          maxLength={128}
           autoComplete={isSignup ? "new-password" : "current-password"}
           placeholder="Sua senha"
           className="w-full rounded-2xl border border-border bg-secondary px-4 py-4 font-bold text-foreground outline-none transition placeholder:text-[var(--input-placeholder-color)] focus:ring-2 focus:ring-primary"
         />
+        {error && <p className="text-sm font-bold text-destructive" role="alert">{error}</p>}
         <button
           type="submit"
+          disabled={isSubmitting}
           className="w-full rounded-2xl bg-primary py-4 font-black text-primary-foreground shadow-[0_6px_0_var(--button-shadow)] transition active:translate-y-1 active:shadow-none"
         >
-          {isSignup ? "Criar conta e fazer teste" : "Entrar na Nublue"}
+          {isSubmitting ? "Aguarde..." : isSignup ? "Criar conta e fazer teste" : "Entrar na Nublue"}
         </button>
       </form>
 
       <button
         type="button"
+        disabled={isSubmitting}
         onClick={onSwitchMode}
         className="mt-5 w-full text-sm font-extrabold text-muted-foreground transition hover:text-foreground"
       >

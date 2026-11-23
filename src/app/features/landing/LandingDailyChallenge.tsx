@@ -25,7 +25,8 @@ export function LandingDailyChallenge({ challengeDate, dark, onThemeChange, onCl
   const [isCorrect, setIsCorrect] = useState(false);
   const resultTimeout = useRef<number | null>(null);
   const retryTimeout = useRef<number | null>(null);
-  const canCheck = Object.keys(level.answers).every((id) => fills[id] != null);
+  const answerKey = level.answers ?? {};
+  const canCheck = Object.keys(answerKey).every((id) => fills[id] != null);
 
   useEffect(() => () => {
     if (resultTimeout.current !== null) window.clearTimeout(resultTimeout.current);
@@ -56,7 +57,7 @@ export function LandingDailyChallenge({ challengeDate, dark, onThemeChange, onCl
   };
 
   const handleDropNumber = (inputId: string, number: number) => {
-    if (hasChecked || !(inputId in level.answers)) return;
+    if (hasChecked || !(inputId in answerKey)) return;
     setFills((previous) => ({ ...previous, [inputId]: number }));
     setSelectedBank(null);
   };
@@ -71,7 +72,7 @@ export function LandingDailyChallenge({ challengeDate, dark, onThemeChange, onCl
 
     const statuses: Record<string, CellStatus> = {};
     let allCorrect = true;
-    for (const [id, answer] of Object.entries(level.answers)) {
+    for (const [id, answer] of Object.entries(answerKey)) {
       const correct = fills[id] === answer;
       statuses[id] = correct ? "correct" : "wrong";
       if (!correct) allCorrect = false;

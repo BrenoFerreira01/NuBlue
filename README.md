@@ -16,19 +16,19 @@
 
 ## Funcionalidades previstas
 
-  - [ ] Cadastro e autenticação de usuários.
-  - [ ] Conteúdos de matemática organizados por tema ou nível.
-  - [ ] Exercícios e desafios interativos.
-  - [ ] Correção de respostas e feedback.
-  - [ ] Pontuação e progressão por níveis.
-  - [ ] Registro e acompanhamento do desempenho.
-  - [ ] Interface responsiva para diferentes tamanhos de tela.
+  - [x] Cadastro e autenticação de usuários.
+  - [x] Conteúdos de matemática organizados por tema ou nível.
+  - [x] Exercícios e desafios interativos.
+  - [x] Correção de respostas e feedback.
+  - [x] Pontuação e progressão por níveis.
+  - [x] Registro e acompanhamento do desempenho.
+  - [x] Interface responsiva para diferentes tamanhos de tela.
 
 ## Tecnologias
 
-  - **Frontend:** React.js e Next.js.
-  - **Backend:** Next.js e Node.js.
-  - **Banco de dados:** PostgreeDB.
+  - **Frontend:** React, TypeScript e Vite, publicado no GitHub Pages.
+  - **Backend:** API Node.js (servidor HTTP nativo) — ver [`backend/README.md`](backend/README.md).
+  - **Banco de dados:** PostgreSQL (PlanetScale Postgres), com migrações versionadas.
   - **Prototipação e design:** Figma.
   - **Versionamento:** Git e GitHub.
 
@@ -58,4 +58,6 @@
   Run `npm i` to install the dependencies.
 
   Run `npm run dev` to start the development server.
+
+  To run the API and database locally, see [`backend/README.md`](backend/README.md). Deployment (GitHub Pages for the frontend, API host and PostgreSQL) is described in [`DEPLOY.md`](DEPLOY.md).
   

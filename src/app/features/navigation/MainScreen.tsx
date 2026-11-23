@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { Flame, Home as HomeIcon, Settings, Swords, Trophy, User, Zap } from "lucide-react";
 import { clsx } from "clsx";
 import type { Difficulty, Level, TabId } from "../../types/game";
+import type { LevelAvailability } from "../../api/client";
 import { Brand } from "../../components/Brand";
 import { ThemeToggle } from "../../components/ThemeToggle";
 import { SkillPathTab } from "../learning/SkillPathTab";
@@ -23,7 +24,9 @@ export function MainScreen({
   activeTab,
   setActiveTab,
   levels,
+  bonusLevel,
   completedLevels,
+  levelAvailability,
   xp,
   streak,
   dailyChallengeStatus,
@@ -42,11 +45,16 @@ export function MainScreen({
   difficulty,
   onDifficultyChange,
   onReturnToLanding,
+  onDeleteAccount,
+  leaderboardOptIn,
+  onLeaderboardOptInChange,
 }: {
   activeTab: TabId;
   setActiveTab: (tab: TabId) => void;
   levels: Level[];
+  bonusLevel?: Level;
   completedLevels: number[];
+  levelAvailability?: LevelAvailability;
   xp: number;
   streak: number;
   dailyChallengeStatus: DailyChallengeStatus | null;
@@ -65,6 +73,9 @@ export function MainScreen({
   difficulty: Difficulty;
   onDifficultyChange: (difficulty: Difficulty) => void;
   onReturnToLanding: () => void;
+  onDeleteAccount?: () => Promise<void>;
+  leaderboardOptIn: boolean;
+  onLeaderboardOptInChange: (enabled: boolean) => Promise<void>;
 }) {
   return (
     <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-background">
@@ -109,7 +120,9 @@ export function MainScreen({
               >
                 <SkillPathTab
                   levels={levels}
+                  bonusLevel={bonusLevel}
                   completedLevels={completedLevels}
+                  levelAvailability={levelAvailability}
                   chapterId={chapterId}
                   onChapterChange={onChapterChange}
                   onStartLevel={onStartLevel}
@@ -145,7 +158,7 @@ export function MainScreen({
                 transition={{ duration: 0.18 }}
                 className="flex min-h-0 flex-1 flex-col overflow-hidden"
               >
-                <RankingTab userName={userName} userXp={xp} userStreak={streak} />
+                <RankingTab />
               </motion.div>
             )}
             {activeTab === "profile" && (
@@ -165,6 +178,7 @@ export function MainScreen({
                   dailyChallengesCompleted={dailyChallengesCompleted}
                   bestDailyStreak={bestDailyStreak}
                   totalSolved={totalSolved}
+                  totalLevels={levels.filter((level) => !level.isBonus).length}
                 />
               </motion.div>
             )}
@@ -181,6 +195,9 @@ export function MainScreen({
                   difficulty={difficulty}
                   onDifficultyChange={onDifficultyChange}
                   onReturnToLanding={onReturnToLanding}
+                  onDeleteAccount={onDeleteAccount}
+                  leaderboardOptIn={leaderboardOptIn}
+                  onLeaderboardOptInChange={onLeaderboardOptInChange}
                 />
               </motion.div>
             )}

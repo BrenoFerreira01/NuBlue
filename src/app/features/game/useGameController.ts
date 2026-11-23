@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { CellStatus, Difficulty, Level, Screen, TabId } from "../../types/game";
+import { api, type LevelAvailability, type RemoteProgress } from "../../api/client";
 import { LEVELS } from "../../data/levels";
 import { generateDailyPuzzle } from "../challenges/generatePuzzle";
 import { getLocalDateKey, getPreviousDateKey, type DailyChallengeStatus } from "../challenges/dailyChallenge";
@@ -90,41 +91,81 @@ function readSavedProgress(): SavedProgress {
   }
 }
 
-export function useGameController() {
+function inputIdsFor(level: Level) {
+  return level.inputIds ?? Object.keys(level.answers ?? {});
+}
+
+function getUtcDateKey() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function applyRemoteProgress(current: SavedProgress, remote: RemoteProgress): SavedProgress {
+  return {
+    ...current,
+    completedLevels: remote.completedLevels,
+    totalXp: remote.totalXp,
+    streak: remote.streak,
+    totalSolved: remote.totalSolved,
+    dailyChallengesCompleted: remote.dailyChallengesCompleted,
+    currentDailyStreak: remote.currentDailyStreak,
+    bestDailyStreak: remote.bestDailyStreak,
+  };
+}
+
+function toSavedAnswers(fills: Record<string, number | null>) {
+  return Object.fromEntries(
+    Object.entries(fills).filter((entry): entry is [string, number] => entry[1] !== null),
+  );
+}
+
+export function useGameController({
+  levels = LEVELS,
+  authenticated = false,
+}: {
+  levels?: Level[];
+  authenticated?: boolean;
+} = {}) {
   const [screen, setScreen] = useState<Screen>("main");
   const [activeTab, setActiveTab] = useState<TabId>("home");
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
 
   const [progress, setProgress] = useState<SavedProgress>(readSavedProgress);
-  const { completedLevels, totalXp, streak, totalSolved } = progress;
+  const [remoteProgressReady, setRemoteProgressReady] = useState(false);
+  const [levelAvailability, setLevelAvailability] = useState<LevelAvailability | null>(null);
+  const availabilityRequest = useRef(0);
+  const visibleProgress = authenticated && !remoteProgressReady ? EMPTY_PROGRESS : progress;
+  const { completedLevels, totalXp, streak, totalSolved } = visibleProgress;
   const [today, setToday] = useState(getLocalDateKey);
   const [activeChallengeDate, setActiveChallengeDate] = useState<string | null>(null);
-  const dailyChallengeStatus = progress.dailyChallengeDate === today ? progress.dailyChallengeStatus : null;
+  const dailyChallengeStatus = visibleProgress.dailyChallengeDate === today ? visibleProgress.dailyChallengeStatus : null;
   const yesterday = getPreviousDateKey(today);
-  const currentDailyStreak = progress.lastDailyChallengeDate === today || progress.lastDailyChallengeDate === yesterday
-    ? progress.currentDailyStreak
-    : 0;
+  const currentDailyStreak = authenticated
+    ? visibleProgress.currentDailyStreak
+    : visibleProgress.lastDailyChallengeDate === today || visibleProgress.lastDailyChallengeDate === yesterday
+      ? visibleProgress.currentDailyStreak
+      : 0;
 
   useEffect(() => {
     const interval = window.setInterval(() => {
       setToday((current) => {
-        const next = getLocalDateKey();
+        const next = authenticated ? getUtcDateKey() : getLocalDateKey();
         return current === next ? current : next;
       });
     }, 60_000);
     return () => window.clearInterval(interval);
-  }, []);
+  }, [authenticated]);
 
   useEffect(() => {
+    if (authenticated) return;
     try {
       window.localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(progress));
       window.localStorage.removeItem(TEMP_DAILY_PROGRESS_STORAGE_KEY);
     } catch {
       // Progress remains available for the current session if storage is disabled.
     }
-  }, [progress]);
+  }, [progress, authenticated]);
 
-  const [currentLevel, setCurrentLevel] = useState<Level>(LEVELS[0]);
+  const [currentLevel, setCurrentLevel] = useState<Level>(levels[0] ?? LEVELS[0]);
   const [fills, setFills] = useState<Record<string, number | null>>({});
   const [selectedBank, setSelectedBank] = useState<number | null>(null);
   const [hearts, setHearts] = useState(3);
@@ -133,8 +174,103 @@ export function useGameController() {
   const [hasChecked, setHasChecked] = useState(false);
 
   const [isChallenge, setIsChallenge] = useState(false);
+  const [xpEarned, setXpEarned] = useState(0);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const dailyDraftTimer = useRef<number | null>(null);
+  const attemptRequest = useRef<{ fingerprint: string; idempotencyKey: string } | null>(null);
 
-  function startLevel(level: Level) {
+  const refreshLevelAvailability = useCallback(async (attempt = 0) => {
+    const requestId = ++availabilityRequest.current;
+    try {
+      const availability = await api.availability();
+      if (availabilityRequest.current === requestId) setLevelAvailability(availability);
+    } catch {
+      // Keep the last known state; the trail stays locked only until a first successful load.
+      if (availabilityRequest.current !== requestId || attempt >= 3) return;
+      window.setTimeout(() => {
+        if (availabilityRequest.current === requestId) void refreshLevelAvailability(attempt + 1);
+      }, 2_000 * 2 ** attempt);
+    }
+  }, []);
+
+  function idempotencyKeyFor(
+    challenge: boolean,
+    levelId: number,
+    answers: Record<string, number>,
+  ) {
+    const fingerprint = JSON.stringify({
+      challenge,
+      date: challenge ? activeChallengeDate ?? today : null,
+      levelId,
+      answers,
+    });
+    if (attemptRequest.current?.fingerprint === fingerprint) {
+      return attemptRequest.current.idempotencyKey;
+    }
+
+    const idempotencyKey = crypto.randomUUID();
+    attemptRequest.current = { fingerprint, idempotencyKey };
+    return idempotencyKey;
+  }
+
+  function queueDailyDraft(nextFills: Record<string, number | null>) {
+    if (dailyDraftTimer.current !== null) window.clearTimeout(dailyDraftTimer.current);
+    dailyDraftTimer.current = window.setTimeout(() => {
+      api.saveDailyDraft(toSavedAnswers(nextFills)).catch((error) => {
+        setErrorMessage(error instanceof Error ? error.message : "Não foi possível salvar o desafio.");
+      });
+    }, 300);
+  }
+
+  function saveDailyDraftNow(currentFills: Record<string, number | null>) {
+    api.saveDailyDraft(toSavedAnswers(currentFills)).catch((error) => {
+      setErrorMessage(error instanceof Error ? error.message : "Não foi possível salvar o desafio.");
+    });
+  }
+
+  useEffect(() => {
+    if (!authenticated) {
+      availabilityRequest.current += 1;
+      setLevelAvailability(null);
+      setRemoteProgressReady(false);
+      setProgress(readSavedProgress());
+      return;
+    }
+
+    let active = true;
+    setRemoteProgressReady(false);
+    setLevelAvailability(null);
+    api.progress().then((remote) => {
+      if (!active) return;
+      setProgress((current) => applyRemoteProgress(EMPTY_PROGRESS, remote));
+      setRemoteProgressReady(true);
+    }).catch(() => undefined);
+    void refreshLevelAvailability();
+    api.dailyChallenge().then((challenge) => {
+      if (!active) return;
+      setToday(challenge.date);
+      setProgress((current) => ({
+        ...current,
+        dailyChallengeDate: challenge.date,
+        dailyChallengeStatus: challenge.status,
+        dailyChallengeFills: challenge.fills,
+        dailyChallengeHearts: challenge.hearts,
+        lastDailyChallengeDate: challenge.date,
+      }));
+    }).catch(() => undefined);
+    const refreshOnFocus = () => void refreshLevelAvailability();
+    window.addEventListener("focus", refreshOnFocus);
+    return () => {
+      active = false;
+      availabilityRequest.current += 1;
+      window.removeEventListener("focus", refreshOnFocus);
+    };
+  }, [authenticated, refreshLevelAvailability]);
+
+  function startLevel(level: Level, dailyChallenge = false) {
+    if (dailyDraftTimer.current !== null) window.clearTimeout(dailyDraftTimer.current);
+    dailyDraftTimer.current = null;
+    setIsChallenge(dailyChallenge);
     setCurrentLevel(level);
     setFills({});
     setSelectedBank(null);
@@ -142,16 +278,39 @@ export function useGameController() {
     setCellStatuses({});
     setIsCorrect(false);
     setHasChecked(false);
+    setXpEarned(0);
+    setErrorMessage(null);
     setScreen("puzzle");
   }
 
-  function startChallenge() {
+  async function startChallenge() {
+    if (authenticated) {
+      try {
+        const challenge = await api.dailyChallenge();
+        setToday(challenge.date);
+        setActiveChallengeDate(challenge.date);
+        setProgress((current) => ({
+          ...current,
+          dailyChallengeDate: challenge.date,
+          dailyChallengeStatus: challenge.status,
+          dailyChallengeFills: challenge.fills,
+          dailyChallengeHearts: challenge.hearts,
+          lastDailyChallengeDate: challenge.date,
+        }));
+        if (challenge.status !== "in_progress") return;
+        startLevel(challenge.level, true);
+        setFills(challenge.fills);
+        setHearts(challenge.hearts);
+      } catch (error) {
+        setErrorMessage(error instanceof Error ? error.message : "Não foi possível carregar o desafio.");
+      }
+      return;
+    }
+
     const isResume = progress.dailyChallengeDate === today && progress.dailyChallengeStatus === "in_progress";
-    if (progress.dailyChallengeDate === today && progress.dailyChallengeStatus !== null && !isResume) return;
     setActiveChallengeDate(today);
-    setIsChallenge(true);
     const puzzle = generateDailyPuzzle(today);
-    startLevel(puzzle);
+    startLevel(puzzle, true);
     if (isResume) {
       setFills(progress.dailyChallengeFills);
       setHearts(progress.dailyChallengeHearts);
@@ -167,6 +326,8 @@ export function useGameController() {
   }
 
   function handleEndChallenge() {
+    if (dailyDraftTimer.current !== null) window.clearTimeout(dailyDraftTimer.current);
+    dailyDraftTimer.current = null;
     setIsChallenge(false);
     setActiveChallengeDate(null);
     setActiveTab("challenges");
@@ -176,29 +337,29 @@ export function useGameController() {
   function handleCellClick(inputId: string) {
     if (hasChecked) return;
     const nextFill = selectedBank !== null ? selectedBank : null;
-    if (selectedBank !== null) {
-      setFills((previous) => ({ ...previous, [inputId]: nextFill }));
-      setSelectedBank(null);
-    } else {
-      setFills((previous) => ({ ...previous, [inputId]: null }));
-    }
+    const nextFills = { ...fills, [inputId]: nextFill };
+    setFills(nextFills);
+    if (selectedBank !== null) setSelectedBank(null);
     if (isChallenge) {
       setProgress((previous) => ({
         ...previous,
         dailyChallengeFills: { ...previous.dailyChallengeFills, [inputId]: nextFill },
       }));
+      if (authenticated) queueDailyDraft(nextFills);
     }
   }
 
   function handleDropNumber(inputId: string, number: number) {
-    if (hasChecked || !(inputId in currentLevel.answers)) return;
-    setFills((previous) => ({ ...previous, [inputId]: number }));
+    if (hasChecked || !inputIdsFor(currentLevel).includes(inputId)) return;
+    const nextFills = { ...fills, [inputId]: number };
+    setFills(nextFills);
     setSelectedBank(null);
     if (isChallenge) {
       setProgress((previous) => ({
         ...previous,
         dailyChallengeFills: { ...previous.dailyChallengeFills, [inputId]: number },
       }));
+      if (authenticated) queueDailyDraft(nextFills);
     }
   }
 
@@ -207,12 +368,78 @@ export function useGameController() {
     setSelectedBank((previous) => (previous === number ? null : number));
   }
 
-  function checkAnswers() {
-    if (hasChecked) return;
+  async function checkAnswers() {
+    if (hasChecked || !canCheck) return;
+    if (dailyDraftTimer.current !== null) window.clearTimeout(dailyDraftTimer.current);
+    dailyDraftTimer.current = null;
+
+    if (authenticated) {
+      setHasChecked(true);
+      setErrorMessage(null);
+      const answers = Object.fromEntries(inputIdsFor(currentLevel).map((id) => [id, fills[id] as number]));
+      try {
+        const idempotencyKey = idempotencyKeyFor(isChallenge, currentLevel.id, answers);
+        let result: {
+          correct: boolean;
+          xpAwarded: number;
+          progress: RemoteProgress;
+          status?: DailyChallengeStatus;
+          hearts?: number;
+        };
+        if (isChallenge) {
+          result = await api.dailyAttempt(answers, idempotencyKey);
+        } else {
+          result = await api.attempt(currentLevel.id, answers, idempotencyKey);
+        }
+        attemptRequest.current = null;
+        const correct = result.correct;
+        const statuses = correct
+          ? Object.fromEntries(inputIdsFor(currentLevel).map((id) => [id, "correct" as const]))
+          : {};
+        setCellStatuses(statuses);
+        setIsCorrect(correct);
+        setXpEarned(result.xpAwarded);
+        setErrorMessage(correct ? null : "Ainda há uma resposta diferente. Confira as equações e tente de novo.");
+        setProgress((previous) => ({
+          ...applyRemoteProgress(previous, result.progress),
+          ...(isChallenge ? {
+            dailyChallengeDate: today,
+            dailyChallengeStatus: result.status ?? "in_progress",
+            dailyChallengeFills: answers,
+            dailyChallengeHearts: result.hearts ?? hearts,
+            lastDailyChallengeDate: today,
+          } : {}),
+        }));
+
+        if (correct) {
+          if (!isChallenge) void refreshLevelAvailability();
+          setTimeout(() => setScreen("result"), 1300);
+          return;
+        }
+
+        const remainingHearts = isChallenge ? result.hearts ?? hearts : hearts - 1;
+        setHearts(remainingHearts);
+        if (remainingHearts <= 0) {
+          setTimeout(() => setScreen("result"), 950);
+        } else {
+          setTimeout(() => {
+            setCellStatuses({});
+            setHasChecked(false);
+            setErrorMessage(null);
+          }, 1500);
+        }
+      } catch (error) {
+        setHasChecked(false);
+        setErrorMessage(error instanceof Error ? error.message : "Não foi possível verificar suas respostas.");
+      }
+      return;
+    }
+
+    const answerKey = currentLevel.answers ?? {};
     const statuses: Record<string, CellStatus> = {};
     let allCorrect = true;
 
-    for (const [id, answer] of Object.entries(currentLevel.answers)) {
+    for (const [id, answer] of Object.entries(answerKey)) {
       const correct = fills[id] === answer;
       statuses[id] = correct ? "correct" : "wrong";
       if (!correct) allCorrect = false;
@@ -221,6 +448,7 @@ export function useGameController() {
     setCellStatuses(statuses);
     setHasChecked(true);
     setIsCorrect(allCorrect);
+    setXpEarned(allCorrect ? currentLevel.xpReward : 0);
 
     if (allCorrect) {
       setProgress((previous) => {
@@ -296,6 +524,9 @@ export function useGameController() {
   }
 
   function handlePuzzleBack() {
+    if (dailyDraftTimer.current !== null) window.clearTimeout(dailyDraftTimer.current);
+    dailyDraftTimer.current = null;
+    if (authenticated && isChallenge) saveDailyDraftNow(fills);
     const wasChallenge = isChallenge;
     setIsChallenge(false);
     setActiveChallengeDate(null);
@@ -303,27 +534,41 @@ export function useGameController() {
     setScreen("main");
   }
 
-  function handleResultContinue() {
+  // Leaves any open puzzle without saving it, so the next person on this device starts at home.
+  function resetSession() {
+    if (dailyDraftTimer.current !== null) window.clearTimeout(dailyDraftTimer.current);
+    dailyDraftTimer.current = null;
+    setIsChallenge(false);
+    setActiveChallengeDate(null);
     setActiveTab("home");
     setScreen("main");
   }
 
-  const canCheck = Object.keys(currentLevel.answers).every((id) => fills[id] != null);
+  function handleResultContinue() {
+    setIsChallenge(false);
+    setActiveChallengeDate(null);
+    setActiveTab("home");
+    setScreen("main");
+  }
+
+  const canCheck = inputIdsFor(currentLevel).every((id) => fills[id] != null);
 
   return {
     screen,
     activeTab,
     setActiveTab,
+    resetSession,
     difficulty,
     setDifficulty,
     completedLevels,
+    levelAvailability,
     totalXp,
     streak,
     totalSolved,
     dailyChallengeStatus,
-    dailyChallengesCompleted: progress.dailyChallengesCompleted,
+    dailyChallengesCompleted: visibleProgress.dailyChallengesCompleted,
     currentDailyStreak,
-    bestDailyStreak: progress.bestDailyStreak,
+    bestDailyStreak: visibleProgress.bestDailyStreak,
     today,
     currentLevel,
     fills,
@@ -331,6 +576,8 @@ export function useGameController() {
     hearts,
     cellStatuses,
     isCorrect,
+    xpEarned,
+    errorMessage,
     hasChecked,
     isChallenge,
     canCheck,

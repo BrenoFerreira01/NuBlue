@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { BookOpen, Check, ChevronDown, Lock } from "lucide-react";
 import { clsx } from "clsx";
 import type { Level } from "../../types/game";
+import type { LevelAvailability } from "../../api/client";
 import { CHAPTERS, DIFF_CHIP, DIFF_LABEL } from "../../data/levels";
 import {
   DropdownMenu,
@@ -13,21 +14,34 @@ import {
 
 export function SkillPathTab({
   levels,
+  bonusLevel,
   completedLevels,
+  levelAvailability,
   chapterId,
   onChapterChange,
   onStartLevel,
 }: {
   levels: Level[];
+  bonusLevel?: Level;
   completedLevels: number[];
+  levelAvailability?: LevelAvailability;
   chapterId: number;
   onChapterChange: (chapterId: number) => void;
   onStartLevel: (level: Level) => void;
 }) {
   const chapter = CHAPTERS.find((item) => item.id === chapterId) ?? CHAPTERS[0];
   const chapterLevels = levels.filter((level) => level.chapter === chapter.id);
-  const completedInChapter = chapterLevels.filter((level) => completedLevels.includes(level.id)).length;
+  const availabilityByLevel = levelAvailability
+    ? new Map(levelAvailability.levels.map((level) => [level.id, level.status] as const))
+    : null;
+  const completedInChapter = availabilityByLevel
+    ? chapterLevels.filter((level) => availabilityByLevel.get(level.id) === "completed").length
+    : chapterLevels.filter((level) => completedLevels.includes(level.id)).length;
   const progress = chapterLevels.length ? (completedInChapter / chapterLevels.length) * 100 : 0;
+  const showBonus = chapter.id === 5 && Boolean(bonusLevel) &&
+    (levelAvailability
+      ? levelAvailability.bonusAvailable
+      : levels.filter((level) => !level.isBonus).every((level) => completedLevels.includes(level.id)));
 
   return (
     <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
@@ -105,10 +119,18 @@ export function SkillPathTab({
           <div className="flex flex-col gap-6">
             {chapterLevels.map((level, index) => {
               const previousLevel = chapterLevels[index - 1];
-              const locked = Boolean(previousLevel && !completedLevels.includes(previousLevel.id));
-              const completed = completedLevels.includes(level.id);
-              const current = !completed && !locked;
+              const remoteStatus = availabilityByLevel?.get(level.id);
+              const completed = availabilityByLevel
+                ? remoteStatus === "completed"
+                : completedLevels.includes(level.id);
+              const locked = availabilityByLevel
+                ? remoteStatus !== "available" && remoteStatus !== "completed"
+                : Boolean(previousLevel && !completedLevels.includes(previousLevel.id));
+              const current = availabilityByLevel
+                ? remoteStatus === "available"
+                : !completed && !locked;
               const alignRight = index % 2 === 1;
+              const startsUnit = level.unit !== previousLevel?.unit;
 
               return (
                 <motion.div
@@ -116,56 +138,84 @@ export function SkillPathTab({
                   initial={{ opacity: 0, y: 18 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.06, type: "spring", stiffness: 200 }}
-                  className={clsx("relative z-10 flex min-w-0", alignRight ? "justify-end" : "justify-start")}
+                  className="relative z-10"
                 >
-                  <button
-                    type="button"
-                    disabled={locked}
-                    onClick={() => onStartLevel(level)}
-                    aria-label={`Sessão ${level.session}: ${level.title}${locked ? ", bloqueada" : ""}`}
-                    className={clsx(
-                      "group flex min-w-0 max-w-[calc(50%_-_0.75rem)] flex-col items-center gap-2.5 rounded-2xl px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                      locked && "cursor-not-allowed",
-                    )}
-                  >
-                    <div
+                  {startsUnit && level.unit && (
+                    <p className="mb-3 rounded-xl bg-secondary/60 px-3 py-2 text-xs font-black uppercase tracking-wide text-muted-foreground">
+                      Unidade {level.unit} — {level.unitTitle}
+                    </p>
+                  )}
+                  <div className={clsx("flex min-w-0", alignRight ? "justify-end" : "justify-start")}>
+                    <button
+                      type="button"
+                      disabled={locked}
+                      onClick={() => onStartLevel(level)}
+                      aria-label={`Sessão ${level.session}: ${level.title}${locked ? ", bloqueada" : ""}`}
                       className={clsx(
-                        "relative flex size-[76px] items-center justify-center rounded-[20px] border-b-4 transition-all duration-200 sm:size-[88px] sm:rounded-[22px]",
-                        completed && "border-success/80 bg-success shadow-lg shadow-success/25 dark:border-emerald-700 dark:bg-emerald-500 dark:shadow-emerald-500/30",
-                        current && "border-foreground bg-primary shadow-2xl shadow-primary/50 group-hover:brightness-110 dark:border-[#3020cc] dark:bg-[#5040ff] dark:shadow-[#5040ff]/50",
-                        locked && "border-secondary bg-background dark:border-[#221660] dark:bg-[#140a3a]",
+                        "group flex min-w-0 max-w-[calc(50%_-_0.75rem)] flex-col items-center gap-2.5 rounded-2xl px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                        locked && "cursor-not-allowed",
                       )}
                     >
-                      {completed ? (
-                        <Check size={32} strokeWidth={3} className="text-success-foreground dark:text-white" />
-                      ) : locked ? (
-                        <Lock size={24} className="text-muted-foreground dark:text-[#3a2a70]" />
-                      ) : (
-                        <span className="text-3xl sm:text-4xl" aria-hidden="true">{level.emoji}</span>
-                      )}
-                      {current && (
-                        <motion.div
-                          className="absolute inset-0 rounded-[20px] border-2 border-white/25 sm:rounded-[22px]"
-                          animate={{ opacity: [0.2, 0.7, 0.2] }}
-                          transition={{ repeat: Infinity, duration: 2.5 }}
-                        />
-                      )}
-                    </div>
-                    <div className="w-full text-center">
-                      <p className={clsx("break-words text-sm font-black leading-tight", locked ? "text-muted-foreground dark:text-[#3a2a70]" : "text-foreground dark:text-white")}>
-                        {level.title}
-                      </p>
-                      <span className={clsx(
-                        "mt-1 inline-block rounded-full px-2 py-0.5 text-[11px] font-bold sm:text-xs",
-                        locked ? "text-muted-foreground dark:text-[#3a2a70]" : DIFF_CHIP[level.difficulty],
-                      )}>
-                        {DIFF_LABEL[level.difficulty]}
-                      </span>
-                    </div>
-                  </button>
+                      <div
+                        className={clsx(
+                          "relative flex size-[76px] items-center justify-center rounded-[20px] border-b-4 transition-all duration-200 sm:size-[88px] sm:rounded-[22px]",
+                          completed && "border-success/80 bg-success shadow-lg shadow-success/25 dark:border-emerald-700 dark:bg-emerald-500 dark:shadow-emerald-500/30",
+                          current && "border-foreground bg-primary shadow-2xl shadow-primary/50 group-hover:brightness-110 dark:border-[#3020cc] dark:bg-[#5040ff] dark:shadow-[#5040ff]/50",
+                          locked && "border-secondary bg-background dark:border-[#221660] dark:bg-[#140a3a]",
+                        )}
+                      >
+                        {completed ? (
+                          <Check size={32} strokeWidth={3} className="text-success-foreground dark:text-white" />
+                        ) : locked ? (
+                          <Lock size={24} className="text-muted-foreground dark:text-[#3a2a70]" />
+                        ) : (
+                          <span className="text-3xl sm:text-4xl" aria-hidden="true">{level.emoji}</span>
+                        )}
+                        {current && (
+                          <motion.div
+                            className="absolute inset-0 rounded-[20px] border-2 border-white/25 sm:rounded-[22px]"
+                            animate={{ opacity: [0.2, 0.7, 0.2] }}
+                            transition={{ repeat: Infinity, duration: 2.5 }}
+                          />
+                        )}
+                      </div>
+                      <div className="w-full text-center">
+                        <p className={clsx("break-words text-sm font-black leading-tight", locked ? "text-muted-foreground dark:text-[#3a2a70]" : "text-foreground dark:text-white")}>
+                          {level.title}
+                        </p>
+                        <span className={clsx(
+                          "mt-1 inline-block rounded-full px-2 py-0.5 text-[11px] font-bold sm:text-xs",
+                          locked ? "text-muted-foreground dark:text-[#3a2a70]" : DIFF_CHIP[level.difficulty],
+                        )}>
+                          {DIFF_LABEL[level.difficulty]}
+                        </span>
+                      </div>
+                    </button>
+                  </div>
                 </motion.div>
               );
             })}
+            {showBonus && bonusLevel && (
+              <motion.div
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="relative z-10 flex justify-center"
+              >
+                <button
+                  type="button"
+                  onClick={() => onStartLevel(bonusLevel)}
+                  className="flex w-full max-w-xs items-center justify-between gap-3 rounded-2xl border border-purple-400/50 bg-purple-500/10 p-4 text-left transition hover:bg-purple-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <span className="text-3xl" aria-hidden="true">{bonusLevel.emoji}</span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-black text-foreground">{bonusLevel.title}</span>
+                    <span className="mt-1 inline-block rounded-full bg-purple-500/15 px-2 py-0.5 text-xs font-bold text-purple-800 dark:text-purple-300">
+                      {DIFF_LABEL[bonusLevel.difficulty]}
+                    </span>
+                  </span>
+                </button>
+              </motion.div>
+            )}
           </div>
         </div>
       </div>

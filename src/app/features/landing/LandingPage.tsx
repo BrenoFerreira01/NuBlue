@@ -12,8 +12,8 @@ import { readLandingDailyProgress, saveLandingDailyProgress, type LandingDailySt
 interface Props {
   dark: boolean;
   onThemeChange: (dark: boolean) => void;
-  onLogin: () => void;
-  onSignup: (name: string) => void;
+  onLogin: (nickname: string, password: string) => Promise<void>;
+  onSignup: (nickname: string, password: string) => Promise<void>;
   dailyChallengeDate: string;
 }
 
@@ -186,9 +186,10 @@ export function LandingPage({
           >
             <AuthDialog
               mode={authMode}
-              onSubmit={(name) => {
-                if (authMode === "signup") onSignup(name?.trim() ?? "");
-                else onLogin();
+              onSubmit={async (nickname, password) => {
+                if (authMode === "signup") await onSignup(nickname, password);
+                else await onLogin(nickname, password);
+                setAuthMode(null);
               }}
               onSwitchMode={() => setAuthMode(authMode === "login" ? "signup" : "login")}
             />

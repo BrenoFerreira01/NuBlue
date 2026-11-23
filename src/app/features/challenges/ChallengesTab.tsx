@@ -44,7 +44,7 @@ export function ChallengesTab({
           </div>
         </div>
         <p className="relative mt-4 text-sm leading-relaxed text-muted-foreground">
-          Uma cruzadinha nova a cada dia local, igual durante todo o dia. Você tem três vidas; o desafio seguinte chega à meia-noite.
+          Uma cruzadinha nova a cada dia, igual para todos os estudantes. Você tem três vidas; o próximo desafio chega à meia-noite UTC.
         </p>
       </section>
 

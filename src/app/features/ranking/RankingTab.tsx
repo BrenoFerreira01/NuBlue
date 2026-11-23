@@ -1,26 +1,34 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { Flame, Trophy, Zap } from "lucide-react";
 import { clsx } from "clsx";
-import { MOCK_PLAYERS } from "../../data/mockPlayers";
+import { api } from "../../api/client";
 
-export function RankingTab({ userName, userXp, userStreak }: { userName: string; userXp: number; userStreak: number }) {
+export function RankingTab() {
   const [tab, setTab] = useState<"weekly" | "all">("weekly");
-
-  const leaderboard = useMemo(() => {
-    const userXpVal = userXp;
-    const all = [
-      ...MOCK_PLAYERS.map((p) => ({
-        ...p,
-        score: tab === "weekly" ? p.weeklyXp : p.xp,
-        isUser: false,
-      })),
-      { id: 0, name: userName, score: userXpVal, streak: userStreak, emoji: Array.from(userName.trim())[0] || "👤", isUser: true, xp: userXp, weeklyXp: userXp },
-    ];
-    return all.sort((a, b) => b.score - a.score);
-  }, [tab, userName, userXp, userStreak]);
-
+  const [leaderboard, setLeaderboard] = useState<{ nickname: string; xp: number; streak: number }[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const medals = ["🥇", "🥈", "🥉"];
+
+  useEffect(() => {
+    let active = true;
+    setIsLoading(true);
+    setLoadFailed(false);
+    api.leaderboard(tab).then(({ entries }) => {
+      if (active) setLeaderboard(entries);
+    }).catch(() => {
+      if (active) {
+        setLeaderboard([]);
+        setLoadFailed(true);
+      }
+    }).finally(() => {
+      if (active) setIsLoading(false);
+    });
+    return () => {
+      active = false;
+    };
+  }, [tab]);
 
   return (
     <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
@@ -49,25 +57,28 @@ export function RankingTab({ userName, userXp, userStreak }: { userName: string;
 
       {/* Leaderboard */}
       <div className="space-y-2 px-3 pb-8 sm:px-4">
+        {!isLoading && leaderboard.length === 0 && (
+          <p className="rounded-2xl border border-secondary/40 p-5 text-center text-sm font-semibold text-muted-foreground">
+            {loadFailed
+              ? "Não foi possível carregar o ranking agora."
+              : "Ainda não há estudantes que escolheram aparecer no ranking."}
+          </p>
+        )}
+        {isLoading && <p className="py-5 text-center text-sm font-semibold text-muted-foreground">Carregando ranking...</p>}
         {leaderboard.map((player, idx) => {
-          const isUser = player.isUser;
           const rank = idx + 1;
           return (
             <motion.div
-              key={player.id}
+              key={player.nickname}
               initial={{ opacity: 0, x: -16 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: idx * 0.04 }}
               className={clsx(
                 "flex min-w-0 items-center gap-2 rounded-2xl border px-3 py-3 transition-all sm:gap-3 sm:px-4",
-                isUser
-                  ? "border-primary/50 shadow-lg shadow-primary/15"
-                  : "border-secondary/40",
+                "border-secondary/40",
               )}
               style={{
-                background: isUser
-                  ? "var(--surface-cyan-overlay)"
-                  : "var(--surface-glass)",
+                background: "var(--surface-glass)",
               }}
             >
               {/* Rank */}
@@ -82,16 +93,15 @@ export function RankingTab({ userName, userXp, userStreak }: { userName: string;
               {/* Avatar */}
               <div className={clsx(
                 "flex size-9 shrink-0 items-center justify-center rounded-xl text-xl sm:size-10",
-                isUser ? "bg-primary/30" : "bg-card",
+                "bg-card",
               )}>
-                {player.emoji}
+                {Array.from(player.nickname.trim())[0]?.toLocaleUpperCase("pt-BR") || "👤"}
               </div>
 
               {/* Name + streak */}
               <div className="flex-1 min-w-0">
                 <p className="font-black text-sm truncate text-foreground">
-                  {player.name}
-                  {isUser && <span className="text-muted-foreground ml-1">· Você</span>}
+                  {player.nickname}
                 </p>
                 <div className="flex items-center gap-1">
                   <Flame size={11} className="text-orange-400 fill-orange-400" />
@@ -104,7 +114,7 @@ export function RankingTab({ userName, userXp, userStreak }: { userName: string;
                 <div className="flex items-center gap-1">
                   <Zap size={13} className="fill-yellow-400 text-yellow-400" />
                   <span className="font-black text-sm text-foreground">
-                    {player.score.toLocaleString("pt-BR")}
+                    {player.xp.toLocaleString("pt-BR")}
                   </span>
                 </div>
                 <span className="text-xs text-muted-foreground">XP</span>
