@@ -7,7 +7,7 @@ export function createPool(connectionString = env.appDatabaseUrl()) {
   const pool = new Pool({
     connectionString,
     ssl: env.databaseSsl,
-    max: 10,
+    max: env.databasePoolMax,
     idleTimeoutMillis: 30_000,
     connectionTimeoutMillis: 10_000,
     application_name: "nublue-api",

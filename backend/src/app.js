@@ -6,7 +6,8 @@ import { createServer } from "node:http";
 import { withTransaction } from "./db/pool.js";
 import { env } from "./config/env.js";
 import { ApiError } from "./errors.js";
-import { createRateLimiter } from "./rate-limit.js";
+import { createLimiters } from "./rate-limit.js";
+import { listMigrationVersions } from "./db/migrations-runner.js";
 
 const scrypt = promisify(scryptCallback);
 const catalogPath = fileURLToPath(new URL("./data/course-catalog.json", import.meta.url));
@@ -14,11 +15,7 @@ const catalog = JSON.parse(await readFile(catalogPath, "utf8"));
 const sessionCookieName = "nublue_session";
 const sessionDurationSeconds = env.sessionDays * 24 * 60 * 60;
 const maxBodyBytes = 64 * 1024;
-const authLimiter = createRateLimiter({ windowMs: 15 * 60_000, max: 8 });
-// Course and daily-challenge submissions share one bucket per account.
-const attemptLimiter = createRateLimiter({ windowMs: 60_000, max: 30 });
-// Drafts are autosaved with a 300 ms debounce while the student plays.
-const draftLimiter = createRateLimiter({ windowMs: 60_000, max: 120 });
+const expectedSchemaVersion = (await listMigrationVersions()).at(-1);
 
 function json(response, status, data) {
   response.writeHead(status, {
@@ -29,28 +26,28 @@ function json(response, status, data) {
   response.end(JSON.stringify(data));
 }
 
-function setSessionCookie(response, token) {
+function writeSessionCookie(response, value, maxAge) {
   const attributes = [
-    `${sessionCookieName}=${token}`,
+    `${sessionCookieName}=${value}`,
     "Path=/api",
     "HttpOnly",
     `SameSite=${env.cookieSameSite}`,
-    `Max-Age=${sessionDurationSeconds}`,
+    `Max-Age=${maxAge}`,
   ];
   if (env.cookieSecure) attributes.push("Secure");
+  // Cross-site deployments (frontend on GitHub Pages, API elsewhere) send the cookie
+  // as a third-party cookie. Partitioned (CHIPS) keeps it working in browsers that
+  // block unpartitioned third-party cookies. See DEPLOY.md for Safari.
+  if (env.cookieSameSite === "None") attributes.push("Partitioned");
   response.setHeader("set-cookie", attributes.join("; "));
 }
 
+function setSessionCookie(response, token) {
+  writeSessionCookie(response, token, sessionDurationSeconds);
+}
+
 function clearSessionCookie(response) {
-  const attributes = [
-    `${sessionCookieName}=`,
-    "Path=/api",
-    "HttpOnly",
-    `SameSite=${env.cookieSameSite}`,
-    "Max-Age=0",
-  ];
-  if (env.cookieSecure) attributes.push("Secure");
-  response.setHeader("set-cookie", attributes.join("; "));
+  writeSessionCookie(response, "", 0);
 }
 
 function cookieValue(request, name) {
@@ -109,9 +106,20 @@ async function verifyPassword(password, encoded) {
   return timingSafeEqual(actual, expected);
 }
 
-function limitAuthAttempts(request, nicknameKey) {
-  const ip = request.socket.remoteAddress ?? "unknown";
-  authLimiter.hit(`${ip}:auth:${nicknameKey}`);
+/**
+ * Client address for rate limiting. Behind N trusted proxies the real client is the
+ * N-th entry from the right of X-Forwarded-For; entries further left are set by the
+ * client and cannot be trusted.
+ */
+export function clientAddress(request, trustProxyHops) {
+  if (trustProxyHops > 0) {
+    const chain = String(request.headers["x-forwarded-for"] ?? "")
+      .split(",")
+      .map((entry) => entry.trim())
+      .filter(Boolean);
+    if (chain.length >= trustProxyHops) return chain[chain.length - trustProxyHops];
+  }
+  return request.socket.remoteAddress ?? "unknown";
 }
 
 async function readJson(request) {
@@ -556,21 +564,58 @@ async function handleDailyAttempt(pool, student, body, request) {
   return { ...result, progress: await getProgress(pool, student.id) };
 }
 
-function addCorsHeaders(request, response) {
+function addCorsHeaders(request, response, allowedOrigins) {
+  response.setHeader("vary", "Origin");
   const origin = request.headers.origin;
-  if (origin && origin !== env.frontendOrigin) throw new ApiError(403, "origin_not_allowed");
   if (!origin) return;
-  response.setHeader("access-control-allow-origin", env.frontendOrigin);
+  if (!allowedOrigins.includes(origin)) throw new ApiError(403, "origin_not_allowed");
+  response.setHeader("access-control-allow-origin", origin);
   response.setHeader("access-control-allow-credentials", "true");
   response.setHeader("access-control-allow-methods", "GET, POST, PATCH, DELETE, OPTIONS");
   response.setHeader("access-control-allow-headers", "content-type, idempotency-key");
-  response.setHeader("vary", "Origin");
+  response.setHeader("access-control-max-age", "600");
 }
 
-export function createApiServer(pool) {
+async function checkHealth(pool) {
+  let applied;
+  try {
+    const result = await pool.query("SELECT max(version) AS version FROM schema_migrations", []);
+    applied = result.rows[0]?.version ?? null;
+  } catch (error) {
+    // 42P01: schema_migrations does not exist yet (migrations never ran).
+    if (error?.code === "42P01") applied = null;
+    else return { status: 503, body: { status: "error", database: "unavailable" } };
+  }
+  // Newer schemas are fine: migrations are additive, and during a deploy the release
+  // step migrates before old instances are replaced. Versions are zero-padded, so
+  // string order is migration order.
+  if (applied === null || applied < expectedSchemaVersion) {
+    return {
+      status: 503,
+      body: { status: "error", database: "connected", error: "schema_outdated", schemaVersion: applied },
+    };
+  }
+  return { status: 200, body: { status: "ok", database: "connected", schemaVersion: applied } };
+}
+
+/**
+ * Options default to the environment; tests override them per server.
+ * - frontendOrigins: origins allowed by CORS.
+ * - rateLimitStore: "memory" (one process) or "postgres" (shared by instances).
+ * - trustProxyHops: reverse proxies that append to X-Forwarded-For.
+ */
+export function createApiServer(pool, {
+  frontendOrigins = env.frontendOrigins,
+  rateLimitStore = env.rateLimitStore,
+  trustProxyHops = env.trustProxyHops,
+} = {}) {
+  const limiters = createLimiters(rateLimitStore, pool);
+  const limitAuthAttempts = (request, nicknameKey) =>
+    limiters.auth.hit(`${clientAddress(request, trustProxyHops)}:auth:${nicknameKey}`);
+
   return createServer(async (request, response) => {
     try {
-      addCorsHeaders(request, response);
+      addCorsHeaders(request, response, frontendOrigins);
       if (request.method === "OPTIONS") {
         response.writeHead(204);
         response.end();
@@ -581,8 +626,8 @@ export function createApiServer(pool) {
       const path = url.pathname;
 
       if (request.method === "GET" && path === "/api/health") {
-        await pool.query("SELECT 1");
-        json(response, 200, { status: "ok", database: "connected" });
+        const health = await checkHealth(pool);
+        json(response, health.status, health.body);
         return;
       }
 
@@ -617,7 +662,7 @@ export function createApiServer(pool) {
       if (request.method === "POST" && path === "/api/auth/register") {
         const body = requireObject(await readJson(request));
         const { nickname, key } = normalizeNickname(body.nickname);
-        limitAuthAttempts(request, key);
+        await limitAuthAttempts(request, key);
         const passwordHash = await hashPassword(validatePassword(body.password));
         const registered = await withTransaction(pool, async (client) => {
           const student = await client.query(
@@ -640,7 +685,7 @@ export function createApiServer(pool) {
       if (request.method === "POST" && path === "/api/auth/login") {
         const body = requireObject(await readJson(request));
         const { key } = normalizeNickname(body.nickname);
-        limitAuthAttempts(request, key);
+        await limitAuthAttempts(request, key);
         const password = validatePassword(body.password);
         const result = await pool.query(
           "SELECT id, nickname, password_hash, leaderboard_opt_in FROM students WHERE nickname_key = $1 AND deleted_at IS NULL",
@@ -709,7 +754,7 @@ export function createApiServer(pool) {
 
       if (request.method === "POST" && path === "/api/attempts") {
         const student = await requireStudent(pool, request);
-        attemptLimiter.hit(student.id);
+        await limiters.attempt.hit(student.id);
         const body = requireObject(await readJson(request));
         json(response, 200, await handleCourseAttempt(pool, student, body, request));
         return;
@@ -723,7 +768,7 @@ export function createApiServer(pool) {
 
       if (request.method === "POST" && path === "/api/daily-challenge/draft") {
         const student = await requireStudent(pool, request);
-        draftLimiter.hit(student.id);
+        await limiters.draft.hit(student.id);
         const body = requireObject(await readJson(request));
         const answers = normalizeAnswers(body.answers);
         const dateKey = utcDateKey();
@@ -744,7 +789,7 @@ export function createApiServer(pool) {
 
       if (request.method === "POST" && path === "/api/daily-challenge/attempt") {
         const student = await requireStudent(pool, request);
-        attemptLimiter.hit(student.id);
+        await limiters.attempt.hit(student.id);
         const body = requireObject(await readJson(request));
         json(response, 200, await handleDailyAttempt(pool, student, body, request));
         return;

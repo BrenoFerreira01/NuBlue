@@ -17,6 +17,9 @@ function nublueAssetResolver() {
 }
 
 export default defineConfig({
+  // GitHub Pages serves the project under /<repo>/; the deploy workflow sets
+  // VITE_BASE_PATH=/NuBlue/. Local dev and custom domains use '/'.
+  base: process.env.VITE_BASE_PATH || '/',
   plugins: [
     nublueAssetResolver(),
     // The React and Tailwind plugins are both required for Make, even if

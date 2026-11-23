@@ -4,6 +4,13 @@ import path from "node:path";
 
 const migrationsDirectory = fileURLToPath(new URL("./migrations/", import.meta.url));
 
+export async function listMigrationVersions() {
+  return (await readdir(migrationsDirectory))
+    .filter((name) => name.endsWith(".sql"))
+    .sort()
+    .map((name) => path.basename(name, ".sql"));
+}
+
 export async function runMigrations(client, { log = () => {} } = {}) {
   await client.query("SELECT pg_advisory_lock(hashtext('nublue:migrations'))");
   try {
@@ -14,12 +21,8 @@ export async function runMigrations(client, { log = () => {} } = {}) {
       )
     `);
 
-    const files = (await readdir(migrationsDirectory))
-      .filter((name) => name.endsWith(".sql"))
-      .sort();
-
-    for (const filename of files) {
-      const version = path.basename(filename, ".sql");
+    for (const version of await listMigrationVersions()) {
+      const filename = `${version}.sql`;
       const applied = await client.query(
         "SELECT 1 FROM schema_migrations WHERE version = $1",
         [version],

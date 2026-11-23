@@ -101,6 +101,20 @@ test("with the bonus disabled the API never offers it", async () => {
       cookie, body: { levelId: 40, answers: { a: 9 }, idempotencyKey: "bonus-attempt-1" },
     });
     assert.equal(attempt.status, 404);
+
+    // A database seeded before the bonus was disabled still has row 40: the API must
+    // refuse it too, not only when the row is missing.
+    await ctx.pool.query(
+      `INSERT INTO course_levels (id, chapter, unit, lesson, public_data, answer_key, is_bonus)
+       VALUES (40, 5, 3, 9, '{"id":40,"chapter":5}'::jsonb, '{"a":9}'::jsonb, true)`,
+      [],
+    );
+    const stale = await ctx.request("POST", "/api/attempts", {
+      cookie, body: { levelId: 40, answers: { a: 9 }, idempotencyKey: "bonus-attempt-2" },
+    });
+    assert.equal(stale.status, 404);
+    assert.equal(stale.body.error, "level_not_found");
+    assert.equal((await ctx.request("GET", "/api/catalog")).body.levels.length, 39);
   } finally {
     await ctx.close();
   }

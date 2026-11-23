@@ -1,7 +1,10 @@
 import type { Level } from "../types/game";
 import { isSessionExpiry, notifySessionExpired } from "./sessionEvents";
 
-const apiBaseUrl = (import.meta.env.VITE_API_URL ?? "http://localhost:4000").replace(/\/$/, "");
+// Production builds (GitHub Pages) must receive VITE_API_URL at build time. Without
+// it they never fall back to localhost: requests fail and the app stays in visitor mode.
+const apiBaseUrl = (import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:4000" : "")).replace(/\/$/, "");
+export const isApiConfigured = apiBaseUrl !== "";
 const errorMessages: Record<string, string> = {
   authentication_required: "Sua sessão expirou. Entre novamente.",
   course_not_seeded: "O curso ainda não foi preparado no banco de dados.",
@@ -57,6 +60,9 @@ export interface DailyChallenge {
 }
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+  if (!isApiConfigured) {
+    throw new ApiClientError(0, "api_not_configured", "O servidor da Nublue não está configurado neste site.");
+  }
   const response = await fetch(`${apiBaseUrl}${path}`, {
     ...init,
     credentials: "include",

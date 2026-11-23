@@ -9,7 +9,8 @@ after(async () => { await ctx.close(); });
 test("GET /api/health reports a connected database", async () => {
   const response = await ctx.request("GET", "/api/health");
   assert.equal(response.status, 200);
-  assert.deepEqual(response.body, { status: "ok", database: "connected" });
+  assert.equal(response.body.status, "ok");
+  assert.equal(response.body.database, "connected");
 });
 
 test("GET /api/catalog serves the 39 levels without answer keys", async () => {

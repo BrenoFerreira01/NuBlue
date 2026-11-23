@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { PGlite } from "@electric-sql/pglite";
@@ -64,13 +65,54 @@ export function uniqueNickname(prefix = "aluno") {
   return `${prefix}_${process.pid}_${nicknameCounter}`.slice(0, 24);
 }
 
-export async function createTestContext({ seed = true } = {}) {
-  const db = createPglite();
-  const pool = createPgliteAdapter(db);
-  await runMigrations(await pool.connect());
+/**
+ * With TEST_DATABASE_URL set (CI job "Backend (PostgreSQL)"), each context gets its own
+ * schema in a real PostgreSQL server through the production `pg` driver, so test files
+ * can run in parallel. Otherwise it uses PGlite (PostgreSQL in WASM, no server needed).
+ */
+async function createRealPostgres(connectionString) {
+  const schema = `test_${process.pid}_${randomBytes(4).toString("hex")}`;
+  const admin = new pg.Client({ connectionString });
+  await admin.connect();
+  await admin.query(`CREATE SCHEMA ${schema}`);
+  const pool = new pg.Pool({ connectionString, max: 5 });
+  // Set per connection instead of the `options` startup parameter, which poolers and
+  // some wire-compatible servers ignore. pg queues this before the client's first query.
+  pool.on("connect", (client) => {
+    client.query(`SET search_path TO ${schema}`).catch(() => {});
+  });
+  return {
+    pool,
+    async end() {
+      await pool.end();
+      await admin.query(`DROP SCHEMA ${schema} CASCADE`);
+      await admin.end();
+    },
+  };
+}
+
+export const testDatabaseUrl = process.env.TEST_DATABASE_URL?.trim() || null;
+
+export async function createTestContext({ seed = true, driver = testDatabaseUrl ? "postgres" : "pglite", server: serverOptions = {} } = {}) {
+  let pool;
+  let endDatabase;
+  if (driver === "postgres") {
+    const real = await createRealPostgres(testDatabaseUrl);
+    pool = real.pool;
+    endDatabase = real.end;
+  } else {
+    pool = createPgliteAdapter(createPglite());
+    endDatabase = () => pool.end();
+  }
+  const migrationClient = await pool.connect();
+  try {
+    await runMigrations(migrationClient);
+  } finally {
+    migrationClient.release();
+  }
   if (seed) await seedCourse(pool, catalog);
 
-  const server = createApiServer(pool);
+  const server = createApiServer(pool, { rateLimitStore: "memory", trustProxyHops: 0, ...serverOptions });
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   const baseUrl = `http://127.0.0.1:${server.address().port}`;
 
@@ -104,8 +146,8 @@ export async function createTestContext({ seed = true } = {}) {
 
   async function close() {
     await new Promise((resolve) => server.close(resolve));
-    await pool.end();
+    await endDatabase();
   }
 
-  return { pool, request, registerStudent, close };
+  return { pool, baseUrl, request, registerStudent, close };
 }

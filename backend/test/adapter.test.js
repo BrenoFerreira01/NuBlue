@@ -5,7 +5,7 @@ import { createTestContext } from "./helpers.js";
 
 // The adapter must parse values like the production `pg` driver, or tests pass on values production never sees.
 let ctx;
-before(async () => { ctx = await createTestContext({ seed: false }); });
+before(async () => { ctx = await createTestContext({ seed: false, driver: "pglite" }); });
 after(async () => { await ctx.close(); });
 
 test("bigint and numeric come back as strings, like pg", async () => {
