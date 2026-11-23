@@ -17,12 +17,12 @@
 ## Funcionalidades previstas
 
   - [ ] Cadastro e autenticação de usuários.
-  - [ ] Conteúdos de matemática organizados por tema ou nível.
-  - [ ] Exercícios e desafios interativos.
+  - [x] Conteúdos de matemática organizados por tema ou nível.
+  - [x] Exercícios e desafios interativos.
   - [ ] Correção de respostas e feedback.
-  - [ ] Pontuação e progressão por níveis.
+  - [x] Pontuação e progressão por níveis.
   - [ ] Registro e acompanhamento do desempenho.
-  - [ ] Interface responsiva para diferentes tamanhos de tela.
+  - [x] Interface responsiva para diferentes tamanhos de tela.
 
 ## Tecnologias
 
