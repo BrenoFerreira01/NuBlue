@@ -13,89 +13,31 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    name: Build
+  test:
+    name: Lint, build e testes
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v7
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build application
-        run: npm run build
-
-      - name: Run frontend unit tests
-        run: npm test
-
-  backend:
-    name: Backend
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    defaults:
-      run:
-        working-directory: backend
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v7
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: backend/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Check syntax
-        run: find src test -name '*.js' -print0 | xargs -0 -n1 node --check
-
-      - name: Validate course catalog
-        run: npm run validate:catalog
-
-      - name: Run API tests against PostgreSQL (PGlite)
-        run: npm test
-
-  backend-postgres:
-    name: Backend (PostgreSQL 17)
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    defaults:
-      run:
-        working-directory: backend
-
+    # Mesmas credenciais e portas do .env.development (infra/compose.yaml).
     services:
       postgres:
-        image: postgres:17
+        image: postgres:17-alpine
         env:
-          POSTGRES_USER: nublue
-          POSTGRES_PASSWORD: nublue
-          POSTGRES_DB: nublue
+          POSTGRES_USER: local_user
+          POSTGRES_PASSWORD: local_password
+          POSTGRES_DB: local_db
         ports:
-          - 5432:5432
+          - 5433:5432
         options: >-
-          --health-cmd "pg_isready -U nublue"
+          --health-cmd "pg_isready -U local_user"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
-
-    env:
-      DATABASE_URL: postgres://nublue:nublue@localhost:5432/nublue
-      DATABASE_DIRECT_URL: postgres://nublue:nublue@localhost:5432/nublue
-      DATABASE_SSL: disable
-      PORT: 4000
+      mailpit:
+        image: axllent/mailpit:v1.27
+        ports:
+          - 1025:1025
+          - 8025:8025
 
     steps:
       - name: Check out repository
@@ -104,37 +46,32 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
-          cache-dependency-path: backend/package-lock.json
 
       - name: Install dependencies
         run: npm ci
 
-      # Same suite as above, through the production `pg` driver; each test context
-      # gets its own schema in this server.
-      - name: Run API tests against PostgreSQL 17
+      - name: Check formatting
+        run: npm run lint:check
+
+      - name: Apply migrations twice (the second run must be a no-op) and seed
+        run: |
+          npm run migrations:up
+          npm run migrations:up
+          npm run dev:seed
+
+      - name: Build
+        run: npm run build
+
+      # Os testes de integração falam com o servidor rodando, como no `npm test` local.
+      - name: Run tests
+        run: |
+          npx next dev > next.log 2>&1 &
+          npx jest --runInBand
         env:
-          TEST_DATABASE_URL: postgres://nublue:nublue@localhost:5432/nublue
-        run: npm test
+          NEXT_TELEMETRY_DISABLED: 1
 
-      - name: Apply migrations twice (second run must be a no-op) and seed
-        run: |
-          node src/db/migrate.js
-          node src/db/migrate.js
-          node src/db/seed-course.js
-
-      - name: Smoke-test the running API
-        run: |
-          node src/server.js > api.log 2>&1 &
-          API_PID=$!
-          for i in $(seq 1 30); do
-            curl -fsS http://localhost:4000/api/health && break
-            sleep 1
-          done
-          curl -fsS http://localhost:4000/api/health | grep -q '"status":"ok"'
-          curl -fsS http://localhost:4000/api/catalog \
-            | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const j=JSON.parse(s);if(j.levels.length!==39||/answer_?key/i.test(s))process.exit(1)})"
-          node src/db/maintenance-cli.js
-          kill "$API_PID"
-          cat api.log
+      - name: Server log
+        if: failure()
+        run: cat next.log
