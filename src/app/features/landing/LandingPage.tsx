@@ -5,7 +5,7 @@ import { Brand } from "../../components/Brand";
 import { ThemeToggle } from "../../components/ThemeToggle";
 import { Dialog, DialogContent } from "../../components/ui/dialog";
 import { generateLandingDailyPuzzle } from "../challenges/generatePuzzle";
-import { AuthDialog, type AuthMode } from "./components/AuthDialog";
+import { AuthDialog, type AuthCredentials, type AuthMode } from "./components/AuthDialog";
 import { LandingDailyChallenge } from "./LandingDailyChallenge";
 import { readLandingDailyProgress, saveLandingDailyProgress, type LandingDailyStatus } from "./landingDailyProgress";
 
@@ -13,7 +13,8 @@ interface Props {
   dark: boolean;
   onThemeChange: (dark: boolean) => void;
   onLogin: (nickname: string, password: string) => Promise<void>;
-  onSignup: (nickname: string, password: string) => Promise<void>;
+  onSignup: (credentials: AuthCredentials) => Promise<void>;
+  onResendVerification: (nickname: string, password: string, email?: string) => Promise<void>;
   dailyChallengeDate: string;
 }
 
@@ -22,6 +23,7 @@ export function LandingPage({
   onThemeChange,
   onLogin,
   onSignup,
+  onResendVerification,
   dailyChallengeDate,
 }: Props) {
   const [authMode, setAuthMode] = useState<AuthMode | null>(null);
@@ -185,12 +187,18 @@ export function LandingPage({
             className="auth-dialog-content min-h-0 max-h-[calc(100vh_-_2rem)] overflow-y-auto overscroll-contain rounded-[30px] border border-border bg-card p-5 text-foreground shadow-2xl sm:max-w-md sm:p-7 [&>button]:right-5 [&>button]:top-5 [&>button]:flex [&>button]:size-10 [&>button]:items-center [&>button]:justify-center [&>button]:rounded-full [&>button]:bg-secondary [&>button]:text-muted-foreground [&>button]:opacity-100"
           >
             <AuthDialog
+              key={authMode}
               mode={authMode}
-              onSubmit={async (nickname, password) => {
-                if (authMode === "signup") await onSignup(nickname, password);
-                else await onLogin(nickname, password);
+              onSubmit={async (credentials) => {
+                // Signup keeps the dialog open: it then asks to confirm the e-mail.
+                if (authMode === "signup") {
+                  await onSignup(credentials);
+                  return;
+                }
+                await onLogin(credentials.nickname, credentials.password);
                 setAuthMode(null);
               }}
+              onResendVerification={onResendVerification}
               onSwitchMode={() => setAuthMode(authMode === "login" ? "signup" : "login")}
             />
           </DialogContent>

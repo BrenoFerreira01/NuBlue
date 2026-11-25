@@ -112,7 +112,16 @@ export async function createTestContext({ seed = true, driver = testDatabaseUrl 
   }
   if (seed) await seedCourse(pool, catalog);
 
-  const server = createApiServer(pool, { rateLimitStore: "memory", trustProxyHops: 0, ...serverOptions });
+  // Captures verification e-mails instead of sending them.
+  const sentEmails = [];
+  const mailer = { async sendVerificationEmail(message) { sentEmails.push(message); } };
+  const server = createApiServer(pool, {
+    rateLimitStore: "memory",
+    trustProxyHops: 0,
+    mailer,
+    appUrl: "http://localhost:5173/",
+    ...serverOptions,
+  });
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   const baseUrl = `http://127.0.0.1:${server.address().port}`;
 
@@ -136,12 +145,23 @@ export async function createTestContext({ seed = true, driver = testDatabaseUrl 
     };
   }
 
+  /** Token of the last verification link sent to `email`. */
+  function lastVerificationToken(email) {
+    const message = sentEmails.findLast((item) => item.to === email);
+    return message ? new URL(message.url).searchParams.get("verify") : null;
+  }
+
+  /** Registers, confirms the e-mail and logs in: a ready-to-use account. */
   async function registerStudent(nickname = uniqueNickname()) {
-    const response = await request("POST", "/api/auth/register", {
-      body: { nickname, password: "senha-segura-1" },
-    });
-    if (response.status !== 201) throw new Error(`register failed: ${response.status} ${response.text}`);
-    return { nickname, cookie: response.cookie, student: response.body.student };
+    const email = `${nickname}@example.com`.toLowerCase();
+    const password = "senha-segura-1";
+    const registered = await request("POST", "/api/auth/register", { body: { nickname, email, password } });
+    if (registered.status !== 201) throw new Error(`register failed: ${registered.status} ${registered.text}`);
+    const verified = await request("POST", "/api/auth/verify-email", { body: { token: lastVerificationToken(email) } });
+    if (verified.status !== 200) throw new Error(`verify failed: ${verified.status} ${verified.text}`);
+    const login = await request("POST", "/api/auth/login", { body: { nickname, password } });
+    if (login.status !== 200) throw new Error(`login failed: ${login.status} ${login.text}`);
+    return { nickname, email, cookie: login.cookie, student: login.body.student };
   }
 
   async function close() {
@@ -149,5 +169,5 @@ export async function createTestContext({ seed = true, driver = testDatabaseUrl 
     await endDatabase();
   }
 
-  return { pool, baseUrl, request, registerStudent, close };
+  return { pool, baseUrl, request, registerStudent, sentEmails, lastVerificationToken, close };
 }

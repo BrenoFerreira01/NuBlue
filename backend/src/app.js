@@ -14,6 +14,7 @@ const catalogPath = fileURLToPath(new URL("./data/course-catalog.json", import.m
 const catalog = JSON.parse(await readFile(catalogPath, "utf8"));
 const sessionCookieName = "nublue_session";
 const sessionDurationSeconds = env.sessionDays * 24 * 60 * 60;
+const verificationDurationSeconds = 24 * 60 * 60;
 const maxBodyBytes = 64 * 1024;
 const expectedSchemaVersion = (await listMigrationVersions()).at(-1);
 
@@ -82,6 +83,14 @@ function validatePassword(value) {
     throw new ApiError(400, "invalid_password", "A senha precisa ter entre 8 e 128 caracteres.");
   }
   return value;
+}
+
+function normalizeEmail(value) {
+  const email = typeof value === "string" ? value.trim().toLowerCase() : "";
+  if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new ApiError(400, "invalid_email", "Informe um e-mail válido.");
+  }
+  return email;
 }
 
 async function hashPassword(password) {
@@ -222,6 +231,50 @@ async function createStudentSession(client, studentId) {
     [hashToken(token), studentId, sessionDurationSeconds],
   );
   return token;
+}
+
+/**
+ * Replaces any pending confirmation link of the student with a new one and returns
+ * its token. Only the token's hash is stored.
+ */
+async function createEmailVerification(client, studentId) {
+  const token = randomBytes(32).toString("hex");
+  await client.query("DELETE FROM email_verifications WHERE student_id = $1", [studentId]);
+  await client.query(
+    `INSERT INTO email_verifications (token_hash, student_id, expires_at)
+     VALUES ($1, $2, now() + ($3 * interval '1 second'))`,
+    [hashToken(token), studentId, verificationDurationSeconds],
+  );
+  return token;
+}
+
+function verificationUrl(appUrl, token) {
+  const url = new URL(appUrl);
+  url.searchParams.set("verify", token);
+  return url.href;
+}
+
+/**
+ * Password check shared by login and resend. Unknown nicknames still pay for one
+ * scrypt so response time does not reveal which nicknames exist.
+ */
+async function findStudentByCredentials(pool, body) {
+  const { key } = normalizeNickname(body.nickname);
+  const password = validatePassword(body.password);
+  const result = await pool.query(
+    `SELECT id, nickname, password_hash, leaderboard_opt_in, email, email_verified_at
+     FROM students WHERE nickname_key = $1 AND deleted_at IS NULL`,
+    [key],
+  );
+  const validPassword = result.rowCount
+    ? await verifyPassword(password, result.rows[0].password_hash)
+    : (await hashPassword(password), false);
+  if (!validPassword) throw new ApiError(401, "invalid_credentials", "Apelido ou senha incorretos.");
+  return result.rows[0];
+}
+
+function awaitingVerification(student) {
+  return student.email !== null && student.email_verified_at === null;
 }
 
 async function getProgress(pool, studentId, dateKey = utcDateKey()) {
@@ -608,10 +661,25 @@ export function createApiServer(pool, {
   frontendOrigins = env.frontendOrigins,
   rateLimitStore = env.rateLimitStore,
   trustProxyHops = env.trustProxyHops,
+  mailer,
+  appUrl = env.appUrl,
 } = {}) {
+  if (!mailer) throw new Error("createApiServer needs a mailer (see src/email.js)");
   const limiters = createLimiters(rateLimitStore, pool);
-  const limitAuthAttempts = (request, nicknameKey) =>
-    limiters.auth.hit(`${clientAddress(request, trustProxyHops)}:auth:${nicknameKey}`);
+  const limitAuthAttempts = async (request, nicknameKey) => {
+    const address = clientAddress(request, trustProxyHops);
+    await limiters.authAddress.hit(address);
+    await limiters.auth.hit(`${address}:auth:${nicknameKey}`);
+  };
+  // The account already exists when this runs: a failed delivery is logged, and the
+  // student can ask for a new link from the login screen.
+  const sendVerification = async (student, email, token) => {
+    try {
+      await mailer.sendVerificationEmail({ to: email, nickname: student.nickname, url: verificationUrl(appUrl, token) });
+    } catch {
+      process.stderr.write("Confirmation e-mail could not be sent\n");
+    }
+  };
 
   return createServer(async (request, response) => {
     try {
@@ -663,41 +731,34 @@ export function createApiServer(pool, {
         const body = requireObject(await readJson(request));
         const { nickname, key } = normalizeNickname(body.nickname);
         await limitAuthAttempts(request, key);
+        const email = normalizeEmail(body.email);
         const passwordHash = await hashPassword(validatePassword(body.password));
+        // No session yet: the account is usable only after the e-mail is confirmed.
         const registered = await withTransaction(pool, async (client) => {
           const student = await client.query(
-            `INSERT INTO students (nickname, nickname_key, password_hash)
-             VALUES ($1, $2, $3) RETURNING id, nickname, leaderboard_opt_in`,
-            [nickname, key, passwordHash],
+            `INSERT INTO students (nickname, nickname_key, password_hash, email)
+             VALUES ($1, $2, $3, $4) RETURNING id, nickname, leaderboard_opt_in`,
+            [nickname, key, passwordHash, email],
           );
           await client.query("INSERT INTO student_progress (student_id) VALUES ($1)", [student.rows[0].id]);
-          const token = await createStudentSession(client, student.rows[0].id);
+          const token = await createEmailVerification(client, student.rows[0].id);
           return { student: student.rows[0], token };
         }).catch((error) => {
           if (error.code === "23505") throw new ApiError(409, "nickname_taken", "Esse apelido já está em uso.");
           throw error;
         });
-        setSessionCookie(response, registered.token);
-        json(response, 201, { student: registered.student });
+        await sendVerification(registered.student, email, registered.token);
+        json(response, 201, { student: registered.student, verificationRequired: true });
         return;
       }
 
       if (request.method === "POST" && path === "/api/auth/login") {
         const body = requireObject(await readJson(request));
-        const { key } = normalizeNickname(body.nickname);
-        await limitAuthAttempts(request, key);
-        const password = validatePassword(body.password);
-        const result = await pool.query(
-          "SELECT id, nickname, password_hash, leaderboard_opt_in FROM students WHERE nickname_key = $1 AND deleted_at IS NULL",
-          [key],
-        );
-        const validPassword = result.rowCount
-          ? await verifyPassword(password, result.rows[0].password_hash)
-          : (await hashPassword(password), false);
-        if (!validPassword) {
-          throw new ApiError(401, "invalid_credentials", "Apelido ou senha incorretos.");
+        await limitAuthAttempts(request, normalizeNickname(body.nickname).key);
+        const student = await findStudentByCredentials(pool, body);
+        if (awaitingVerification(student)) {
+          throw new ApiError(403, "email_not_verified", "Confirme seu e-mail para entrar. Enviamos um link para você.");
         }
-        const student = result.rows[0];
         const token = await withTransaction(pool, (client) => createStudentSession(client, student.id));
         setSessionCookie(response, token);
         json(response, 200, {
@@ -707,6 +768,52 @@ export function createApiServer(pool, {
             leaderboardOptIn: student.leaderboard_opt_in,
           },
         });
+        return;
+      }
+
+      if (request.method === "POST" && path === "/api/auth/resend-verification") {
+        const body = requireObject(await readJson(request));
+        await limitAuthAttempts(request, normalizeNickname(body.nickname).key);
+        // Optional `email` corrects a mistyped address. The password proves ownership,
+        // and only unconfirmed accounts can change it.
+        const newEmail = body.email === undefined ? null : normalizeEmail(body.email);
+        const student = await findStudentByCredentials(pool, body);
+        if (awaitingVerification(student)) {
+          const email = newEmail ?? student.email;
+          const token = await withTransaction(pool, async (client) => {
+            if (email !== student.email) {
+              await client.query("UPDATE students SET email = $2 WHERE id = $1", [student.id, email]);
+            }
+            return createEmailVerification(client, student.id);
+          });
+          await sendVerification(student, email, token);
+        }
+        json(response, 200, { ok: true });
+        return;
+      }
+
+      if (request.method === "POST" && path === "/api/auth/verify-email") {
+        const body = requireObject(await readJson(request));
+        await limiters.authAddress.hit(clientAddress(request, trustProxyHops));
+        const token = typeof body.token === "string" && /^[0-9a-f]{64}$/i.test(body.token) ? body.token : null;
+        // Deleting the row consumes the link, so it works only once.
+        const verified = token && await withTransaction(pool, async (client) => {
+          const used = await client.query(
+            `DELETE FROM email_verifications
+             WHERE token_hash = $1 AND expires_at > now() RETURNING student_id`,
+            [hashToken(token)],
+          );
+          if (!used.rowCount) return false;
+          await client.query(
+            "UPDATE students SET email_verified_at = COALESCE(email_verified_at, now()) WHERE id = $1",
+            [used.rows[0].student_id],
+          );
+          return true;
+        });
+        if (!verified) {
+          throw new ApiError(400, "invalid_verification_token", "Este link de confirmação é inválido ou expirou.");
+        }
+        json(response, 200, { verified: true });
         return;
       }
 

@@ -38,6 +38,9 @@ Variáveis de produção:
 | `TRUST_PROXY_HOPS` | `1` na maioria dos hosts (um proxy na frente); confira a documentação do host |
 | `RATE_LIMIT_STORE` | `postgres` (padrão em produção; compartilhado entre instâncias) |
 | `DATABASE_POOL_MAX` | opcional; instâncias × este valor deve caber no limite do pooler |
+| `APP_URL` | URL pública do site, com o caminho base: `https://brenoferreira01.github.io/NuBlue/`. Vai nos links de confirmação de e-mail |
+| `RESEND_API_KEY` | chave da API do [Resend](https://resend.com); **obrigatória em produção** (a API não sobe sem ela) |
+| `EMAIL_FROM` | remetente, num domínio verificado no Resend: `Nublue <nao-responda@seu-dominio>` |
 
 Em cada deploy: `node src/db/migrate.js` como etapa de release, depois a nova versão. Configure o health check do host em `GET /api/health`: ele responde `503` se o banco estiver fora ou se faltar alguma migração do código (`schema_outdated`).
 
@@ -70,10 +73,16 @@ Aí os dois ficam no mesmo site, o cookie volta a ser primário e a API pode usa
 
 ## 5. Verificação pós-deploy
 
-- `GET https://<api>/api/health` → `{"status":"ok","database":"connected","schemaVersion":"002_rate_limit_buckets"}`.
-- Abrir o site do Pages, criar uma conta de teste, resolver o nível 1 e recarregar a página: o progresso deve continuar lá.
+- `GET https://<api>/api/health` → `{"status":"ok","database":"connected","schemaVersion":"003_email_verification"}`.
+- Abrir o site do Pages, criar uma conta de teste com um e-mail real, abrir o link recebido (deve mostrar "E-mail confirmado"), entrar, resolver o nível 1 e recarregar a página: o progresso deve continuar lá.
 - No DevTools → Network, as chamadas para a API não podem ter erro de CORS; a resposta do login deve trazer `set-cookie` com `Secure`.
 
 ## Pendências antes de abrir para alunos
 
 Continuam valendo os itens de `backend/README.md` → "Limites antes de produção": revisão de privacidade para público infantil, recuperação de conta, monitoramento e o primeiro ensaio de restauração de backup.
+
+## Confirmação de e-mail
+
+Contas novas informam um e-mail (pode ser o de um responsável; o mesmo e-mail serve para várias contas) e só conseguem entrar depois de abrir o link enviado. O link vale 24 horas e funciona uma vez; na tela de login, quem ainda não confirmou pode pedir um novo ou corrigir um e-mail digitado errado. Contas criadas antes desta mudança não têm e-mail e continuam entrando normalmente. Contas não confirmadas em 7 dias são apagadas pela manutenção horária, liberando o apelido.
+
+Fora de produção, sem `RESEND_API_KEY`, a API não envia nada: o link aparece no log (`[email] Confirmation link for ...`).

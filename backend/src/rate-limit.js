@@ -72,6 +72,9 @@ export function createLimiters(store, pool) {
     : createRateLimiter(options));
   return {
     auth: make("auth", { windowMs: 15 * 60_000, max: 8 }),
+    // Per address across all nicknames: stops account-creation spam, password spraying
+    // and scrypt CPU exhaustion. Generous because classrooms share one NAT address.
+    authAddress: make("auth-address", { windowMs: 15 * 60_000, max: 100 }),
     // Course and daily-challenge submissions share one bucket per account.
     attempt: make("attempt", { windowMs: 60_000, max: 30 }),
     // Drafts are autosaved with a 300 ms debounce while the student plays.
