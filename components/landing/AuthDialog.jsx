@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MailCheck } from "lucide-react";
+import { Eye, EyeOff, MailCheck } from "lucide-react";
 import { ApiClientError } from "lib/api";
 import { Brand } from "components/Brand";
 import {
@@ -158,16 +158,8 @@ export function AuthDialog({
             className={inputClassName}
           />
         )}
-        <input
-          required
-          aria-label="Senha"
-          name="password"
-          type="password"
-          minLength={8}
-          maxLength={128}
+        <PasswordInput
           autoComplete={isSignup ? "new-password" : "current-password"}
-          placeholder="Sua senha"
-          className={inputClassName}
         />
         {error && (
           <p className="text-sm font-bold text-destructive" role="alert">
@@ -239,6 +231,36 @@ export function AuthDialog({
         {isSignup
           ? "Já tem conta? Faça login"
           : "Novo por aqui? Crie sua conta"}
+      </button>
+    </div>
+  );
+}
+
+/** Campo de senha com botão para mostrar ou ocultar o que foi digitado. */
+function PasswordInput({ autoComplete }) {
+  const [visible, setVisible] = useState(false);
+  const Icon = visible ? EyeOff : Eye;
+  return (
+    <div className="relative">
+      <input
+        required
+        aria-label="Senha"
+        name="password"
+        type={visible ? "text" : "password"}
+        minLength={8}
+        maxLength={128}
+        autoComplete={autoComplete}
+        placeholder="Sua senha"
+        className={`${inputClassName} pr-14`}
+      />
+      <button
+        type="button"
+        onClick={() => setVisible((current) => !current)}
+        aria-label={visible ? "Ocultar senha" : "Mostrar senha"}
+        aria-pressed={visible}
+        className="absolute inset-y-0 right-2 my-auto flex size-10 items-center justify-center rounded-xl text-muted-foreground transition hover:bg-[var(--hover-surface)] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      >
+        <Icon size={20} aria-hidden="true" />
       </button>
     </div>
   );
