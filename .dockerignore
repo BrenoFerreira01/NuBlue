@@ -1,0 +1,14 @@
+node_modules
+.next
+.git
+.github
+.superpowers
+docs
+dist
+coverage
+tests
+legacy-src
+backend
+.env*
+!.env.production.example
+*.log

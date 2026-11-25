@@ -1,0 +1,8 @@
+.next
+node_modules
+dist
+coverage
+docs
+.superpowers
+package-lock.json
+infra/data/course-catalog.json
