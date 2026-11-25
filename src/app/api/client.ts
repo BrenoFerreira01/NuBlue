@@ -8,9 +8,12 @@ export const isApiConfigured = apiBaseUrl !== "";
 const errorMessages: Record<string, string> = {
   authentication_required: "Sua sessão expirou. Entre novamente.",
   course_not_seeded: "O curso ainda não foi preparado no banco de dados.",
+  email_not_verified: "Confirme seu e-mail para entrar. Enviamos um link para você.",
   invalid_credentials: "Apelido ou senha incorretos.",
+  invalid_email: "Informe um e-mail válido.",
   invalid_nickname: "Use um apelido de 3 a 24 letras, números, _ ou -.",
   invalid_password: "A senha precisa ter entre 8 e 128 caracteres.",
+  invalid_verification_token: "Este link de confirmação é inválido ou expirou.",
   level_locked: "Complete o nível anterior para continuar.",
   nickname_taken: "Esse apelido já está em uso.",
   request_failed: "Não foi possível concluir essa ação. Tente novamente.",
@@ -94,8 +97,15 @@ export const api = {
   me: () => request<{ student: StudentAccount; progress: RemoteProgress }>("/api/me"),
   progress: () => request<RemoteProgress>("/api/progress"),
   availability: () => request<LevelAvailability>("/api/progress/availability"),
-  register: (nickname: string, password: string) =>
-    request<{ student: StudentAccount }>("/api/auth/register", post({ nickname, password })),
+  register: (nickname: string, email: string, password: string) =>
+    request<{ student: StudentAccount; verificationRequired: true }>(
+      "/api/auth/register",
+      post({ nickname, email, password }),
+    ),
+  verifyEmail: (token: string) => request<{ verified: true }>("/api/auth/verify-email", post({ token })),
+  /** `email` corrects the address of an account that is not confirmed yet. */
+  resendVerification: (nickname: string, password: string, email?: string) =>
+    request<{ ok: true }>("/api/auth/resend-verification", post({ nickname, password, email })),
   login: (nickname: string, password: string) =>
     request<{ student: StudentAccount }>("/api/auth/login", post({ nickname, password })),
   logout: () => request<{ ok: true }>("/api/auth/logout", post()),

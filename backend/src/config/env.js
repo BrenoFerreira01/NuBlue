@@ -48,7 +48,23 @@ function databaseSsl() {
   throw new Error("DATABASE_SSL must be verify-full or disable");
 }
 
+/** Public URL of the site (with base path), used in e-mail confirmation links. */
+function parseAppUrl(value) {
+  let url;
+  try {
+    url = new URL(value);
+  } catch {
+    throw new Error(`APP_URL has an invalid URL: ${value}`);
+  }
+  if (url.search || url.hash) throw new Error("APP_URL must not have a query or fragment");
+  if (isProduction && url.protocol !== "https:") throw new Error("APP_URL must use HTTPS in production");
+  return url.href;
+}
+
 const frontendOrigins = parseOrigins(process.env.FRONTEND_ORIGIN ?? "http://localhost:5173");
+const appUrl = parseAppUrl(process.env.APP_URL?.trim() || "http://localhost:5173/");
+const resendApiKey = process.env.RESEND_API_KEY?.trim() || null;
+const emailFrom = process.env.EMAIL_FROM?.trim() || null;
 const rateLimitStore = process.env.RATE_LIMIT_STORE ?? (isProduction ? "postgres" : "memory");
 
 export const env = {
@@ -67,8 +83,12 @@ export const env = {
   // 0 = use the socket address (direct exposure or unknown proxy chain).
   trustProxyHops: integer("TRUST_PROXY_HOPS", 0, { min: 0, max: 5 }),
   rateLimitStore,
+  appUrl,
+  resendApiKey,
+  emailFrom,
 };
 
+if (resendApiKey && !emailFrom) throw new Error("EMAIL_FROM is required when RESEND_API_KEY is set");
 if (isProduction && frontendOrigins.some((origin) => !origin.startsWith("https://"))) {
   throw new Error("FRONTEND_ORIGIN must use HTTPS in production");
 }

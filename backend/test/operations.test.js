@@ -92,6 +92,25 @@ test("behind a trusted proxy each client address gets its own login bucket", asy
   }
 });
 
+test("one address cannot spray auth requests across many nicknames", async () => {
+  const proxied = await createTestContext({ seed: false, server: { trustProxyHops: 1 } });
+  try {
+    // Short passwords fail validation after the limiter, so no scrypt work is done.
+    const from = (ip) => ({
+      body: { nickname: uniqueNickname("spray"), password: "curta" },
+      headers: { "x-forwarded-for": ip },
+    });
+    for (let i = 0; i < 100; i += 1) {
+      assert.equal((await proxied.request("POST", "/api/auth/register", from("192.0.2.50"))).status, 400);
+    }
+    const limited = await proxied.request("POST", "/api/auth/login", from("192.0.2.50"));
+    assert.equal(limited.status, 429);
+    assert.equal((await proxied.request("POST", "/api/auth/login", from("192.0.2.51"))).status, 400);
+  } finally {
+    await proxied.close();
+  }
+});
+
 test("clientAddress ignores X-Forwarded-For unless proxies are trusted", () => {
   const request = { headers: { "x-forwarded-for": "6.6.6.6, 10.0.0.5" }, socket: { remoteAddress: "10.0.0.1" } };
   assert.equal(clientAddress(request, 0), "10.0.0.1");
@@ -119,6 +138,29 @@ test("purgeExpiredData removes expired sessions and closed windows only", async 
   assert.equal((await ctx.request("GET", "/api/me", { cookie: live.cookie })).status, 200);
   const { rows } = await ctx.pool.query("SELECT count(*)::integer AS count FROM rate_limit_buckets WHERE bucket_key = 'old'", []);
   assert.equal(rows[0].count, 0);
+});
+
+test("purgeExpiredData removes accounts left unconfirmed for 7 days, freeing the nickname", async () => {
+  const stale = uniqueNickname("stale");
+  const recent = uniqueNickname("recent");
+  for (const nickname of [stale, recent]) {
+    await ctx.request("POST", "/api/auth/register", {
+      body: { nickname, email: `${nickname}@example.com`, password: "senha-segura-1" },
+    });
+  }
+  const confirmed = await ctx.registerStudent();
+  await ctx.pool.query(
+    "UPDATE students SET created_at = now() - interval '8 days' WHERE nickname = $1 OR id = $2",
+    [stale, confirmed.student.id],
+  );
+
+  const removed = await purgeExpiredData(ctx.pool);
+  assert.ok(removed.unverifiedStudents >= 1);
+  const { rows } = await ctx.pool.query(
+    "SELECT nickname FROM students WHERE nickname = ANY($1::text[]) ORDER BY nickname",
+    [[stale, recent, confirmed.nickname]],
+  );
+  assert.deepEqual(rows.map((row) => row.nickname).sort(), [confirmed.nickname, recent].sort());
 });
 
 test("CORS echoes each configured origin and refuses others", async () => {

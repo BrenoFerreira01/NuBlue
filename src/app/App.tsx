@@ -5,6 +5,7 @@ import { onSessionExpired } from "./api/sessionEvents";
 import type { Level } from "./types/game";
 import { LEVELS } from "./data/levels";
 import { LandingPage } from "./features/landing/LandingPage";
+import type { AuthCredentials } from "./features/landing/components/AuthDialog";
 import { DiagnosticTest } from "./features/onboarding/DiagnosticTest";
 import { MainScreen } from "./features/navigation/MainScreen";
 import { PuzzleScreen } from "./features/game/components/PuzzleScreen";
@@ -35,6 +36,20 @@ export default function App() {
     document.documentElement.classList.toggle("dark", dark);
     window.localStorage.setItem("nublue-theme", dark ? "dark" : "light");
   }, [dark]);
+
+  // Confirmation links from the e-mail open the site with ?verify=<token>.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const token = url.searchParams.get("verify");
+    if (!token) return;
+    url.searchParams.delete("verify");
+    window.history.replaceState(null, "", url);
+    api.verifyEmail(token)
+      .then(() => setSessionNotice("E-mail confirmado! Entre com seu apelido e senha."))
+      .catch((error: unknown) => {
+        setSessionNotice(error instanceof Error ? error.message : "Não foi possível confirmar o e-mail.");
+      });
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -106,19 +121,26 @@ export default function App() {
   const login = async (nickname: string, password: string) => {
     const { student: signedInStudent } = await api.login(nickname, password);
     setSessionNotice(null);
-    await loadCatalog();
+    const [, progress] = await Promise.all([loadCatalog(), api.progress()]);
     setStudent(signedInStudent);
     setUserName(signedInStudent.nickname);
-    enterGame();
+    // New accounts only get a session after confirming the e-mail, so the placement
+    // test runs on the first login of an account that has not played yet.
+    if (progress.totalSolved === 0 && progress.completedLevels.length === 0) {
+      startDiagnostic(signedInStudent.nickname);
+    } else {
+      enterGame();
+    }
   };
 
-  const signup = async (nickname: string, password: string) => {
-    const { student: newStudent } = await api.register(nickname, password);
+  // Creates the account only: the student logs in after confirming the e-mail.
+  const signup = async ({ nickname, email, password }: AuthCredentials) => {
+    await api.register(nickname, email, password);
     setSessionNotice(null);
-    await loadCatalog();
-    setStudent(newStudent);
-    setUserName(newStudent.nickname);
-    startDiagnostic(newStudent.nickname);
+  };
+
+  const resendVerification = async (nickname: string, password: string, email?: string) => {
+    await api.resendVerification(nickname, password, email);
   };
 
   const changeChapter = (nextChapter: number) => {
@@ -154,7 +176,8 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors">
-      {view === "landing" && sessionNotice && (
+      {/* Shown on every view: a confirmation link may be opened while signed in. */}
+      {sessionNotice && (
         <div
           role="status"
           className="fixed inset-x-3 top-3 z-50 mx-auto flex max-w-md items-center justify-between gap-3 rounded-2xl border border-amber-500/30 bg-card px-4 py-3 text-sm font-bold text-foreground shadow-lg"
@@ -184,6 +207,7 @@ export default function App() {
               onThemeChange={setDark}
               onLogin={login}
               onSignup={signup}
+              onResendVerification={resendVerification}
               dailyChallengeDate={game.today}
             />
           </motion.div>
