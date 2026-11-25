@@ -1,4 +1,26 @@
-import { clientAddress } from "infra/request.js";
+import { allowedOrigins, appUrl, clientAddress } from "infra/request.js";
+
+describe("appUrl", () => {
+  afterEach(() => {
+    delete process.env.APP_URL;
+  });
+
+  it("aceita APP_URL sem https:// (erro comum ao cadastrar na Vercel)", () => {
+    process.env.APP_URL = "nublue.vercel.app/";
+    expect(appUrl()).toBe("https://nublue.vercel.app");
+  });
+
+  it("mantém uma URL completa e tira a barra final", () => {
+    process.env.APP_URL = " https://nublue.vercel.app/ ";
+    expect(appUrl()).toBe("https://nublue.vercel.app");
+  });
+
+  it("a checagem de origem não quebra com APP_URL sem protocolo", () => {
+    process.env.APP_URL = "nublue.vercel.app";
+    const origins = allowedOrigins({ headers: {}, socket: {} });
+    expect(origins.has("https://nublue.vercel.app")).toBe(true);
+  });
+});
 
 const req = {
   headers: { "x-forwarded-for": "6.6.6.6, 10.0.0.5" },

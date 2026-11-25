@@ -59,8 +59,13 @@ export function clientAddress(req) {
 
 /** URL pública do site, sem barra final (usada nos links dos e-mails). */
 export function appUrl() {
-  const configured = process.env.APP_URL?.trim();
-  if (configured) return configured.replace(/\/+$/, "");
+  const configured = process.env.APP_URL?.trim().replace(/\/+$/, "");
+  if (configured) {
+    // "nublue.vercel.app" sem protocolo quebraria new URL() em toda requisição POST.
+    return /^https?:\/\//i.test(configured)
+      ? configured
+      : `https://${configured}`;
+  }
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
   return "http://localhost:3000";
 }
