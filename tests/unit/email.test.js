@@ -1,4 +1,33 @@
-import { verificationEmail } from "infra/email.js";
+import { smtpConfig, verificationEmail } from "infra/email.js";
+
+describe("smtpConfig", () => {
+  const keys = ["SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASSWORD"];
+  afterEach(() => keys.forEach((key) => delete process.env[key]));
+
+  it("ignora espaços e tabulações coladas junto com os valores", () => {
+    process.env.SMTP_HOST = "\tsmtp.resend.com ";
+    process.env.SMTP_PORT = " 465\n";
+    process.env.SMTP_USER = " resend\t";
+    process.env.SMTP_PASSWORD = "\tre_chave \n";
+
+    const config = smtpConfig();
+
+    expect(config.host).toBe("smtp.resend.com");
+    expect(config.port).toBe(465);
+    expect(config.secure).toBe(true);
+    expect(config.auth).toEqual({ user: "resend", pass: "re_chave" });
+  });
+
+  it("sem usuário, não envia credenciais (Mailpit local)", () => {
+    process.env.SMTP_HOST = "localhost";
+    process.env.SMTP_PORT = "1025";
+
+    const config = smtpConfig();
+
+    expect(config.secure).toBe(false);
+    expect(config.auth).toBeUndefined();
+  });
+});
 
 describe("verificationEmail", () => {
   it("traz o link no texto e no HTML", () => {
