@@ -244,3 +244,63 @@ describe("GET /api/v1/users/me/availability", () => {
     expect(response.status).toBe(401);
   });
 });
+
+describe("vidas das lições", () => {
+  const livesOf = async (cookie) =>
+    (await request("/api/v1/users/me", { cookie })).data.lives;
+
+  it("conta nova começa com 5 vidas, sem cronômetro", async () => {
+    const { cookie } = await createStudent();
+    expect(await livesOf(cookie)).toEqual({
+      lives: 5,
+      max: 5,
+      nextLifeAt: null,
+    });
+  });
+
+  it("errar gasta uma vida e liga o cronômetro de 15 minutos", async () => {
+    const { cookie } = await createStudent();
+    const before = Date.now();
+
+    const wrong = await attempt(cookie, 1, { answers: wrongAnswersOf(1) });
+
+    expect(wrong.data.lives.lives).toBe(4);
+    const next = Date.parse(wrong.data.lives.nextLifeAt);
+    expect(next - before).toBeGreaterThanOrEqual(15 * 60 * 1000 - 2000);
+    expect(next - before).toBeLessThanOrEqual(15 * 60 * 1000 + 5000);
+  });
+
+  it("concluir um nível não devolve as vidas", async () => {
+    const { cookie } = await createStudent();
+    await attempt(cookie, 1, { answers: wrongAnswersOf(1) });
+
+    const done = await completeLesson(cookie, 1);
+
+    expect(done.data.lessonCompleted).toBe(true);
+    expect(done.data.lives.lives).toBe(4);
+    expect((await livesOf(cookie)).lives).toBe(4);
+  });
+
+  it("sem vidas a tentativa é recusada", async () => {
+    const { cookie } = await createStudent();
+    for (let i = 0; i < 5; i += 1)
+      await attempt(cookie, 1, { answers: wrongAnswersOf(1) });
+
+    const blocked = await attempt(cookie, 1);
+
+    expect(blocked.status).toBe(409);
+    expect(blocked.data.error).toBe("no_lives");
+  });
+
+  it("uma vida volta a cada 15 minutos", async () => {
+    const { cookie, id } = await createStudent();
+    for (let i = 0; i < 3; i += 1)
+      await attempt(cookie, 1, { answers: wrongAnswersOf(1) });
+    await query(
+      "UPDATE students SET lives_updated_at = now() - interval '16 minutes' WHERE id = $1",
+      [id],
+    );
+
+    expect((await livesOf(cookie)).lives).toBe(3);
+  });
+});

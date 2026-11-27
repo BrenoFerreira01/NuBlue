@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { Check, Flame, Star, Zap } from "lucide-react";
 import { clsx } from "clsx";
+import { ACHIEVEMENTS } from "lib/game/achievements";
 export function ProfileTab({
   userName,
   xp,
@@ -16,45 +17,19 @@ export function ProfileTab({
   const progressPct = (xpInLevel / 50) * 100;
   const avatarInitial =
     Array.from(userName.trim())[0]?.toLocaleUpperCase("pt-BR") || "N";
-  const allLevelsCompleted = completedLevels.length >= totalLevels;
-  const achievements = [
-    {
-      emoji: "🏁",
-      name: "Primeiro Passo",
-      desc: "Complete qualquer nível",
-      unlocked: completedLevels.length >= 1,
-    },
-    {
-      emoji: "🎓",
-      name: "Mestre da trilha",
-      desc: `Complete os ${totalLevels} níveis dos cinco capítulos`,
-      unlocked: allLevelsCompleted,
-    },
-    {
-      emoji: "⚔️",
-      name: "Desafiador",
-      desc: "Conclua seu primeiro desafio diário",
-      unlocked: dailyChallengesCompleted >= 1,
-    },
-    {
-      emoji: "🔥",
-      name: "Em Chamas",
-      desc: "Mantenha 7 dias de sequência",
-      unlocked: streak >= 7,
-    },
-    {
-      emoji: "💎",
-      name: "Colecionador de XP",
-      desc: "Acumule 100 XP no total",
-      unlocked: xp >= 100,
-    },
-    {
-      emoji: "🌪️",
-      name: "Imparável",
-      desc: "Conclua desafios diários por 7 dias seguidos",
-      unlocked: bestDailyStreak >= 7,
-    },
-  ];
+  const stats = {
+    completedLevels,
+    totalLevels,
+    xp,
+    streak,
+    dailyChallengesCompleted,
+    bestDailyStreak,
+  };
+  const achievements = ACHIEVEMENTS.map((achievement) => ({
+    ...achievement,
+    desc: achievement.desc(stats),
+    unlocked: achievement.unlocked(stats),
+  }));
   return (
     <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-3 py-4 sm:px-4">
       {/* Profile card */}

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import {
   CalendarDays,
@@ -8,6 +9,14 @@ import {
   Trophy,
 } from "lucide-react";
 import { formatDateKey } from "lib/game/dailyChallenge";
+import { formatCountdown } from "components/game/LivesBadge";
+
+/** Próxima meia-noite local (visitante) em ms. */
+function nextLocalMidnight() {
+  const midnight = new Date();
+  midnight.setHours(24, 0, 0, 0);
+  return midnight.getTime();
+}
 export function ChallengesTab({
   challengeDate,
   dark,
@@ -16,8 +25,17 @@ export function ChallengesTab({
   currentStreak,
   bestStreak,
   onStartChallenge,
+  isChallengeMode = false,
+  challengeInfo = null,
 }) {
   const isLocked = status === "completed" || status === "failed";
+  const title = isChallengeMode ? "Modo Desafio" : "Desafio diário";
+  const resetsAt = challengeInfo?.resetsAt ?? nextLocalMidnight();
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const interval = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(interval);
+  }, []);
   return (
     <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-3 py-4 sm:px-4">
       <section
@@ -34,18 +52,16 @@ export function ChallengesTab({
             <Swords size={20} className="text-muted-foreground" />
           </div>
           <div>
-            <h2 className="text-lg font-black text-foreground">
-              Desafio diário
-            </h2>
+            <h2 className="text-lg font-black text-foreground">{title}</h2>
             <p className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground">
               <CalendarDays size={13} /> {formatDateKey(challengeDate)}
             </p>
           </div>
         </div>
         <p className="relative mt-4 text-sm leading-relaxed text-muted-foreground">
-          Uma sequência sem fim de cruzadinhas, que começa na sua dificuldade
-          geral e fica mais difícil a cada 3 acertos. O modo tem três vidas
-          próprias: no 3º erro, o desafio do dia termina.
+          {isChallengeMode
+            ? "Cruzadinhas sorteadas sem fim, começando na sua dificuldade geral e ficando mais difíceis a cada 3 acertos. O modo tem 5 vidas próprias, que voltam sozinhas na virada do dia."
+            : "Uma sequência sem fim de cruzadinhas, que começa na sua dificuldade geral e fica mais difícil a cada 3 acertos. O modo tem três vidas próprias: no 3º erro, o desafio do dia termina."}
         </p>
       </section>
 
@@ -85,6 +101,17 @@ export function ChallengesTab({
           {currentStreak === 1 ? "dia" : "dias"}
         </p>
       </section>
+
+      {(isLocked || challengeInfo) && (
+        <p
+          className="rounded-2xl bg-[var(--landing-hero-badge-background)] px-4 py-3 text-sm font-black text-[var(--landing-hero-badge-foreground)] dark:bg-accent/15 dark:text-accent"
+          aria-live="polite"
+        >
+          {isLocked
+            ? `Vidas voltam em ${formatCountdown(resetsAt, now)}`
+            : `${challengeInfo.hearts} ${challengeInfo.hearts === 1 ? "vida" : "vidas"} hoje · renovam em ${formatCountdown(resetsAt, now)}`}
+        </p>
+      )}
 
       <section
         className="rounded-2xl border border-accent/35 p-4"

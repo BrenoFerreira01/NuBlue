@@ -2,7 +2,13 @@ import database from "infra/database.js";
 import { ConflictError, ValidationError } from "infra/errors.js";
 import { answersMatch, assertSameAnswers } from "models/answers.js";
 import progress, { utcDateKey } from "models/progress.js";
-import { applyDailyAnswer, dailyPuzzle, dailyXp } from "lib/game/dailyRun.mjs";
+import { randomUUID } from "node:crypto";
+import {
+  MODE_HEARTS,
+  applyDailyAnswer,
+  dailyPuzzle,
+  dailyXp,
+} from "lib/game/dailyRun.mjs";
 import { DAILY_START_STEP, trackForStep } from "lib/game/tracks.mjs";
 
 function finished() {
@@ -15,19 +21,30 @@ function finished() {
  */
 async function ensureRun(client, student, dateKey) {
   await client.query(
-    `INSERT INTO daily_challenge_runs (student_id, challenge_date, status, start_step)
-     VALUES ($1, $2::date, 'in_progress', $3)
+    `INSERT INTO daily_challenge_runs
+       (student_id, challenge_date, status, start_step, seed, hearts)
+     VALUES ($1, $2::date, 'in_progress', $3, $4, $5)
      ON CONFLICT (student_id, challenge_date) DO NOTHING`,
-    [student.id, dateKey, DAILY_START_STEP[student.difficulty] ?? 3],
+    [
+      student.id,
+      dateKey,
+      DAILY_START_STEP[student.difficulty] ?? 3,
+      randomUUID(),
+      MODE_HEARTS,
+    ],
   );
   const { rows } = await client.query(
     `SELECT status, hearts, attempt_count, submitted_answers,
-            current_index, score, start_step
+            current_index, score, start_step, seed
      FROM daily_challenge_runs WHERE student_id = $1 AND challenge_date = $2::date`,
     [student.id, dateKey],
   );
   return rows[0];
 }
+
+// A semente sorteia as cruzadinhas da rodada e nunca vai para o cliente
+// (rodadas antigas, sem semente, usam a data).
+const seedOf = (row, dateKey) => row.seed ?? dateKey;
 
 const toRun = (row, dateKey) => ({
   date: dateKey,
@@ -44,7 +61,7 @@ function publicLevel(run, { step, puzzle }) {
     id: -(Number(run.date.replaceAll("-", "")) * 1000 + run.currentIndex),
     chapter: 0,
     session: 1,
-    title: "Desafio diário",
+    title: "Modo Desafio",
     subtitle: `Cruzadinha ${run.currentIndex + 1}`,
     emoji: "🔥",
     difficulty: trackForStep(step),
@@ -55,16 +72,24 @@ function publicLevel(run, { step, puzzle }) {
   };
 }
 
-const currentPuzzle = (run) =>
-  dailyPuzzle(run.date, run.startStep, run.currentIndex, run.score);
+const currentPuzzle = (run, seed) =>
+  dailyPuzzle(seed, run.startStep, run.currentIndex, run.score);
+
+/** As vidas do Modo Desafio voltam na virada do dia (meia-noite UTC). */
+function nextUtcMidnight(dateKey) {
+  const reset = new Date(`${dateKey}T00:00:00.000Z`);
+  reset.setUTCDate(reset.getUTCDate() + 1);
+  return reset.toISOString();
+}
 
 async function get(student) {
   const dateKey = utcDateKey();
   const row = await ensureRun(database, student, dateKey);
   const run = toRun(row, dateKey);
-  const current = currentPuzzle(run);
+  const current = currentPuzzle(run, seedOf(row, dateKey));
   return {
     ...run,
+    resetsAt: nextUtcMidnight(dateKey),
     step: current.step,
     attemptCount: row.attempt_count,
     fills: row.submitted_answers,
@@ -78,7 +103,7 @@ async function saveDraft(student, answers) {
   const row = await ensureRun(database, student, dateKey);
   if (row.status !== "in_progress") throw finished();
   const validInputIds = new Set(
-    currentPuzzle(toRun(row, dateKey)).puzzle.inputIds,
+    currentPuzzle(toRun(row, dateKey), seedOf(row, dateKey)).puzzle.inputIds,
   );
   if (Object.keys(answers).some((id) => !validInputIds.has(id))) {
     throw new ValidationError("invalid_answers");
@@ -140,12 +165,13 @@ async function submit(student, { answers, idempotencyKey }) {
     const {
       rows: [row],
     } = await client.query(
-      `SELECT status, hearts, current_index, score, start_step
+      `SELECT status, hearts, current_index, score, start_step, seed
        FROM daily_challenge_runs
        WHERE student_id = $1 AND challenge_date = $2::date FOR UPDATE`,
       [student.id, dateKey],
     );
     const run = toRun(row, dateKey);
+    const seed = seedOf(row, dateKey);
 
     const duplicate = await client.query(
       `SELECT is_correct, xp_awarded, submitted_answers, puzzle_index, solved_before
@@ -157,7 +183,7 @@ async function submit(student, { answers, idempotencyKey }) {
       const [previous] = duplicate.rows;
       assertSameAnswers(previous.submitted_answers, answers);
       const replayedPuzzle = dailyPuzzle(
-        dateKey,
+        seed,
         run.startStep,
         previous.puzzle_index,
         previous.solved_before,
@@ -176,7 +202,7 @@ async function submit(student, { answers, idempotencyKey }) {
     }
     if (run.status !== "in_progress") throw finished();
 
-    const { step, puzzle } = currentPuzzle(run);
+    const { step, puzzle } = currentPuzzle(run, seed);
     const correct = answersMatch(answers, puzzle.answers);
     const xpAwarded = correct ? dailyXp(step) : 0;
     await client.query(

@@ -7,6 +7,7 @@ import {
   recordAnswer,
 } from "lib/game/placement";
 import { PuzzleScreen } from "components/game/PuzzleScreen";
+import { playSound } from "lib/game/sound";
 
 // O teste tem no máximo 4 cruzadinhas de operações e 2 de dificuldade.
 const MAX_CROSSWORDS = 6;
@@ -84,6 +85,7 @@ export function DiagnosticTest({
     setCellStatuses(statuses);
     setCorrectAnswers(correct ? null : answerKey);
     setChecked(correct ? "correct" : "wrong");
+    playSound(correct ? "correct" : "wrong");
     setPlacement((current) => recordAnswer(current, { correct, seconds }));
   };
   const handleContinue = () => {

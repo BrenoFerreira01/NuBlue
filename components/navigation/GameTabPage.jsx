@@ -48,6 +48,10 @@ export function GameTabPage({ tab }) {
       onDeleteAccount={student ? nublue.deleteAccount : undefined}
       leaderboardOptIn={student?.leaderboardOptIn ?? false}
       onLeaderboardOptInChange={nublue.setLeaderboardOptIn}
+      lives={game.lives}
+      isChallengeMode={Boolean(student)}
+      challengeInfo={student ? game.challengeInfo : null}
+      clock={game.clock}
     />
   );
 }
