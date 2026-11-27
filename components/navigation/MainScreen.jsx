@@ -53,7 +53,8 @@ export function MainScreen({
   onLeaderboardOptInChange,
 }) {
   return (
-    <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-background">
+    // Altura fixa da janela: cada aba rola por dentro e a navegação fica sempre visível.
+    <div className="relative flex h-dvh flex-col overflow-hidden bg-background">
       <div
         className="pointer-events-none fixed inset-0"
         style={{ background: "var(--glow-brand)" }}
@@ -194,7 +195,7 @@ export function MainScreen({
 
       <nav
         aria-label="Navegação principal"
-        className="relative z-10 flex border-t border-secondary bg-card pb-[env(safe-area-inset-bottom)] dark:border-[#1a1050] dark:bg-[#0a0428]"
+        className="relative z-10 flex shrink-0 border-t border-secondary bg-card pb-[env(safe-area-inset-bottom)] dark:border-[#1a1050] dark:bg-[#0a0428]"
       >
         {NAV_ITEMS.map(({ id, Icon, label }) => (
           <NavButton
