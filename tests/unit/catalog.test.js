@@ -218,11 +218,7 @@ describe("catálogo do curso", () => {
     });
 
     it("no modo não estrito aceita puzzles locais sem dedução em cadeia", () => {
-      expect(
-        validateCatalog(single(anel4()), {
-          strict: false,
-        }),
-      ).toEqual([]);
+      expect(validateCatalog(single(anel4()), { strict: false })).toEqual([]);
     });
   });
 

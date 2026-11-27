@@ -3,7 +3,7 @@ import {
   generateDailyPuzzle,
   generatePuzzle,
 } from "lib/game/generatePuzzle.js";
-import { createSeededRandom } from "lib/game/dailyChallenge";
+import { createSeededRandom } from "lib/game/dailyChallenge.js";
 import { validateCatalog } from "infra/catalog-validation.mjs";
 
 // Puzzles locais e gerados são validados no modo não estrito: topologia,
