@@ -193,10 +193,12 @@ export function LandingPage({
               key={authMode}
               mode={authMode}
               onSubmit={async (credentials) => {
-                // Signup keeps the dialog open: it then asks to confirm the e-mail.
+                // Signup keeps the dialog open when it asks to confirm the e-mail;
+                // without confirmation the student is already signed in.
                 if (authMode === "signup") {
-                  await onSignup(credentials);
-                  return;
+                  const result = await onSignup(credentials);
+                  if (result?.verificationRequired === false) setAuthMode(null);
+                  return result;
                 }
                 await onLogin(credentials.nickname, credentials.password);
                 setAuthMode(null);

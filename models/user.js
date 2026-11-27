@@ -55,8 +55,11 @@ export function awaitingVerification(student) {
   return student.email !== null && student.email_verified_at === null;
 }
 
-/** Cria a conta (sem sessão) e o link de confirmação; retorna { student, token }. */
-async function create({ nickname, key, email, password }) {
+/**
+ * Cria a conta (sem sessão) e, se `verified` for falso, o link de confirmação.
+ * Retorna { student, token } (token é null quando a conta já nasce confirmada).
+ */
+async function create({ nickname, key, email, password, verified = false }) {
   const passwordHash = await hashPassword(password);
   try {
     return await database.transaction(async (client) => {
@@ -69,7 +72,9 @@ async function create({ nickname, key, email, password }) {
         "INSERT INTO student_progress (student_id) VALUES ($1)",
         [rows[0].id],
       );
-      const token = await emailVerification.create(client, rows[0].id);
+      const token = verified
+        ? null
+        : await emailVerification.create(client, rows[0].id);
       return { student: rows[0], token };
     });
   } catch (error) {
@@ -103,6 +108,14 @@ async function findByCredentials({ key, password }) {
     );
   }
   return rows[0];
+}
+
+/** Marca o e-mail como confirmado (usado com a confirmação desligada). */
+async function markVerified(id) {
+  await database.query(
+    "UPDATE students SET email_verified_at = COALESCE(email_verified_at, now()) WHERE id = $1",
+    [id],
+  );
 }
 
 async function remove(id) {
