@@ -48,8 +48,10 @@ export function AuthDialog({
     setPendingVerification(null);
     setIsSubmitting(true);
     try {
-      await onSubmit(credentials);
-      if (isSignup) setSignupEmail(credentials.email);
+      const result = await onSubmit(credentials);
+      if (isSignup && result?.verificationRequired !== false) {
+        setSignupEmail(credentials.email);
+      }
     } catch (submitError) {
       setError(errorMessage(submitError));
       if (

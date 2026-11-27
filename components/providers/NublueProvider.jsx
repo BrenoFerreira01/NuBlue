@@ -173,9 +173,17 @@ export default function NublueProvider({ children }) {
   };
 
   // Só cria a conta: o aluno entra depois de confirmar o e-mail.
+  // Com a confirmação desligada no servidor, a conta já entra direto no jogo.
+  // Retorna { verificationRequired } para o formulário decidir o que mostrar.
   const signup = async ({ nickname, email, password }) => {
-    await api.register(nickname, email, password);
+    const { verificationRequired } = await api.register(
+      nickname,
+      email,
+      password,
+    );
     setSessionNotice(null);
+    if (!verificationRequired) await login(nickname, password);
+    return { verificationRequired };
   };
 
   const resendVerification = (nickname, password, email) =>

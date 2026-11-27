@@ -7,24 +7,36 @@ import nodemailer from "nodemailer";
 
 let transporter;
 
+// Valores colados no painel da hospedagem às vezes trazem espaços ou tabulações.
+const env = (name) => process.env[name]?.trim() || undefined;
+
+/**
+ * Confirmação de e-mail no cadastro. EMAIL_VERIFICATION=off desliga (contas já
+ * nascem confirmadas e nenhum e-mail é enviado); sem a variável, fica ligada.
+ */
+export function emailVerificationRequired() {
+  return env("EMAIL_VERIFICATION")?.toLowerCase() !== "off";
+}
+
+export function smtpConfig() {
+  const port = Number(env("SMTP_PORT") || 587);
+  const user = env("SMTP_USER");
+  return {
+    host: env("SMTP_HOST"),
+    port,
+    secure: port === 465,
+    auth: user ? { user, pass: env("SMTP_PASSWORD") } : undefined,
+    connectionTimeout: 10_000,
+  };
+}
+
 function getTransporter() {
-  if (!transporter) {
-    const port = Number(process.env.SMTP_PORT || 587);
-    transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port,
-      secure: port === 465,
-      auth: process.env.SMTP_USER
-        ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASSWORD }
-        : undefined,
-      connectionTimeout: 10_000,
-    });
-  }
+  if (!transporter) transporter = nodemailer.createTransport(smtpConfig());
   return transporter;
 }
 
 function shouldOnlyLog() {
-  return !process.env.SMTP_HOST || process.env.VERCEL_ENV === "preview";
+  return !env("SMTP_HOST") || process.env.VERCEL_ENV === "preview";
 }
 
 const HTML_ESCAPES = {
@@ -68,7 +80,7 @@ export async function sendVerificationEmail({ to, nickname, url }) {
   }
   try {
     await getTransporter().sendMail({
-      from: process.env.EMAIL_FROM,
+      from: env("EMAIL_FROM"),
       to,
       ...verificationEmail(nickname, url),
     });
