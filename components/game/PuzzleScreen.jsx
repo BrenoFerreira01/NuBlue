@@ -1,11 +1,32 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "motion/react";
-import { ArrowLeft, Heart, Sparkles, Swords } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Heart,
+  Sparkles,
+  Swords,
+  XCircle,
+} from "lucide-react";
 import { clsx } from "clsx";
 import { ThemeToggle } from "components/ThemeToggle";
 import { CHAPTERS, DIFF_CHIP, DIFF_LABEL } from "lib/game/levels";
 import { Cell } from "components/game/Cell";
+
+const CHECK_BUTTON_WRONG =
+  "bg-red-500 border-red-700 text-white shadow-lg shadow-red-500/30 hover:bg-red-600";
+const CHECK_BUTTON_ENABLED =
+  "bg-primary border-foreground text-white shadow-lg shadow-primary/40 hover:bg-foreground dark:bg-[#5040ff] dark:border-[#3020cc] dark:shadow-[#5040ff]/40 dark:hover:bg-[#6050ff]";
+const CHECK_BUTTON_DISABLED =
+  "bg-background border-secondary text-muted-foreground cursor-not-allowed dark:bg-[#1a1050] dark:border-[#251570] dark:text-[#3a2870]";
+
+function checkButtonClass(checkState, canSubmit) {
+  if (checkState === "wrong") return CHECK_BUTTON_WRONG;
+  if (checkState === "correct" || canSubmit) return CHECK_BUTTON_ENABLED;
+  return CHECK_BUTTON_DISABLED;
+}
+
 export function PuzzleScreen({
   level,
   fills,
@@ -22,6 +43,11 @@ export function PuzzleScreen({
   backLabel,
   secondaryAction,
   errorMessage,
+  // Revisão no estilo Duolingo: depois de verificar, nada avança sozinho.
+  checkState = "idle",
+  correctAnswers = null,
+  notice,
+  onContinue,
   dark,
   onThemeChange,
   onCellClick,
@@ -35,6 +61,8 @@ export function PuzzleScreen({
   const filledCount = inputIds.filter((id) => fills[id] != null).length;
   const progress = inputIds.length > 0 ? filledCount / inputIds.length : 0;
   const displayedProgress = progressOverride ?? progress;
+  const reviewing = checkState !== "idle";
+  const answeredCorrectly = checkState === "correct";
   const pointerDrag = useRef(null);
   const dropNumberRef = useRef(onDropNumber);
   const suppressNextClick = useRef(false);
@@ -210,6 +238,14 @@ export function PuzzleScreen({
             {errorMessage}
           </p>
         )}
+        {notice && (
+          <p
+            className="mt-2 rounded-xl bg-[var(--landing-hero-badge-background)] px-3 py-2 text-sm font-black text-[var(--landing-hero-badge-foreground)] dark:bg-[#c080ff]/15 dark:text-[#c080ff]"
+            role="status"
+          >
+            {notice}
+          </p>
+        )}
       </div>
 
       {/* Grid */}
@@ -231,6 +267,13 @@ export function PuzzleScreen({
                     fill={cell?.inputId ? fills[cell.inputId] : undefined}
                     status={
                       cell?.inputId ? cellStatuses[cell.inputId] : undefined
+                    }
+                    correctValue={
+                      cell?.inputId &&
+                      correctAnswers &&
+                      cellStatuses[cell.inputId] === "wrong"
+                        ? correctAnswers[cell.inputId]
+                        : undefined
                     }
                     canReceive={
                       !!cell?.inputId &&
@@ -310,20 +353,45 @@ export function PuzzleScreen({
         </div>
       </div>
 
-      {/* Verify button */}
+      {/* Verify / continue button */}
       <div className="px-3 pb-8 sm:px-5 sm:pb-10">
+        {reviewing && (
+          <div
+            role="status"
+            className={clsx(
+              "mb-3 flex items-start gap-3 rounded-2xl px-4 py-3",
+              answeredCorrectly
+                ? "bg-success/15 text-success-foreground dark:bg-emerald-500/15 dark:text-emerald-300"
+                : "bg-destructive/10 text-destructive dark:bg-red-500/15 dark:text-red-300",
+            )}
+          >
+            {answeredCorrectly ? (
+              <CheckCircle2 size={22} className="mt-0.5 shrink-0" />
+            ) : (
+              <XCircle size={22} className="mt-0.5 shrink-0" />
+            )}
+            <div>
+              <p className="font-black">
+                {answeredCorrectly ? "Correto!" : "Resposta correta"}
+              </p>
+              {checkState === "wrong" && (
+                <p className="text-sm font-semibold">
+                  Confira os números em verde nos espaços que você errou.
+                </p>
+              )}
+            </div>
+          </div>
+        )}
         <motion.button
           whileTap={{ scale: 0.97 }}
-          onClick={onCheck}
-          disabled={!canCheck || hasChecked}
+          onClick={reviewing ? onContinue : onCheck}
+          disabled={!reviewing && (!canCheck || hasChecked)}
           className={clsx(
             "w-full rounded-2xl border-b-4 py-4 text-base font-black transition-all sm:text-lg",
-            canCheck && !hasChecked
-              ? "bg-primary border-foreground text-white shadow-lg shadow-primary/40 hover:bg-foreground dark:bg-[#5040ff] dark:border-[#3020cc] dark:shadow-[#5040ff]/40 dark:hover:bg-[#6050ff]"
-              : "bg-background border-secondary text-muted-foreground cursor-not-allowed dark:bg-[#1a1050] dark:border-[#251570] dark:text-[#3a2870]",
+            checkButtonClass(checkState, canCheck && !hasChecked),
           )}
         >
-          Verificar Resposta
+          {reviewing ? "Continuar" : "Verificar Resposta"}
         </motion.button>
         {secondaryAction && (
           <button

@@ -19,9 +19,13 @@ import {
   AlertDialogTrigger,
 } from "components/ui/alert-dialog";
 const DIFFICULTY_OPTIONS = [
-  ["easy", "Iniciante", "Números menores e mais dicas"],
-  ["medium", "Intermediário", "Desafios equilibrados"],
-  ["hard", "Avançado", "Operações complexas"],
+  [
+    "easy",
+    "Iniciante",
+    "Grades pequenas, resolvidas em cadeia, números até 20",
+  ],
+  ["medium", "Intermediário", "Mais contas cruzadas, números até 50"],
+  ["hard", "Avançado", "Grades maiores, mais lacunas, números até 120"],
 ];
 export function SettingsTab({
   difficulty,

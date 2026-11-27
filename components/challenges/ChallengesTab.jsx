@@ -43,8 +43,9 @@ export function ChallengesTab({
           </div>
         </div>
         <p className="relative mt-4 text-sm leading-relaxed text-muted-foreground">
-          Uma cruzadinha nova a cada dia, igual para todos os estudantes. Você
-          tem três vidas; o próximo desafio chega à meia-noite UTC.
+          Uma sequência sem fim de cruzadinhas, que começa na sua dificuldade
+          geral e fica mais difícil a cada 3 acertos. O modo tem três vidas
+          próprias: no 3º erro, o desafio do dia termina.
         </p>
       </section>
 
@@ -94,10 +95,10 @@ export function ChallengesTab({
           <div className="flex items-start gap-3">
             <CheckCircle2 size={21} className="mt-0.5 shrink-0 text-success" />
             <div>
-              <p className="font-black text-foreground">Desafio concluído</p>
+              <p className="font-black text-foreground">Desafio encerrado</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Sua resposta e seu XP já foram salvos. Volte amanhã para outra
-                cruzadinha.
+                Suas 3 vidas acabaram e seus acertos e XP foram salvos. Volte
+                amanhã para um novo desafio.
               </p>
             </div>
           </div>
@@ -112,8 +113,8 @@ export function ChallengesTab({
                 Tentativas encerradas
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                O desafio de hoje terminou. Uma nova cruzadinha fica disponível
-                amanhã.
+                Suas 3 vidas acabaram sem acertos hoje. Um novo desafio fica
+                disponível amanhã.
               </p>
             </div>
           </div>
@@ -123,7 +124,7 @@ export function ChallengesTab({
             <div>
               <p className="font-black text-foreground">Desafio em andamento</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Suas respostas e vidas ficaram salvas. Continue de onde parou.
+                Seus acertos e vidas ficaram salvos. Continue de onde parou.
               </p>
             </div>
           </div>
@@ -133,7 +134,7 @@ export function ChallengesTab({
             <div>
               <p className="font-black text-foreground">Pronto para jogar?</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Resolva a cruzadinha de hoje para ganhar XP e manter sua
+                Acerte quantas cruzadinhas conseguir para ganhar XP e manter sua
                 sequência diária.
               </p>
             </div>

@@ -123,6 +123,7 @@ describe("POST /api/v1/auth/login", () => {
       id: expect.any(String),
       nickname,
       leaderboardOptIn: false,
+      difficulty: "medium",
     });
     expect(ok.setCookie).toMatch(
       /^nublue_session=[0-9a-f]{64}; Path=\/; HttpOnly; SameSite=Lax; Max-Age=2592000$/,

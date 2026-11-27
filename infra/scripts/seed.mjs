@@ -10,9 +10,30 @@ import { assertValidCatalog } from "../catalog-validation.mjs";
 // Campos que nunca vão para o navegador.
 const PRIVATE_KEYS = new Set(["answerKey", "source"]);
 
-function publicLevelData(level) {
+function withoutPrivate(object) {
   return Object.fromEntries(
-    Object.entries(level).filter(([key]) => !PRIVATE_KEYS.has(key)),
+    Object.entries(object).filter(([key]) => !PRIVATE_KEYS.has(key)),
+  );
+}
+
+/** Nível sem respostas: cada versão leva só grade, lacunas e banco. */
+function publicLevelData(level) {
+  const variants = Object.fromEntries(
+    Object.entries(level.variants).map(([difficulty, variant]) => [
+      difficulty,
+      { ...variant, puzzles: variant.puzzles.map(withoutPrivate) },
+    ]),
+  );
+  return { ...withoutPrivate(level), variants };
+}
+
+/** { easy: [4 chaves], medium: [...], hard: [...] } */
+function answerKeyOf(level) {
+  return Object.fromEntries(
+    Object.entries(level.variants).map(([difficulty, variant]) => [
+      difficulty,
+      variant.puzzles.map((puzzle) => puzzle.answerKey),
+    ]),
   );
 }
 
@@ -57,7 +78,7 @@ try {
         level.session,
         catalog.version,
         JSON.stringify(publicLevelData(level)),
-        JSON.stringify(level.answerKey),
+        JSON.stringify(answerKeyOf(level)),
         level.isBonus,
       ],
     );

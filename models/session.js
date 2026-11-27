@@ -34,12 +34,12 @@ async function create(res, studentId) {
   );
 }
 
-/** Aluno da sessão ({ id, nickname, leaderboard_opt_in }) ou null. */
+/** Aluno da sessão ({ id, nickname, leaderboard_opt_in, difficulty }) ou null. */
 async function findStudent(req) {
   const token = readToken(req);
   if (!token) return null;
   const result = await database.query(
-    `SELECT s.id, s.nickname, s.leaderboard_opt_in
+    `SELECT s.id, s.nickname, s.leaderboard_opt_in, s.difficulty
      FROM student_sessions ss
      JOIN students s ON s.id = ss.student_id
      WHERE ss.session_hash = $1 AND ss.expires_at > now() AND s.deleted_at IS NULL`,

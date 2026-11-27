@@ -1,4 +1,3 @@
-import { readFileSync } from "node:fs";
 import {
   PASSWORD,
   createStudent,
@@ -6,14 +5,41 @@ import {
   query,
   request,
 } from "tests/orchestrator.js";
-
-const catalog = JSON.parse(
-  readFileSync("infra/data/course-catalog.json", "utf8"),
-);
+import { completeLesson } from "tests/catalog.js";
 
 beforeAll(prepare);
 
 describe("PATCH /api/v1/users/me", () => {
+  it("a dificuldade geral começa em medium e pode ser trocada", async () => {
+    const { cookie } = await createStudent();
+    const before = await request("/api/v1/users/me", { cookie });
+    expect(before.data.student.difficulty).toBe("medium");
+
+    const changed = await request("/api/v1/users/me", {
+      method: "PATCH",
+      cookie,
+      body: { difficulty: "hard" },
+    });
+    expect(changed.status).toBe(200);
+    expect(changed.data).toEqual({ difficulty: "hard" });
+
+    const after = await request("/api/v1/users/me", { cookie });
+    expect(after.data.student.difficulty).toBe("hard");
+  });
+
+  it("recusa dificuldade desconhecida", async () => {
+    const { cookie } = await createStudent();
+
+    const response = await request("/api/v1/users/me", {
+      method: "PATCH",
+      cookie,
+      body: { difficulty: "expert" },
+    });
+
+    expect(response.status).toBe(400);
+    expect(response.data.error).toBe("invalid_difficulty");
+  });
+
   it("liga e desliga a participação no ranking", async () => {
     const { cookie } = await createStudent();
 
@@ -46,16 +72,8 @@ describe("PATCH /api/v1/users/me", () => {
 describe("DELETE /api/v1/users/me", () => {
   it("apaga a conta e todos os dados dela", async () => {
     const { cookie, nickname, id } = await createStudent();
-    const solved = await request("/api/v1/attempts", {
-      method: "POST",
-      cookie,
-      body: {
-        levelId: 1,
-        answers: catalog.levels[0].answerKey,
-        idempotencyKey: "delete-test-1",
-      },
-    });
-    expect(solved.data.correct).toBe(true);
+    const solved = await completeLesson(cookie, 1);
+    expect(solved.data.lessonCompleted).toBe(true);
 
     const deleted = await request("/api/v1/users/me", {
       method: "DELETE",

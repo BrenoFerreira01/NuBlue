@@ -4,13 +4,10 @@ import { motion } from "motion/react";
 import { Brand } from "components/Brand";
 import { ThemeToggle } from "components/ThemeToggle";
 import { Dialog, DialogContent } from "components/ui/dialog";
-import { generateLandingDailyPuzzle } from "lib/game/generatePuzzle";
+import { dailyPuzzle, dailyXp } from "lib/game/dailyRun.mjs";
 import { AuthDialog } from "components/landing/AuthDialog";
 import { LandingDailyChallenge } from "components/landing/LandingDailyChallenge";
-import {
-  readLandingDailyProgress,
-  saveLandingDailyProgress,
-} from "lib/game/landingDailyProgress";
+import { readLandingDailyStatus } from "lib/game/landingDailyProgress";
 export function LandingPage({
   dark,
   onThemeChange,
@@ -20,44 +17,23 @@ export function LandingPage({
   dailyChallengeDate,
 }) {
   const [authMode, setAuthMode] = useState(null);
-  const [dailyChallengeStatus, setDailyChallengeStatus] = useState(
-    () => readLandingDailyProgress(dailyChallengeDate)?.status ?? null,
+  const [dailyChallengeStatus, setDailyChallengeStatus] = useState(() =>
+    readLandingDailyStatus(dailyChallengeDate),
   );
   const [isDailyChallengeOpen, setIsDailyChallengeOpen] = useState(false);
   useEffect(() => {
-    setDailyChallengeStatus(
-      readLandingDailyProgress(dailyChallengeDate)?.status ?? null,
-    );
+    setDailyChallengeStatus(readLandingDailyStatus(dailyChallengeDate));
     setIsDailyChallengeOpen(false);
   }, [dailyChallengeDate]);
+  // Depois que as 3 vidas acabam, o desafio só volta no dia seguinte.
   const startDailyChallenge = () => {
-    const saved = readLandingDailyProgress(dailyChallengeDate);
-    if (saved?.status === "completed" || saved?.status === "failed") {
-      setDailyChallengeStatus(saved.status);
-      return;
-    }
-    setDailyChallengeStatus("in_progress");
-    saveLandingDailyProgress(
-      saved ?? {
-        date: dailyChallengeDate,
-        status: "in_progress",
-        fills: {},
-        hearts: 3,
-      },
-    );
+    const status = readLandingDailyStatus(dailyChallengeDate);
+    setDailyChallengeStatus(status);
+    if (status === "completed" || status === "failed") return;
     setIsDailyChallengeOpen(true);
   };
   const closeDailyChallenge = () => {
-    setDailyChallengeStatus(
-      readLandingDailyProgress(dailyChallengeDate)?.status ?? null,
-    );
-    setIsDailyChallengeOpen(false);
-  };
-  const finishDailyChallenge = (isCorrect) => {
-    const status = isCorrect ? "completed" : "failed";
-    const saved = readLandingDailyProgress(dailyChallengeDate);
-    if (saved) saveLandingDailyProgress({ ...saved, status });
-    setDailyChallengeStatus(status);
+    setDailyChallengeStatus(readLandingDailyStatus(dailyChallengeDate));
     setIsDailyChallengeOpen(false);
   };
   return (
@@ -243,14 +219,16 @@ export function LandingPage({
           dark={dark}
           onThemeChange={onThemeChange}
           onClose={closeDailyChallenge}
-          onComplete={finishDailyChallenge}
         />
       )}
     </div>
   );
 }
 function HeroPuzzle({ challengeDate, status, onStart }) {
-  const puzzle = generateLandingDailyPuzzle(challengeDate);
+  const puzzle = {
+    ...dailyPuzzle(challengeDate, 0, 0, 0).puzzle,
+    xpReward: dailyXp(0),
+  };
   const isLocked = status === "completed" || status === "failed";
   const actionLabel =
     status === "in_progress"
@@ -290,7 +268,10 @@ function HeroPuzzle({ challengeDate, status, onStart }) {
           </span>
         </div>
         <div
-          className="grid grid-cols-5 gap-2 sm:gap-3"
+          className="grid gap-2 sm:gap-3"
+          style={{
+            gridTemplateColumns: `repeat(${puzzle.grid[0].length}, minmax(0, 1fr))`,
+          }}
           aria-label="Prévia do desafio diário"
         >
           {puzzle.grid.map((row, rowIndex) =>

@@ -1,13 +1,17 @@
 import { readFileSync } from "node:fs";
 import { validateCatalog } from "infra/catalog-validation.mjs";
+import { generateTrackPuzzle } from "lib/game/trackPuzzle.mjs";
+import { TRACK_IDS, sessionMinStalls, variantXp } from "lib/game/tracks.mjs";
 
 const catalog = JSON.parse(
   readFileSync("infra/data/course-catalog.json", "utf8"),
 );
 const clone = (value) => structuredClone(value);
 const errorsOf = (value) => validateCatalog(value).join("\n");
-const firstCell = (level, predicate) => {
-  for (const row of level.grid)
+// 1ª cruzadinha da versão Intermediário do nível (a grade da versão 3).
+const firstPuzzle = (level) => level.variants.medium.puzzles[0];
+const firstCell = (puzzle, predicate) => {
+  for (const row of puzzle.grid)
     for (const cell of row) if (cell && predicate(cell)) return cell;
   throw new Error("cell not found");
 };
@@ -17,35 +21,49 @@ describe("catálogo do curso", () => {
     expect(validateCatalog(catalog)).toEqual([]);
   });
 
+  it("o catálogo publicado está na versão 4, com três versões por nível", () => {
+    expect(catalog.version).toBe(4);
+    for (const level of catalog.levels) {
+      expect(Object.keys(level.variants)).toEqual(["easy", "medium", "hard"]);
+      expect(level.grid).toBeUndefined();
+    }
+  });
+
   it("o bônus fica desativado até ter uma grade consistente", () => {
     expect(catalog.bonus).toBeNull();
   });
 
   it("recusa resposta cuja entrada não aparece na grade", () => {
     const broken = clone(catalog);
-    for (const row of broken.levels[0].grid) {
+    for (const row of firstPuzzle(broken.levels[0]).grid) {
       for (const cell of row) {
-        if (cell?.inputId !== "l01-e01") continue;
+        if (cell?.inputId !== "l01-i1-01") continue;
         delete cell.inputId;
         cell.value = 3;
       }
     }
-    expect(errorsOf(broken)).toMatch(/level 1: input l01-e01 .*grid/);
+    expect(errorsOf(broken)).toMatch(
+      /level 1: medium puzzle 1: input l01-i1-01 .*grid/,
+    );
   });
 
   it("recusa resposta que não está no banco de números", () => {
     const broken = clone(catalog);
-    broken.levels[0].bank = broken.levels[0].bank.filter(
-      (value) => value !== 5,
+    const puzzle = firstPuzzle(broken.levels[0]);
+    puzzle.bank = puzzle.bank.filter((value) => value !== 5);
+    expect(errorsOf(broken)).toMatch(
+      /level 1: medium puzzle 1: answer 5 .*bank/,
     );
-    expect(errorsOf(broken)).toMatch(/level 1: answer 5 .*bank/);
   });
 
   it("recusa equação que não fecha", () => {
     const broken = clone(catalog);
-    broken.levels[0].answerKey["l01-e01"] = 4;
-    broken.levels[0].bank.push(4);
-    expect(errorsOf(broken)).toMatch(/level 1: equation 4\+9=12/);
+    const puzzle = firstPuzzle(broken.levels[0]);
+    puzzle.answerKey["l01-i1-01"] = 4;
+    puzzle.bank.push(4);
+    expect(errorsOf(broken)).toMatch(
+      /level 1: medium puzzle 1: equation 4\+9=12/,
+    );
   });
 
   it("exige ids sequenciais e capítulos existentes", () => {
@@ -60,10 +78,13 @@ describe("catálogo do curso", () => {
   it("recusa células e dificuldades malformadas", () => {
     const broken = clone(catalog);
     broken.levels[0].difficulty = "impossible";
-    firstCell(broken.levels[0], (cell) => cell.type === "operator").value = "%";
+    firstCell(
+      firstPuzzle(broken.levels[0]),
+      (cell) => cell.type === "operator",
+    ).value = "%";
     const errors = errorsOf(broken);
     expect(errors).toMatch(/level 1: invalid difficulty/);
-    expect(errors).toMatch(/level 1: invalid operator %/);
+    expect(errors).toMatch(/level 1: medium puzzle 1: invalid operator %/);
   });
 
   describe("cruzadinhas conectadas", () => {
@@ -115,12 +136,17 @@ describe("catálogo do curso", () => {
       answerKey: { a: 2, b: 3, c: 1, d: 4 },
       bank: [1, 2, 3, 4],
     });
+    // Metadados do nível 1 sem as versões: fixtures de grade única.
+    const legacyMetadata = () => {
+      const { variants, ...metadata } = clone(catalog.levels[0]);
+      return metadata;
+    };
     const single = (level) => ({
       ...clone(catalog),
       bonus: null,
       levels: [
         {
-          ...clone(catalog.levels[0]),
+          ...legacyMetadata(),
           difficulty: "easy",
           ...level,
           id: 1,
@@ -225,7 +251,158 @@ describe("catálogo do curso", () => {
   it("valida o nível bônus como qualquer outro", () => {
     const broken = clone(catalog);
     broken.bonus = { ...clone(catalog.levels[0]), id: 40, isBonus: true };
-    broken.bonus.answerKey["l01-e02"] = 7;
+    firstPuzzle(broken.bonus).answerKey["l01-i1-02"] = 7;
     expect(errorsOf(broken)).toMatch(/level 40: /);
+  });
+});
+
+describe("catálogo v4: três versões por nível", () => {
+  const TRACK_LETTER = { easy: "b", medium: "i", hard: "a" };
+  const BASE_XP = 10;
+
+  // Renomeia as lacunas n1, n2… para lNN-<faixa><cruzadinha>-MM.
+  function renamed(puzzle, track, index) {
+    const id = (n) =>
+      `l01-${TRACK_LETTER[track]}${index + 1}-${String(n).padStart(2, "0")}`;
+    const map = Object.fromEntries(
+      puzzle.inputIds.map((old, i) => [old, id(i + 1)]),
+    );
+    return {
+      grid: puzzle.grid.map((row) =>
+        row.map((cell) =>
+          cell?.inputId ? { ...cell, inputId: map[cell.inputId] } : cell,
+        ),
+      ),
+      inputIds: puzzle.inputIds.map((old) => map[old]),
+      bank: puzzle.bank,
+      answerKey: Object.fromEntries(
+        Object.entries(puzzle.answers).map(([old, v]) => [map[old], v]),
+      ),
+    };
+  }
+
+  function v4Level({ difficulty = "easy" } = {}) {
+    const variants = {};
+    for (const track of TRACK_IDS) {
+      variants[track] = {
+        xpReward: variantXp(BASE_XP, track),
+        puzzles: [0, 1, 2, 3].map((index) =>
+          renamed(
+            generateTrackPuzzle({
+              operations: ["+", "−"],
+              track,
+              seed: `v4-${track}-${index}`,
+              minStalls: sessionMinStalls(track, difficulty),
+            }),
+            track,
+            index,
+          ),
+        ),
+      };
+    }
+    return {
+      id: 1,
+      chapter: 1,
+      session: 1,
+      isBonus: false,
+      title: "Primeiras somas",
+      subtitle: "Teste",
+      emoji: "➕",
+      difficulty,
+      xpReward: BASE_XP,
+      variants,
+    };
+  }
+  const v4Catalog = (level) => ({
+    version: 4,
+    chapters: [{ id: 1, title: "Adição" }],
+    levels: [level],
+    bonus: null,
+  });
+  const v4Errors = (level) => validateCatalog(v4Catalog(level)).join("\n");
+
+  it("aceita um nível com as três versões válidas", () => {
+    expect(validateCatalog(v4Catalog(v4Level()))).toEqual([]);
+  });
+
+  it("exige as três versões", () => {
+    const level = v4Level();
+    delete level.variants.hard;
+    expect(v4Errors(level)).toMatch(
+      /level 1: variants must have easy, medium and hard/,
+    );
+  });
+
+  it("exige 4 cruzadinhas por versão", () => {
+    const level = v4Level();
+    level.variants.easy.puzzles.pop();
+    expect(v4Errors(level)).toMatch(
+      /level 1: variant easy must have 4 puzzles/,
+    );
+  });
+
+  it("recusa a mesma lacuna em duas cruzadinhas", () => {
+    const level = v4Level();
+    const first = level.variants.easy.puzzles[0];
+    const second = level.variants.easy.puzzles[1];
+    const oldId = second.inputIds[0];
+    const newId = first.inputIds[0];
+    second.inputIds[0] = newId;
+    second.answerKey = Object.fromEntries(
+      Object.entries(second.answerKey).map(([k, v]) => [
+        k === oldId ? newId : k,
+        v,
+      ]),
+    );
+    for (const row of second.grid)
+      for (const cell of row) if (cell?.inputId === oldId) cell.inputId = newId;
+    expect(v4Errors(level)).toMatch(
+      new RegExp(`level 1: input ${newId} is used more than once`),
+    );
+  });
+
+  it("aplica as regras de travamento de cada faixa", () => {
+    const level = v4Level();
+    level.variants.easy.puzzles[1] = renamed(
+      generateTrackPuzzle({
+        operations: ["+", "−"],
+        track: "hard",
+        seed: "trava",
+      }),
+      "easy",
+      1,
+    );
+    expect(v4Errors(level)).toMatch(
+      /level 1: easy puzzle 2 must be solvable by chain deduction/,
+    );
+  });
+
+  it("exige 2 travamentos no Avançado das sessões difíceis", () => {
+    const level = v4Level();
+    level.difficulty = "hard";
+    expect(v4Errors(level)).toMatch(
+      /level 1: hard puzzle \d needs at least 2 deduction stalls/,
+    );
+    expect(validateCatalog(v4Catalog(v4Level({ difficulty: "hard" })))).toEqual(
+      [],
+    );
+  });
+
+  it("recusa valores acima do limite da faixa", () => {
+    const level = v4Level();
+    const puzzle = level.variants.easy.puzzles[0];
+    const given = puzzle.grid
+      .flat()
+      .find((cell) => cell?.type === "number" && cell.value !== undefined);
+    given.value = 25;
+    expect(v4Errors(level)).toMatch(/level 1: easy puzzle 1 uses 25, above 20/);
+  });
+
+  it("confere o XP de cada versão", () => {
+    const level = v4Level();
+    level.variants.hard.xpReward = 30;
+    expect(v4Errors(level)).toMatch(
+      /level 1: variant hard xpReward must be 20/,
+    );
   });
 });

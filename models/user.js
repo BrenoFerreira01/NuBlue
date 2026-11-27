@@ -40,7 +40,14 @@ export function toPublic(row) {
     id: row.id,
     nickname: row.nickname,
     leaderboardOptIn: row.leaderboard_opt_in,
+    difficulty: row.difficulty,
   };
+}
+
+export const DIFFICULTIES = ["easy", "medium", "hard"];
+
+export function isDifficulty(value) {
+  return DIFFICULTIES.includes(value);
 }
 
 /** Conta criada com e-mail que ainda não foi confirmado. */
@@ -57,10 +64,9 @@ async function create({ nickname, key, email, password, verified = false }) {
   try {
     return await database.transaction(async (client) => {
       const { rows } = await client.query(
-        `INSERT INTO students (nickname, nickname_key, password_hash, email, email_verified_at)
-         VALUES ($1, $2, $3, $4, CASE WHEN $5 THEN now() END)
-         RETURNING id, nickname, leaderboard_opt_in`,
-        [nickname, key, passwordHash, email, verified],
+        `INSERT INTO students (nickname, nickname_key, password_hash, email)
+         VALUES ($1, $2, $3, $4) RETURNING id, nickname, leaderboard_opt_in, difficulty`,
+        [nickname, key, passwordHash, email],
       );
       await client.query(
         "INSERT INTO student_progress (student_id) VALUES ($1)",
@@ -85,7 +91,7 @@ async function create({ nickname, key, email, password, verified = false }) {
  */
 async function findByCredentials({ key, password }) {
   const { rows } = await database.query(
-    `SELECT id, nickname, password_hash, leaderboard_opt_in, email, email_verified_at
+    `SELECT id, nickname, password_hash, leaderboard_opt_in, difficulty, email, email_verified_at
      FROM students WHERE nickname_key = $1 AND deleted_at IS NULL`,
     [key],
   );
@@ -124,12 +130,20 @@ async function setLeaderboardOptIn(id, enabled) {
   return rows[0].leaderboard_opt_in;
 }
 
+async function setDifficulty(id, difficulty) {
+  const { rows } = await database.query(
+    "UPDATE students SET difficulty = $2 WHERE id = $1 RETURNING difficulty",
+    [id, difficulty],
+  );
+  return rows[0].difficulty;
+}
+
 const user = {
   create,
   findByCredentials,
-  markVerified,
   remove,
   setLeaderboardOptIn,
+  setDifficulty,
 };
 
 export default user;

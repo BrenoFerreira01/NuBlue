@@ -17,6 +17,9 @@ async function submit(req, res) {
       levelId,
       answers,
       idempotencyKey,
+      difficulty: req.body?.difficulty,
+      puzzleIndex: req.body?.puzzleIndex,
+      lessonId: req.body?.lessonId,
     }),
   );
 }

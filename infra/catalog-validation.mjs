@@ -1,3 +1,11 @@
+import {
+  TRACKS,
+  TRACK_IDS,
+  sessionMinStalls,
+  variantXp,
+} from "../lib/game/tracks.mjs";
+
+export const PUZZLES_PER_LESSON = 4;
 const DIFFICULTIES = new Set(["easy", "medium", "hard", "very_hard"]);
 const OPERATIONS = {
   "+": (left, right) => left + right,
@@ -46,7 +54,7 @@ const MAX_SEARCH_STEPS = 200_000;
 // Equations are five consecutive cells: number, operator, number, equals, number.
 // Horizontal ones use plain operator/equals cells; vertical ones are marked isVertical.
 // Each equation keeps the coordinates ("row,col") of its three number cells.
-function findEquations(grid) {
+export function findEquations(grid) {
   const at = (x, y) => grid[y]?.[x] ?? null;
   const equations = [];
   const collect = (positions, orientation) => {
@@ -148,7 +156,7 @@ function countSolutions(equations, inputIds, bank) {
 
 // Solves blanks one equation at a time. A stall is a moment when no equation
 // has exactly one unknown blank, so the player must reason across equations.
-function countStalls(equations, inputIds) {
+export function countStalls(equations, inputIds) {
   const known = new Set();
   const unknownIn = (equation) => [
     ...new Set(
@@ -173,11 +181,13 @@ function countStalls(equations, inputIds) {
   return stalls;
 }
 
-function validateCrossword(level, equations, strict, errors, prefix) {
-  const inputIds = Array.isArray(level.inputIds) ? level.inputIds : [];
+// Topology and solution checks shared by every crossword. Returns the number
+// of chain-deduction stalls in strict mode (null otherwise).
+function validateCrossword(puzzle, equations, strict, errors, prefix) {
+  const inputIds = Array.isArray(puzzle.inputIds) ? puzzle.inputIds : [];
   if (
-    level.grid.length > MAX_GRID_SIZE ||
-    level.grid.some((row) => row.length > MAX_GRID_SIZE)
+    puzzle.grid.length > MAX_GRID_SIZE ||
+    puzzle.grid.some((row) => row.length > MAX_GRID_SIZE)
   )
     errors.push(`${prefix}: grid must be at most 7×7`);
 
@@ -199,8 +209,8 @@ function validateCrossword(level, equations, strict, errors, prefix) {
   if (!isConnected(equations))
     errors.push(`${prefix}: equations must form one connected crossword`);
 
-  if (!strict) return;
-  const bank = Array.isArray(level.bank) ? level.bank : [];
+  if (!strict) return null;
+  const bank = Array.isArray(puzzle.bank) ? puzzle.bank : [];
   const solutions = countSolutions(equations, inputIds, bank);
   if (solutions === null)
     errors.push(`${prefix}: solution search is too large`);
@@ -208,60 +218,22 @@ function validateCrossword(level, equations, strict, errors, prefix) {
     errors.push(`${prefix}: has no solution with the bank numbers`);
   else if (solutions > 1)
     errors.push(`${prefix}: has more than one solution with the bank numbers`);
-
-  const stalls = countStalls(equations, inputIds);
-  switch (level.difficulty) {
-    case "easy":
-      if (stalls > 0)
-        errors.push(
-          `${prefix}: easy level must be solvable by chain deduction`,
-        );
-      break;
-    case "medium":
-      if (stalls > 1)
-        errors.push(
-          `${prefix}: medium level allows at most one deduction stall`,
-        );
-      break;
-    case "hard":
-    case "very_hard":
-      if (inputIds.length >= 4 && stalls === 0)
-        errors.push(`${prefix}: hard level needs at least one deduction stall`);
-      break;
-  }
+  return countStalls(equations, inputIds);
 }
 
-function validateLevel(level, { chapterIds, expectBonus, strict }, errors) {
-  const prefix = `level ${level?.id ?? "?"}`;
-  if (!isObject(level)) {
-    errors.push(`${prefix}: must be an object`);
-    return;
-  }
-  if (level.isBonus !== expectBonus)
-    errors.push(`${prefix}: isBonus must be ${expectBonus}`);
-  if (!chapterIds.has(level.chapter))
-    errors.push(`${prefix}: unknown chapter ${level.chapter}`);
-  if (!Number.isInteger(level.session) || level.session < 1)
-    errors.push(`${prefix}: session must be a positive integer`);
-  for (const field of ["title", "subtitle", "emoji"]) {
-    if (!isNonEmptyString(level[field]))
-      errors.push(`${prefix}: ${field} is required`);
-  }
-  if (!DIFFICULTIES.has(level.difficulty))
-    errors.push(`${prefix}: invalid difficulty ${level.difficulty}`);
-  if (!Number.isInteger(level.xpReward) || level.xpReward < 1)
-    errors.push(`${prefix}: xpReward must be a positive integer`);
-
+// Grid, inputs, answers, bank and arithmetic of one crossword.
+// Returns { stalls, values } or null when the grid is unusable.
+function validatePuzzle(puzzle, strict, errors, prefix) {
   if (
-    !Array.isArray(level.grid) ||
-    level.grid.length === 0 ||
-    !level.grid.every(Array.isArray)
+    !Array.isArray(puzzle.grid) ||
+    puzzle.grid.length === 0 ||
+    !puzzle.grid.every(Array.isArray)
   ) {
     errors.push(`${prefix}: grid must be a non-empty array of rows`);
-    return;
+    return null;
   }
   const gridInputs = new Set();
-  for (const row of level.grid) {
+  for (const row of puzzle.grid) {
     for (const cell of row) {
       validateCell(cell, errors, prefix);
       if (cell?.type === "number" && isNonEmptyString(cell.inputId))
@@ -269,17 +241,17 @@ function validateLevel(level, { chapterIds, expectBonus, strict }, errors) {
     }
   }
 
-  const inputIds = Array.isArray(level.inputIds) ? level.inputIds : [];
-  if (!Array.isArray(level.inputIds) || inputIds.length === 0)
+  const inputIds = Array.isArray(puzzle.inputIds) ? puzzle.inputIds : [];
+  if (!Array.isArray(puzzle.inputIds) || inputIds.length === 0)
     errors.push(`${prefix}: inputIds must be a non-empty array`);
   if (new Set(inputIds).size !== inputIds.length)
     errors.push(`${prefix}: inputIds must be unique`);
 
-  const answerKey = isObject(level.answerKey) ? level.answerKey : {};
-  if (!isObject(level.answerKey))
+  const answerKey = isObject(puzzle.answerKey) ? puzzle.answerKey : {};
+  if (!isObject(puzzle.answerKey))
     errors.push(`${prefix}: answerKey must be an object`);
-  const bank = Array.isArray(level.bank) ? level.bank : [];
-  if (!Array.isArray(level.bank) || !bank.every(Number.isInteger))
+  const bank = Array.isArray(puzzle.bank) ? puzzle.bank : [];
+  if (!Array.isArray(puzzle.bank) || !bank.every(Number.isInteger))
     errors.push(`${prefix}: bank must be an array of integers`);
 
   for (const inputId of inputIds) {
@@ -307,7 +279,7 @@ function validateLevel(level, { chapterIds, expectBonus, strict }, errors) {
       );
   }
 
-  const equations = findEquations(level.grid);
+  const equations = findEquations(puzzle.grid);
   if (equations.length === 0) errors.push(`${prefix}: grid has no equation`);
   const valueOf = (cell) =>
     cell.inputId !== undefined ? answerKey[cell.inputId] : cell.value;
@@ -318,8 +290,150 @@ function validateLevel(level, { chapterIds, expectBonus, strict }, errors) {
     if (OPERATIONS[operator](a, b) !== c)
       errors.push(`${prefix}: equation ${a}${operator}${b}=${c} does not hold`);
   }
-  if (equations.length > 0)
-    validateCrossword(level, equations, strict, errors, prefix);
+  const values = puzzle.grid
+    .flat()
+    .filter((cell) => cell?.type === "number")
+    .map(valueOf)
+    .filter(Number.isInteger);
+  const stalls =
+    equations.length > 0
+      ? validateCrossword(puzzle, equations, strict, errors, prefix)
+      : null;
+  return { stalls, values };
+}
+
+// Stall rules for single-grid (legacy, local and generated) levels.
+function checkSessionStalls(difficulty, stalls, blanks, errors, prefix) {
+  if (stalls === null) return;
+  switch (difficulty) {
+    case "easy":
+      if (stalls > 0)
+        errors.push(
+          `${prefix}: easy level must be solvable by chain deduction`,
+        );
+      break;
+    case "medium":
+      if (stalls > 1)
+        errors.push(
+          `${prefix}: medium level allows at most one deduction stall`,
+        );
+      break;
+    case "hard":
+    case "very_hard":
+      if (blanks >= 4 && stalls === 0)
+        errors.push(`${prefix}: hard level needs at least one deduction stall`);
+      break;
+  }
+}
+
+// Track rules (spec table) for one crossword of a v4 variant.
+function checkTrackRules(track, difficulty, puzzle, result, errors, prefix) {
+  const rules = TRACKS[track];
+  const blanks = Array.isArray(puzzle.inputIds) ? puzzle.inputIds.length : 0;
+  const [minBlanks, maxBlanks] = rules.blanks;
+  if (blanks < minBlanks || blanks > maxBlanks)
+    errors.push(`${prefix} must have ${minBlanks}–${maxBlanks} blanks`);
+  const above = result.values.find((value) => value > rules.maxValue);
+  if (above !== undefined)
+    errors.push(`${prefix} uses ${above}, above ${rules.maxValue}`);
+
+  const { stalls } = result;
+  if (stalls === null) return;
+  const minStalls = Math.max(
+    rules.stalls.min,
+    sessionMinStalls(track, difficulty),
+  );
+  if (rules.stalls.max === 0 && stalls > 0)
+    errors.push(`${prefix} must be solvable by chain deduction`);
+  else if (stalls > rules.stalls.max)
+    errors.push(`${prefix} allows at most one deduction stall`);
+  if (stalls < minStalls)
+    errors.push(
+      minStalls === 1
+        ? `${prefix} needs at least one deduction stall`
+        : `${prefix} needs at least ${minStalls} deduction stalls`,
+    );
+}
+
+function validateVariants(level, strict, errors, prefix) {
+  const variants = isObject(level.variants) ? level.variants : {};
+  if (!TRACK_IDS.every((track) => isObject(variants[track]))) {
+    errors.push(`${prefix}: variants must have easy, medium and hard`);
+    return;
+  }
+  const seenInputs = new Set();
+  for (const track of TRACK_IDS) {
+    const variant = variants[track];
+    const expectedXp = variantXp(level.xpReward, track);
+    if (variant.xpReward !== expectedXp)
+      errors.push(`${prefix}: variant ${track} xpReward must be ${expectedXp}`);
+    const puzzles = Array.isArray(variant.puzzles) ? variant.puzzles : [];
+    if (puzzles.length !== PUZZLES_PER_LESSON)
+      errors.push(
+        `${prefix}: variant ${track} must have ${PUZZLES_PER_LESSON} puzzles`,
+      );
+    puzzles.forEach((puzzle, index) => {
+      const puzzlePrefix = `${prefix}: ${track} puzzle ${index + 1}`;
+      if (!isObject(puzzle)) {
+        errors.push(`${puzzlePrefix} must be an object`);
+        return;
+      }
+      const inputIds = Array.isArray(puzzle.inputIds) ? puzzle.inputIds : [];
+      for (const inputId of inputIds) {
+        if (seenInputs.has(inputId))
+          errors.push(`${prefix}: input ${inputId} is used more than once`);
+        seenInputs.add(inputId);
+      }
+      const result = validatePuzzle(puzzle, strict, errors, puzzlePrefix);
+      if (result)
+        checkTrackRules(
+          track,
+          level.difficulty,
+          puzzle,
+          result,
+          errors,
+          puzzlePrefix,
+        );
+    });
+  }
+}
+
+function validateLevel(level, { chapterIds, expectBonus, strict }, errors) {
+  const prefix = `level ${level?.id ?? "?"}`;
+  if (!isObject(level)) {
+    errors.push(`${prefix}: must be an object`);
+    return;
+  }
+  if (level.isBonus !== expectBonus)
+    errors.push(`${prefix}: isBonus must be ${expectBonus}`);
+  if (!chapterIds.has(level.chapter))
+    errors.push(`${prefix}: unknown chapter ${level.chapter}`);
+  if (!Number.isInteger(level.session) || level.session < 1)
+    errors.push(`${prefix}: session must be a positive integer`);
+  for (const field of ["title", "subtitle", "emoji"]) {
+    if (!isNonEmptyString(level[field]))
+      errors.push(`${prefix}: ${field} is required`);
+  }
+  if (!DIFFICULTIES.has(level.difficulty))
+    errors.push(`${prefix}: invalid difficulty ${level.difficulty}`);
+  if (!Number.isInteger(level.xpReward) || level.xpReward < 1)
+    errors.push(`${prefix}: xpReward must be a positive integer`);
+
+  // Catalog v4 levels carry three variants; local and generated puzzles
+  // keep a single grid.
+  if ("variants" in level) {
+    validateVariants(level, strict, errors, prefix);
+    return;
+  }
+  const result = validatePuzzle(level, strict, errors, prefix);
+  if (result)
+    checkSessionStalls(
+      level.difficulty,
+      result.stalls,
+      Array.isArray(level.inputIds) ? level.inputIds.length : 0,
+      errors,
+      prefix,
+    );
 }
 
 /**

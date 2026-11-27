@@ -7,6 +7,7 @@ export function Cell({
   canReceive,
   onClick,
   dropTargetId,
+  correctValue,
 }) {
   if (!cell)
     return <div className="size-10 flex-shrink-0 sm:size-12 md:size-14" />;
@@ -16,9 +17,8 @@ export function Cell({
       <div
         className={clsx(
           "flex size-10 flex-shrink-0 select-none items-center justify-center font-black sm:size-12 md:size-14",
-          cell.isVertical
-            ? "text-xs text-muted-foreground sm:text-sm dark:text-[#5040a0]"
-            : "text-lg text-muted-foreground sm:text-2xl dark:text-[#9080cc]",
+          "text-lg text-primary sm:text-2xl",
+          cell.isVertical ? "dark:text-[#5040a0]" : "dark:text-[#9080cc]",
         )}
       >
         {sym}
@@ -30,7 +30,7 @@ export function Cell({
       <div
         className={clsx(
           "flex size-10 flex-shrink-0 select-none items-center justify-center rounded-lg",
-          "border-b-4 border-accent bg-background font-black text-lg text-foreground shadow-sm dark:border-[#c8a060] dark:bg-[#f4e5bc] dark:text-[#1a0840]",
+          "border-b-4 border-[var(--landing-cell-shadow)] bg-[var(--landing-cell-background)] font-black text-lg text-[var(--landing-cell-foreground)] dark:border-[#c8a060] dark:bg-[#f4e5bc] dark:text-[#1a0840]",
           "sm:size-12 sm:rounded-xl sm:text-xl md:size-14 md:rounded-2xl md:text-2xl",
         )}
       >
@@ -48,17 +48,17 @@ export function Cell({
         dropTargetId ? "Espaço vazio para colocar um número" : undefined
       }
       className={clsx(
-        "flex size-10 flex-shrink-0 cursor-pointer items-center justify-center rounded-lg border-2",
+        "relative flex size-10 flex-shrink-0 cursor-pointer items-center justify-center rounded-lg border-2",
         "font-black text-lg transition-colors duration-150 sm:size-12 sm:rounded-xl sm:text-xl md:size-14 md:rounded-2xl md:text-2xl",
         !filled &&
           !canReceive &&
-          "bg-card border-primary text-muted-foreground dark:bg-[#100840] dark:border-[#5040ee] dark:text-[#5040ee]",
+          "bg-[var(--landing-cell-question-background)] border-[var(--landing-cell-question-border)] text-[var(--landing-cell-question-foreground)] dark:bg-[#100840] dark:border-[#5040ee] dark:text-[#5040ee]",
         !filled &&
           canReceive &&
-          "bg-secondary border-accent text-muted-foreground shadow-[var(--shadow-accent-glow)] ring-2 ring-accent/25 dark:bg-[#1c1260] dark:border-[#9070ff] dark:text-[#9070ff] dark:shadow-[0_0_12px_rgba(144,112,255,0.4)] dark:ring-0",
+          "bg-[var(--landing-play-background)] border-[var(--accent-strong)] text-white shadow-[var(--shadow-accent-glow)] ring-2 ring-accent dark:bg-[#1c1260] dark:border-[#9070ff] dark:text-[#9070ff] dark:shadow-[0_0_12px_rgba(144,112,255,0.4)] dark:ring-0",
         filled &&
           status === null &&
-          "bg-primary border-secondary text-white shadow-[var(--shadow-primary-glow)] dark:border-[#7060ff]",
+          "bg-[var(--accent-strong)] border-[var(--primary-border)] text-white shadow-[var(--shadow-primary-glow)] dark:bg-primary dark:border-[#7060ff]",
         filled &&
           status === "correct" &&
           "bg-success border-success text-success-foreground dark:bg-emerald-500 dark:border-emerald-400 dark:text-white",
@@ -66,6 +66,14 @@ export function Cell({
       )}
     >
       {filled ? fill : "?"}
+      {correctValue !== undefined && (
+        <span
+          aria-label={`Resposta certa: ${correctValue}`}
+          className="absolute -bottom-2.5 -right-2.5 flex h-7 min-w-7 items-center justify-center rounded-full border-2 border-white bg-success px-1.5 text-sm font-black text-white shadow dark:border-[#0a0428]"
+        >
+          {correctValue}
+        </span>
+      )}
     </motion.button>
   );
 }

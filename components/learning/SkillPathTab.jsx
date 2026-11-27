@@ -1,5 +1,14 @@
 import { motion } from "motion/react";
-import { BookOpen, Check, ChevronDown, Lock } from "lucide-react";
+import {
+  BookOpen,
+  Check,
+  ChevronDown,
+  Divide,
+  Lock,
+  Minus,
+  Plus,
+  X,
+} from "lucide-react";
 import { clsx } from "clsx";
 import { CHAPTERS, DIFF_CHIP, DIFF_LABEL } from "lib/game/levels";
 import {
@@ -9,6 +18,33 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "components/ui/dropdown-menu";
+
+// Emojis de sinais têm cor própria; os sinais de operação viram ícones brancos.
+const OPERATION_ICONS = {
+  "➕": Plus,
+  "➖": Minus,
+  "✖️": X,
+  "➗": Divide,
+};
+
+function LevelSymbol({ emoji }) {
+  const Icon = OPERATION_ICONS[emoji];
+  if (Icon) {
+    return (
+      <Icon
+        className="size-9 text-white sm:size-10"
+        strokeWidth={3.5}
+        aria-hidden="true"
+      />
+    );
+  }
+  return (
+    <span className="text-3xl sm:text-4xl" aria-hidden="true">
+      {emoji}
+    </span>
+  );
+}
+
 export function SkillPathTab({
   levels,
   bonusLevel,
@@ -48,12 +84,11 @@ export function SkillPathTab({
             <button
               type="button"
               aria-label={`Selecionar capítulo. Atual: ${chapter.title}`}
-              className="w-full rounded-2xl border border-accent/45 p-4 text-left transition hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:p-5"
-              style={{ background: "var(--surface-glass-strong)" }}
+              className="w-full rounded-2xl border-2 border-[var(--landing-puzzle-border)] bg-card p-4 text-left shadow-[0_18px_40px_var(--landing-puzzle-shadow)] transition hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:p-5 dark:border dark:border-accent/45 dark:bg-[var(--surface-glass-strong)] dark:shadow-none dark:hover:border-accent"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
-                  <div className="mb-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-muted-foreground">
+                  <div className="mb-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[var(--landing-puzzle-kicker)] dark:text-muted-foreground">
                     <BookOpen size={14} aria-hidden="true" />
                     <span className="text-xs font-black uppercase tracking-widest">
                       Capítulo {chapter.id} — {chapter.title}
@@ -68,7 +103,7 @@ export function SkillPathTab({
                 </div>
                 <ChevronDown
                   size={20}
-                  className="mt-1 shrink-0 text-muted-foreground"
+                  className="mt-1 shrink-0 text-primary dark:text-muted-foreground"
                   aria-hidden="true"
                 />
               </div>
@@ -80,7 +115,7 @@ export function SkillPathTab({
                 aria-valuemax={chapterLevels.length}
                 aria-valuenow={completedInChapter}
               >
-                <div className="h-2 min-w-0 flex-1 overflow-hidden rounded-full bg-background">
+                <div className="h-2 min-w-0 flex-1 overflow-hidden rounded-full bg-secondary dark:bg-background">
                   <div
                     className="h-full rounded-full transition-[width] duration-500"
                     style={{
@@ -179,7 +214,7 @@ export function SkillPathTab({
                           current &&
                             "border-foreground bg-primary shadow-2xl shadow-primary/50 group-hover:brightness-110 dark:border-[#3020cc] dark:bg-[#5040ff] dark:shadow-[#5040ff]/50",
                           locked &&
-                            "border-secondary bg-background dark:border-[#221660] dark:bg-[#140a3a]",
+                            "border-accent bg-card dark:border-[#221660] dark:bg-[#140a3a]",
                         )}
                       >
                         {completed ? (
@@ -191,15 +226,10 @@ export function SkillPathTab({
                         ) : locked ? (
                           <Lock
                             size={24}
-                            className="text-muted-foreground dark:text-[#3a2a70]"
+                            className="text-primary/70 dark:text-[#3a2a70]"
                           />
                         ) : (
-                          <span
-                            className="text-3xl sm:text-4xl"
-                            aria-hidden="true"
-                          >
-                            {level.emoji}
-                          </span>
+                          <LevelSymbol emoji={level.emoji} />
                         )}
                         {current && (
                           <motion.div

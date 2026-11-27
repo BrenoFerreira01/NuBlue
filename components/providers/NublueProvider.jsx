@@ -42,6 +42,7 @@ export default function NublueProvider({ children }) {
   const game = useGameController({
     levels,
     authenticated: Boolean(student),
+    studentDifficulty: student?.difficulty,
   });
 
   useEffect(() => {
@@ -194,14 +195,18 @@ export default function NublueProvider({ children }) {
     window.localStorage.setItem("nublue-chapter", String(nextChapter));
   };
 
-  const finishDiagnostic = (difficulty) => {
-    game.setDifficulty(difficulty);
+  /** Resultado do nivelamento: capítulo de partida e dificuldade geral. */
+  const finishDiagnostic = ({ chapter, difficulty }) => {
+    game.applyPlacement({ chapter, difficulty });
+    changeChapter(chapter);
     enterGame();
   };
 
+  // Pular começa do início, sem marcar nada como concluído.
   const skipDiagnostic = () => {
+    game.setDifficulty("easy");
     changeChapter(1);
-    finishDiagnostic("easy");
+    enterGame();
   };
 
   const returnToLanding = async () => {
