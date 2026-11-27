@@ -1,16 +1,22 @@
-import { createStudent, prepare, request } from "tests/orchestrator.js";
+import { createStudent, prepare, query, request } from "tests/orchestrator.js";
 import { completeLesson } from "tests/catalog.js";
 import { dailyPuzzle } from "lib/game/dailyRun.mjs";
 import { DAILY_START_STEP } from "lib/game/tracks.mjs";
 
-// A cruzadinha atual é gerada de novo a partir do que a API devolve.
-const answersFor = (challenge) =>
-  dailyPuzzle(
-    challenge.date,
+// A semente da rodada fica só no servidor; o teste a lê do banco para gerar
+// de novo a cruzadinha atual.
+async function answersFor(studentId, challenge) {
+  const [run] = await query(
+    "SELECT seed FROM daily_challenge_runs WHERE student_id = $1 AND challenge_date = $2::date",
+    [studentId, challenge.date],
+  );
+  return dailyPuzzle(
+    run.seed,
     challenge.startStep,
     challenge.currentIndex,
     challenge.score,
   ).puzzle.answers;
+}
 let keyCounter = 0;
 const newKey = () => `daily-key-${process.pid}-${++keyCounter}`;
 
@@ -33,8 +39,8 @@ const wrongAnswersFor = (challenge) =>
 beforeAll(prepare);
 
 describe("/api/v1/daily-challenge", () => {
-  it("começa na dificuldade geral do aluno, com 3 vidas, sem expor as respostas", async () => {
-    const { cookie } = await createStudent();
+  it("começa na dificuldade geral do aluno, com 5 vidas, sem expor respostas nem semente", async () => {
+    const { cookie, id } = await createStudent();
     await request("/api/v1/users/me", {
       method: "PATCH",
       cookie,
@@ -47,14 +53,17 @@ describe("/api/v1/daily-challenge", () => {
     expect(response.data).toMatchObject({
       status: "in_progress",
       date: new Date().toISOString().slice(0, 10),
-      hearts: 3,
+      hearts: 5,
       score: 0,
       currentIndex: 0,
       startStep: DAILY_START_STEP.hard,
       step: DAILY_START_STEP.hard,
     });
     expect(response.data.level.inputIds.length).toBeGreaterThan(0);
-    expect(JSON.stringify(response.data)).not.toMatch(/answer|answer_?key/i);
+    expect(JSON.stringify(response.data)).not.toMatch(/answer|seed/i);
+    const midnight = new Date();
+    midnight.setUTCHours(24, 0, 0, 0);
+    expect(response.data.resetsAt).toBe(midnight.toISOString());
   });
 
   it("sem sessão responde 401", async () => {
@@ -62,7 +71,7 @@ describe("/api/v1/daily-challenge", () => {
   });
 
   it("guarda o rascunho e recusa entradas desconhecidas", async () => {
-    const { cookie } = await createStudent();
+    const { cookie, id } = await createStudent();
     const { data: challenge } = await getChallenge(cookie);
     const [firstInput] = challenge.level.inputIds;
 
@@ -79,18 +88,18 @@ describe("/api/v1/daily-challenge", () => {
   });
 
   it("acertar soma ponto e XP e passa para a próxima cruzadinha", async () => {
-    const { cookie } = await createStudent();
+    const { cookie, id } = await createStudent();
     const { data: challenge } = await getChallenge(cookie);
 
     const correct = await submit(cookie, {
-      answers: answersFor(challenge),
+      answers: await answersFor(id, challenge),
       idempotencyKey: newKey(),
     });
 
     expect(correct.data).toMatchObject({
       correct: true,
       score: 1,
-      hearts: 3,
+      hearts: 5,
       status: "in_progress",
       xpAwarded: 5 + challenge.step,
     });
@@ -98,11 +107,11 @@ describe("/api/v1/daily-challenge", () => {
     expect(correct.data.progress.dailyChallengesCompleted).toBe(1);
     const next = await getChallenge(cookie);
     expect(next.data.currentIndex).toBe(1);
-    expect(next.data.level.inputIds).not.toEqual(challenge.level.inputIds);
+    expect(next.data.level.id).not.toBe(challenge.level.id);
   });
 
   it("errar gasta uma vida, mostra a resposta certa e segue para a próxima", async () => {
-    const { cookie } = await createStudent();
+    const { cookie, id } = await createStudent();
     const { data: challenge } = await getChallenge(cookie);
 
     const wrong = await submit(cookie, {
@@ -112,16 +121,16 @@ describe("/api/v1/daily-challenge", () => {
 
     expect(wrong.data).toMatchObject({
       correct: false,
-      hearts: 2,
+      hearts: 4,
       score: 0,
       xpAwarded: 0,
-      correctAnswers: answersFor(challenge),
+      correctAnswers: await answersFor(id, challenge),
     });
     expect((await getChallenge(cookie)).data.currentIndex).toBe(1);
   });
 
   it("continua de onde parou no mesmo dia", async () => {
-    const { cookie } = await createStudent();
+    const { cookie, id } = await createStudent();
     const { data: first } = await getChallenge(cookie);
     await submit(cookie, {
       answers: wrongAnswersFor(first),
@@ -130,12 +139,12 @@ describe("/api/v1/daily-challenge", () => {
 
     const again = await getChallenge(cookie);
     const thirdTime = await getChallenge(cookie);
-    expect(again.data).toMatchObject({ currentIndex: 1, hearts: 2 });
+    expect(again.data).toMatchObject({ currentIndex: 1, hearts: 4 });
     expect(thirdTime.data.level).toEqual(again.data.level);
   });
 
   it("repetir a chave de idempotência não gasta outra vida", async () => {
-    const { cookie } = await createStudent();
+    const { cookie, id } = await createStudent();
     const { data: challenge } = await getChallenge(cookie);
     const body = {
       answers: wrongAnswersFor(challenge),
@@ -146,20 +155,20 @@ describe("/api/v1/daily-challenge", () => {
     const replay = await submit(cookie, body);
 
     expect(replay.data.replayed).toBe(true);
-    expect(replay.data.hearts).toBe(2);
-    expect((await getChallenge(cookie)).data.hearts).toBe(2);
+    expect(replay.data.hearts).toBe(4);
+    expect((await getChallenge(cookie)).data.hearts).toBe(4);
   });
 
-  it("o 3º erro encerra o desafio do dia", async () => {
-    const { cookie } = await createStudent();
+  it("o 5º erro encerra o Modo Desafio do dia", async () => {
+    const { cookie, id } = await createStudent();
     let challenge = (await getChallenge(cookie)).data;
     await submit(cookie, {
-      answers: answersFor(challenge),
+      answers: await answersFor(id, challenge),
       idempotencyKey: newKey(),
     });
 
     let last;
-    for (let i = 0; i < 3; i += 1) {
+    for (let i = 0; i < 5; i += 1) {
       challenge = (await getChallenge(cookie)).data;
       last = await submit(cookie, {
         answers: wrongAnswersFor(challenge),
@@ -181,10 +190,10 @@ describe("/api/v1/daily-challenge", () => {
   });
 
   it("sem nenhum acerto o dia falha e a sequência zera", async () => {
-    const { cookie } = await createStudent();
+    const { cookie, id } = await createStudent();
 
     let last;
-    for (let i = 0; i < 3; i += 1) {
+    for (let i = 0; i < 5; i += 1) {
       const challenge = (await getChallenge(cookie)).data;
       last = await submit(cookie, {
         answers: wrongAnswersFor(challenge),
@@ -194,6 +203,17 @@ describe("/api/v1/daily-challenge", () => {
 
     expect(last.data).toMatchObject({ status: "failed", score: 0 });
     expect(last.data.progress.currentDailyStreak).toBe(0);
+  });
+
+  it("cada conta recebe cruzadinhas sorteadas, com a mesma progressão", async () => {
+    const alice = await createStudent();
+    const bob = await createStudent();
+
+    const a = (await getChallenge(alice.cookie)).data;
+    const b = (await getChallenge(bob.cookie)).data;
+
+    expect(a.step).toBe(b.step);
+    expect(a.level.grid).not.toEqual(b.level.grid);
   });
 });
 
@@ -284,5 +304,61 @@ describe("GET /api/v1/leaderboard", () => {
 
     expect(invalid.status).toBe(400);
     expect(invalid.data.error).toBe("invalid_period");
+  });
+});
+
+describe("posição do aluno no ranking", () => {
+  const optIn = (cookie, enabled = true) =>
+    request("/api/v1/users/me", {
+      method: "PATCH",
+      cookie,
+      body: { leaderboardOptIn: enabled },
+    });
+
+  it("mostra a posição e o XP de quem está logado e aparece no ranking", async () => {
+    const student = await createStudent();
+    await completeLesson(student.cookie, 1);
+    await optIn(student.cookie);
+
+    const board = await request("/api/v1/leaderboard?period=weekly", {
+      cookie: student.cookie,
+    });
+
+    const index = board.data.entries.findIndex(
+      (entry) => entry.nickname === student.nickname,
+    );
+    expect(board.data.me).toEqual({
+      optedIn: true,
+      xp: board.data.entries[index].xp,
+      rank: index + 1,
+    });
+  });
+
+  it("quem ainda não tem XP também vê a própria posição", async () => {
+    const student = await createStudent();
+    await optIn(student.cookie);
+
+    const board = await request("/api/v1/leaderboard?period=all", {
+      cookie: student.cookie,
+    });
+
+    expect(board.data.me.xp).toBe(0);
+    expect(board.data.me.rank).toBe(board.data.entries.length + 1);
+  });
+
+  it("quem não aceitou aparecer recebe só o próprio XP", async () => {
+    const student = await createStudent();
+    await completeLesson(student.cookie, 1);
+
+    const board = await request("/api/v1/leaderboard?period=all", {
+      cookie: student.cookie,
+    });
+
+    expect(board.data.me).toEqual({ optedIn: false, xp: 15, rank: null });
+  });
+
+  it("visitante não recebe posição", async () => {
+    const board = await request("/api/v1/leaderboard?period=all");
+    expect(board.data.me).toBeUndefined();
   });
 });

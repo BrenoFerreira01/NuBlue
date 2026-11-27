@@ -1,6 +1,8 @@
 import { createHandler, requireStudent } from "infra/controller.js";
 import { ValidationError } from "infra/errors.js";
 import progress from "models/progress.js";
+import lives from "models/lives.js";
+import database from "infra/database.js";
 import session from "models/session.js";
 import user, { isDifficulty, toPublic } from "models/user.js";
 
@@ -9,6 +11,7 @@ async function getMe(req, res) {
   res.status(200).json({
     student: toPublic(student),
     progress: await progress.get(student.id),
+    lives: await lives.get(database, student.id),
   });
 }
 

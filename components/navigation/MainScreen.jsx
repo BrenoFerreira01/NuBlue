@@ -11,6 +11,7 @@ import {
 import { clsx } from "clsx";
 import { Brand } from "components/Brand";
 import { ThemeToggle } from "components/ThemeToggle";
+import { LivesBadge } from "components/game/LivesBadge";
 import { SkillPathTab } from "components/learning/SkillPathTab";
 import { ChallengesTab } from "components/challenges/ChallengesTab";
 import { RankingTab } from "components/ranking/RankingTab";
@@ -51,6 +52,10 @@ export function MainScreen({
   onDeleteAccount,
   leaderboardOptIn,
   onLeaderboardOptInChange,
+  lives,
+  clock,
+  isChallengeMode,
+  challengeInfo,
 }) {
   return (
     // Altura fixa da janela: cada aba rola por dentro e a navegação fica sempre visível.
@@ -77,6 +82,14 @@ export function MainScreen({
             </p>
           </div>
           <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
+            {lives && (
+              <LivesBadge
+                lives={lives.lives}
+                max={lives.max}
+                nextLifeAt={lives.nextLifeAt}
+                now={clock}
+              />
+            )}
             <div className="flex items-center gap-1 rounded-full bg-secondary px-2 py-1.5 text-xs font-black sm:gap-1.5 sm:px-3 sm:text-sm">
               <Flame
                 size={14}
@@ -134,6 +147,8 @@ export function MainScreen({
                   currentStreak={currentDailyStreak}
                   bestStreak={bestDailyStreak}
                   onStartChallenge={onStartChallenge}
+                  isChallengeMode={isChallengeMode}
+                  challengeInfo={challengeInfo}
                 />
               </motion.div>
             )}

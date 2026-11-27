@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { api } from "lib/api";
 import {
+  DAILY_HEARTS,
+  MODE_HEARTS,
   applyDailyAnswer,
   canPlay,
   createDailyRun,
@@ -10,6 +12,7 @@ import {
 import { trackForStep } from "lib/game/tracks.mjs";
 import { readDailyRun, saveDailyRun } from "lib/game/localDailyRun";
 import { PuzzleScreen } from "components/game/PuzzleScreen";
+import { playSound } from "lib/game/sound";
 import { ResultScreen } from "components/game/ResultScreen";
 
 /** Cruzadinha local `k` do dia, no formato de um nível (com as respostas). */
@@ -55,6 +58,7 @@ export function DailyRunScreen({
   exitLabel = "Voltar para desafios",
   successDescription,
   failureDescription,
+  title = "Desafio diário",
 }) {
   const [run, setRun] = useState(null);
   const [level, setLevel] = useState(null);
@@ -177,6 +181,9 @@ export function DailyRunScreen({
     );
     setCorrectAnswers(correct ? null : expected);
     setChecked(correct ? "correct" : "wrong");
+    playSound(
+      after.status !== "in_progress" ? "fail" : correct ? "correct" : "wrong",
+    );
     setXpGained((total) => total + xp);
     setSolvedGained((total) => total + (correct ? 1 : 0));
     setRun((current) => ({ ...current, hearts: after.hearts }));
@@ -234,7 +241,7 @@ export function DailyRunScreen({
         }
         failureDescription={
           failureDescription ??
-          "Suas 3 vidas acabaram. Um novo desafio fica disponível amanhã."
+          `Suas ${source === "remote" ? MODE_HEARTS : DAILY_HEARTS} vidas acabaram. Elas voltam na virada do dia.`
         }
         rewardLabel="XP desta rodada"
         endChallengeLabel={exitLabel}
@@ -252,7 +259,8 @@ export function DailyRunScreen({
       hasChecked={Boolean(checked) || busy}
       canCheck={canCheck}
       isChallenge
-      badgeLabel={`Desafio diário · ${run.score} ${run.score === 1 ? "acerto" : "acertos"}`}
+      maxHearts={source === "remote" ? MODE_HEARTS : DAILY_HEARTS}
+      badgeLabel={`${title} · ${run.score} ${run.score === 1 ? "acerto" : "acertos"}`}
       progressOverride={(run.score % 3) / 3}
       errorMessage={errorMessage}
       checkState={checked ?? "idle"}

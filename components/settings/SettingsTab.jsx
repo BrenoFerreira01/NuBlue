@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { isSoundEnabled, playSound, setSoundEnabled } from "lib/game/sound";
 import {
   Bell,
   ChevronRight,
@@ -6,6 +7,7 @@ import {
   Shield,
   Trash2,
   Trophy,
+  Volume2,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -36,6 +38,12 @@ export function SettingsTab({
   onLeaderboardOptInChange,
 }) {
   const [visibilityError, setVisibilityError] = useState(null);
+  const [sound, setSound] = useState(isSoundEnabled);
+  const updateSound = (enabled) => {
+    setSoundEnabled(enabled);
+    setSound(enabled);
+    if (enabled) playSound("correct");
+  };
   const [reminders, setReminders] = useState(() => {
     if (typeof window === "undefined") return true;
     return window.localStorage.getItem("nublue-daily-reminders") !== "off";
@@ -90,6 +98,14 @@ export function SettingsTab({
         </section>
 
         <section className="overflow-hidden rounded-[26px] border border-border bg-card">
+          <SettingRow
+            Icon={Volume2}
+            title="Efeitos sonoros"
+            description="Sons de acerto, erro, conquistas e vidas."
+            action={
+              <Toggle label="Efeitos sonoros" on={sound} setOn={updateSound} />
+            }
+          />
           <SettingRow
             Icon={Bell}
             title="Lembretes diários"

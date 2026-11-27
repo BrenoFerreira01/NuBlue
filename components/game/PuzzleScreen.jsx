@@ -32,6 +32,7 @@ export function PuzzleScreen({
   fills,
   selectedBank,
   hearts,
+  maxHearts = 3,
   cellStatuses,
   hasChecked,
   canCheck,
@@ -162,7 +163,7 @@ export function PuzzleScreen({
             className="flex shrink-0 gap-1 sm:gap-1.5"
             aria-label={`${hearts} tentativas restantes`}
           >
-            {[0, 1, 2].map((i) => (
+            {Array.from({ length: maxHearts }, (_, i) => (
               <Heart
                 key={i}
                 size={18}

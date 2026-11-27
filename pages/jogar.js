@@ -25,6 +25,7 @@ export default function Jogar() {
         fills={game.fills}
         selectedBank={game.selectedBank}
         hearts={game.hearts}
+        maxHearts={game.lives.max}
         cellStatuses={game.cellStatuses}
         hasChecked={game.hasChecked}
         canCheck={game.canCheck}
@@ -60,6 +61,7 @@ export default function Jogar() {
         dark={dark}
         onThemeChange={setDark}
         onExit={game.handleEndChallenge}
+        title={student ? "Modo Desafio" : "Desafio diário"}
       />
     );
   }

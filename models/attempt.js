@@ -9,6 +9,7 @@ import {
 import { answersMatch, assertSameAnswers } from "models/answers.js";
 import courseCatalog, { catalog } from "models/catalog.js";
 import progress, { utcDateKey } from "models/progress.js";
+import lives from "models/lives.js";
 import { isDifficulty } from "models/user.js";
 
 export function parseLevelId(value) {
@@ -151,6 +152,8 @@ async function submitCourseAttempt(
       return replayResult(level, replay, lessonCompleted);
     }
 
+    // Sem vidas, nenhuma cruzadinha nova é corrigida.
+    const livesState = await lives.requireLife(client, student.id);
     const answerKey = level.answer_key[difficulty][puzzleIndex];
     const correct = answersMatch(answers, answerKey);
     const created = await client.query(
@@ -189,6 +192,7 @@ async function submitCourseAttempt(
         lessonCompleted: false,
         xpAwarded: 0,
         replayed: false,
+        lives: await lives.spend(client, student.id, livesState),
       };
     }
 
@@ -221,7 +225,11 @@ async function submitCourseAttempt(
     return { correct: true, lessonCompleted, xpAwarded, replayed: false };
   });
 
-  return { ...result, progress: await progress.get(student.id) };
+  return {
+    ...result,
+    lives: result.lives ?? (await lives.get(database, student.id)),
+    progress: await progress.get(student.id),
+  };
 }
 
 const attempt = { submitCourseAttempt };

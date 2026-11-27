@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { Notices } from "components/ui/Notices";
 import { useRouter } from "next/router";
 import { api } from "lib/api";
 import { LEVELS } from "lib/game/levels";
@@ -43,6 +44,7 @@ export default function NublueProvider({ children }) {
     levels,
     authenticated: Boolean(student),
     studentDifficulty: student?.difficulty,
+    userKey: student?.id ?? "guest",
   });
 
   useEffect(() => {
@@ -264,6 +266,7 @@ export default function NublueProvider({ children }) {
             </button>
           </div>
         )}
+        <Notices notices={game.notices} onDismiss={game.dismissNotice} />
         {children}
       </div>
     </NublueContext.Provider>

@@ -6,6 +6,7 @@ import { api } from "lib/api";
 export function RankingTab() {
   const [tab, setTab] = useState("weekly");
   const [leaderboard, setLeaderboard] = useState([]);
+  const [me, setMe] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadFailed, setLoadFailed] = useState(false);
   const medals = ["🥇", "🥈", "🥉"];
@@ -15,8 +16,10 @@ export function RankingTab() {
     setLoadFailed(false);
     api
       .leaderboard(tab)
-      .then(({ entries }) => {
-        if (active) setLeaderboard(entries);
+      .then(({ entries, me: position }) => {
+        if (!active) return;
+        setLeaderboard(entries);
+        setMe(position ?? null);
       })
       .catch(() => {
         if (active) {
@@ -57,6 +60,33 @@ export function RankingTab() {
           ))}
         </div>
       </div>
+
+      {/* Sua posição */}
+      {me && !isLoading && (
+        <div className="px-3 pb-2 sm:px-4">
+          <div
+            className="flex items-center justify-between gap-3 rounded-2xl border-2 border-[var(--landing-puzzle-border)] bg-card px-4 py-3 dark:border-accent/45 dark:bg-[var(--surface-glass-strong)]"
+            aria-label="Sua posição no ranking"
+          >
+            <div className="min-w-0">
+              <p className="text-xs font-black uppercase tracking-widest text-[var(--landing-puzzle-kicker)] dark:text-muted-foreground">
+                Sua posição
+              </p>
+              <p className="text-sm font-bold text-foreground">
+                {me.optedIn
+                  ? me.xp > 0
+                    ? `${me.rank}º lugar`
+                    : "Ganhe XP para entrar na lista"
+                  : "Ative “Aparecer no ranking” em Ajustes"}
+              </p>
+            </div>
+            <span className="flex shrink-0 items-center gap-1 text-sm font-black text-foreground">
+              <Zap size={14} className="fill-yellow-400 text-yellow-400" />
+              {me.xp} XP
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Leaderboard */}
       <div className="space-y-2 px-3 pb-8 sm:px-4">
