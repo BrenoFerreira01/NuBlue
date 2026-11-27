@@ -1,3 +1,4 @@
+import { PUZZLES_PER_LESSON } from "infra/catalog-validation.mjs";
 import database from "infra/database.js";
 import {
   ConflictError,
@@ -8,6 +9,7 @@ import {
 import { answersMatch, assertSameAnswers } from "models/answers.js";
 import courseCatalog, { catalog } from "models/catalog.js";
 import progress, { utcDateKey } from "models/progress.js";
+import { isDifficulty } from "models/user.js";
 
 export function parseLevelId(value) {
   const levelId = Number(value);
@@ -47,10 +49,42 @@ async function assertLevelUnlocked(client, studentId, level) {
   if (!completed.rowCount) throw levelLocked();
 }
 
-/** Tentativa já registrada com esta chave: devolve o mesmo resultado. */
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Qual cruzadinha da lição o aluno respondeu. */
+function parseLessonTarget({ difficulty, puzzleIndex, lessonId }) {
+  if (!isDifficulty(difficulty)) {
+    throw new ValidationError("invalid_difficulty");
+  }
+  if (
+    !Number.isInteger(puzzleIndex) ||
+    puzzleIndex < 0 ||
+    puzzleIndex >= PUZZLES_PER_LESSON
+  ) {
+    throw new ValidationError("invalid_puzzle_index");
+  }
+  if (typeof lessonId !== "string" || !UUID.test(lessonId)) {
+    throw new ValidationError("invalid_lesson_id");
+  }
+  return { difficulty, puzzleIndex, lessonId };
+}
+
+/** As 4 cruzadinhas da lição já têm uma tentativa certa? */
+async function lessonIsComplete(client, studentId, levelId, lessonId) {
+  const { rows } = await client.query(
+    `SELECT count(DISTINCT puzzle_index)::integer AS solved
+     FROM level_attempts
+     WHERE student_id = $1 AND level_id = $2 AND lesson_id = $3 AND is_correct`,
+    [studentId, levelId, lessonId],
+  );
+  return rows[0].solved === PUZZLES_PER_LESSON;
+}
+
+/** Tentativa já registrada com esta chave (ou null). */
 async function findReplay(client, studentId, levelId, idempotencyKey, answers) {
   const { rows } = await client.query(
-    `SELECT level_id, submitted_answers, is_correct, xp_awarded
+    `SELECT level_id, submitted_answers, is_correct, xp_awarded,
+            difficulty, puzzle_index, lesson_id
      FROM level_attempts WHERE student_id = $1 AND idempotency_key = $2`,
     [studentId, idempotencyKey],
   );
@@ -60,20 +94,33 @@ async function findReplay(client, studentId, levelId, idempotencyKey, answers) {
     throw new ConflictError("idempotency_key_reused");
   }
   assertSameAnswers(attempt.submitted_answers, answers);
+  return attempt;
+}
+
+/** Devolve o resultado já gravado; errar inclui a resposta certa. */
+function replayResult(level, attempt, lessonCompleted) {
+  const result = { correct: attempt.is_correct };
+  if (!attempt.is_correct) {
+    result.correctAnswers =
+      level.answer_key[attempt.difficulty][attempt.puzzle_index];
+  }
   return {
-    correct: attempt.is_correct,
+    ...result,
+    lessonCompleted,
     xpAwarded: attempt.xp_awarded,
     replayed: true,
   };
 }
 
 /**
- * Corrige a tentativa no servidor. O XP vem só na primeira conclusão do nível;
- * repetir a mesma chave de idempotência devolve o resultado já gravado.
+ * Corrige uma cruzadinha da lição no servidor. Errar devolve a resposta certa;
+ * o nível é concluído (e o XP da versão é dado, só na primeira vez) quando as
+ * 4 cruzadinhas da mesma lição estão certas. Repetir a mesma chave de
+ * idempotência devolve o resultado já gravado.
  */
 async function submitCourseAttempt(
   student,
-  { levelId, answers, idempotencyKey },
+  { levelId, answers, idempotencyKey, ...target },
 ) {
   const result = await database.transaction(async (client) => {
     const { rows } = await client.query(
@@ -84,6 +131,7 @@ async function submitCourseAttempt(
     if (!level || (level.is_bonus && !catalog.bonus)) {
       throw new NotFoundError("level_not_found");
     }
+    const { difficulty, puzzleIndex, lessonId } = parseLessonTarget(target);
     await assertLevelUnlocked(client, student.id, level);
 
     const replay = await findReplay(
@@ -93,41 +141,84 @@ async function submitCourseAttempt(
       idempotencyKey,
       answers,
     );
-    if (replay) return replay;
+    if (replay) {
+      const lessonCompleted = await lessonIsComplete(
+        client,
+        student.id,
+        levelId,
+        replay.lesson_id,
+      );
+      return replayResult(level, replay, lessonCompleted);
+    }
 
-    const correct = answersMatch(answers, level.answer_key);
+    const answerKey = level.answer_key[difficulty][puzzleIndex];
+    const correct = answersMatch(answers, answerKey);
     const created = await client.query(
-      `INSERT INTO level_attempts (student_id, level_id, idempotency_key, submitted_answers, is_correct)
-       VALUES ($1, $2, $3, $4::jsonb, $5)
+      `INSERT INTO level_attempts
+        (student_id, level_id, idempotency_key, submitted_answers, is_correct,
+         difficulty, puzzle_index, lesson_id)
+       VALUES ($1, $2, $3, $4::jsonb, $5, $6, $7, $8)
        ON CONFLICT (student_id, idempotency_key) DO NOTHING
        RETURNING id`,
-      [student.id, levelId, idempotencyKey, JSON.stringify(answers), correct],
+      [
+        student.id,
+        levelId,
+        idempotencyKey,
+        JSON.stringify(answers),
+        correct,
+        difficulty,
+        puzzleIndex,
+        lessonId,
+      ],
     );
     if (!created.rowCount) {
       // Outra requisição com a mesma chave gravou primeiro.
-      return findReplay(client, student.id, levelId, idempotencyKey, answers);
+      const raced = await findReplay(
+        client,
+        student.id,
+        levelId,
+        idempotencyKey,
+        answers,
+      );
+      return replayResult(level, raced, false);
     }
-    if (!correct) return { correct: false, xpAwarded: 0, replayed: false };
+    if (!correct) {
+      return {
+        correct: false,
+        correctAnswers: answerKey,
+        lessonCompleted: false,
+        xpAwarded: 0,
+        replayed: false,
+      };
+    }
 
-    const completion = await client.query(
-      `INSERT INTO level_completions (student_id, level_id)
-       VALUES ($1, $2) ON CONFLICT DO NOTHING RETURNING level_id`,
-      [student.id, levelId],
+    const lessonCompleted = await lessonIsComplete(
+      client,
+      student.id,
+      levelId,
+      lessonId,
     );
     let xpAwarded = 0;
-    if (completion.rowCount) {
-      xpAwarded = level.public_data.xpReward;
-      await client.query(
-        "INSERT INTO xp_events (student_id, source, source_id, amount) VALUES ($1, 'level', $2, $3)",
-        [student.id, String(levelId), xpAwarded],
+    if (lessonCompleted) {
+      const completion = await client.query(
+        `INSERT INTO level_completions (student_id, level_id)
+         VALUES ($1, $2) ON CONFLICT DO NOTHING RETURNING level_id`,
+        [student.id, levelId],
       );
-      await client.query(
-        "UPDATE level_attempts SET xp_awarded = $1 WHERE id = $2",
-        [xpAwarded, created.rows[0].id],
-      );
-      await progress.recordActivity(client, student.id, utcDateKey());
+      if (completion.rowCount) {
+        xpAwarded = level.public_data.variants[difficulty].xpReward;
+        await client.query(
+          "INSERT INTO xp_events (student_id, source, source_id, amount) VALUES ($1, 'level', $2, $3)",
+          [student.id, String(levelId), xpAwarded],
+        );
+        await client.query(
+          "UPDATE level_attempts SET xp_awarded = $1 WHERE id = $2",
+          [xpAwarded, created.rows[0].id],
+        );
+        await progress.recordActivity(client, student.id, utcDateKey());
+      }
     }
-    return { correct: true, xpAwarded, replayed: false };
+    return { correct: true, lessonCompleted, xpAwarded, replayed: false };
   });
 
   return { ...result, progress: await progress.get(student.id) };

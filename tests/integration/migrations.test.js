@@ -76,6 +76,7 @@ describe("infra/scripts/migrate.mjs", () => {
     const [row] = await query(
       "SELECT count(*)::integer AS count FROM pgmigrations",
     );
-    expect(row.count).toBe(1);
+    // Uma linha por arquivo em infra/migrations.
+    expect(row.count).toBe(2);
   });
 });

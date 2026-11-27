@@ -1,22 +1,37 @@
-import { useEffect, useRef, useState } from "react";
-import { createSeededRandom } from "lib/game/dailyChallenge";
-import { generatePuzzle } from "lib/game/generatePuzzle";
+import { useRef, useState } from "react";
+import { generateTrackPuzzle } from "lib/game/trackPuzzle.mjs";
+import {
+  createPlacement,
+  nextPuzzle,
+  placementResult,
+  recordAnswer,
+} from "lib/game/placement";
 import { PuzzleScreen } from "components/game/PuzzleScreen";
-const TOTAL_CROSSWORDS = 6;
-function createDiagnosticPuzzle(step) {
-  const round = (step + 1) * 2;
-  const puzzle = generatePuzzle(
-    round,
-    createSeededRandom(`placement-test-${step + 1}`),
-  );
+
+// O teste tem no máximo 4 cruzadinhas de operações e 2 de dificuldade.
+const MAX_CROSSWORDS = 6;
+
+function createDiagnosticLevel(placement, step) {
+  const target = nextPuzzle(placement);
+  const puzzle = generateTrackPuzzle(target);
   return {
     ...puzzle,
     id: -(100_000 + step),
     chapter: 0,
+    session: 1,
     title: `Cruzadinha ${step + 1}`,
+    subtitle: "Teste de nivelamento",
+    difficulty: target.track,
+    emoji: "🧭",
     xpReward: 0,
   };
 }
+
+/**
+ * Teste de nivelamento adaptativo: analisa acertos e tempo e indica o capítulo
+ * e a dificuldade geral de partida. Errar mostra a resposta certa e só avança
+ * com Continuar.
+ */
 export function DiagnosticTest({
   dark,
   onThemeChange,
@@ -24,71 +39,67 @@ export function DiagnosticTest({
   onSkip,
   onFinish,
 }) {
+  const [placement, setPlacement] = useState(createPlacement);
   const [step, setStep] = useState(0);
-  const [score, setScore] = useState(0);
-  const [level, setLevel] = useState(() => createDiagnosticPuzzle(0));
+  const [level, setLevel] = useState(() =>
+    createDiagnosticLevel(createPlacement(), 0),
+  );
   const [fills, setFills] = useState({});
   const [selectedBank, setSelectedBank] = useState(null);
   const [cellStatuses, setCellStatuses] = useState({});
-  const [hasChecked, setHasChecked] = useState(false);
-  const answerTimeout = useRef(null);
+  const [checked, setChecked] = useState(null);
+  const [correctAnswers, setCorrectAnswers] = useState(null);
+  const startedAt = useRef(Date.now());
   const answerKey = level.answers ?? {};
-  const canCheck = Object.keys(answerKey).every((id) => fills[id] != null);
-  const filledCount = Object.keys(answerKey).filter(
-    (id) => fills[id] != null,
-  ).length;
+  const inputIds = Object.keys(answerKey);
+  const canCheck = !checked && inputIds.every((id) => fills[id] != null);
+  const filledCount = inputIds.filter((id) => fills[id] != null).length;
   const crosswordProgress =
-    Object.keys(answerKey).length > 0
-      ? filledCount / Object.keys(answerKey).length
-      : 0;
-  useEffect(
-    () => () => {
-      if (answerTimeout.current !== null)
-        window.clearTimeout(answerTimeout.current);
-    },
-    [],
-  );
+    inputIds.length > 0 ? filledCount / inputIds.length : 0;
+
   const handleCellClick = (inputId) => {
-    if (hasChecked) return;
-    const nextFill = selectedBank !== null ? selectedBank : null;
-    setFills((previous) => ({ ...previous, [inputId]: nextFill }));
+    if (checked) return;
+    setFills((previous) => ({ ...previous, [inputId]: selectedBank }));
     setSelectedBank(null);
   };
   const handleDropNumber = (inputId, number) => {
-    if (hasChecked || !(inputId in answerKey)) return;
+    if (checked || !(inputId in answerKey)) return;
     setFills((previous) => ({ ...previous, [inputId]: number }));
     setSelectedBank(null);
   };
   const handleBankClick = (number) => {
-    if (hasChecked) return;
+    if (checked) return;
     setSelectedBank((previous) => (previous === number ? null : number));
   };
   const handleCheck = () => {
-    if (hasChecked || !canCheck) return;
-    const statuses = {};
-    let allCorrect = true;
-    for (const [id, answer] of Object.entries(answerKey)) {
-      const correct = fills[id] === answer;
-      statuses[id] = correct ? "correct" : "wrong";
-      if (!correct) allCorrect = false;
-    }
+    if (!canCheck) return;
+    const statuses = Object.fromEntries(
+      inputIds.map((id) => [
+        id,
+        fills[id] === answerKey[id] ? "correct" : "wrong",
+      ]),
+    );
+    const correct = Object.values(statuses).every((s) => s === "correct");
+    const seconds = (Date.now() - startedAt.current) / 1000;
     setCellStatuses(statuses);
-    setHasChecked(true);
-    const nextScore = score + Number(allCorrect);
-    answerTimeout.current = window.setTimeout(() => {
-      if (step === TOTAL_CROSSWORDS - 1) {
-        onFinish(nextScore >= 5 ? "hard" : nextScore >= 3 ? "medium" : "easy");
-        return;
-      }
-      const nextStep = step + 1;
-      setScore(nextScore);
-      setStep(nextStep);
-      setLevel(createDiagnosticPuzzle(nextStep));
-      setFills({});
-      setSelectedBank(null);
-      setCellStatuses({});
-      setHasChecked(false);
-    }, 900);
+    setCorrectAnswers(correct ? null : answerKey);
+    setChecked(correct ? "correct" : "wrong");
+    setPlacement((current) => recordAnswer(current, { correct, seconds }));
+  };
+  const handleContinue = () => {
+    if (!nextPuzzle(placement)) {
+      onFinish(placementResult(placement));
+      return;
+    }
+    const nextStep = step + 1;
+    setStep(nextStep);
+    setLevel(createDiagnosticLevel(placement, nextStep));
+    setFills({});
+    setSelectedBank(null);
+    setCellStatuses({});
+    setCorrectAnswers(null);
+    setChecked(null);
+    startedAt.current = Date.now();
   };
   return (
     <PuzzleScreen
@@ -97,12 +108,17 @@ export function DiagnosticTest({
       selectedBank={selectedBank}
       hearts={0}
       cellStatuses={cellStatuses}
-      hasChecked={hasChecked}
+      hasChecked={Boolean(checked)}
       canCheck={canCheck}
       isChallenge={false}
-      badgeLabel={`Teste de nivelamento · ${step + 1}/${TOTAL_CROSSWORDS}`}
-      progressOverride={(step + crosswordProgress) / TOTAL_CROSSWORDS}
+      badgeLabel={`Teste de nivelamento · ${step + 1}`}
+      progressOverride={Math.min(
+        1,
+        (step + (checked ? 1 : crosswordProgress)) / MAX_CROSSWORDS,
+      )}
       showHearts={false}
+      checkState={checked ?? "idle"}
+      correctAnswers={correctAnswers}
       backLabel="Voltar para a página inicial"
       secondaryAction={{
         label: "Pular cruzadinhas e começar do início",
@@ -114,6 +130,7 @@ export function DiagnosticTest({
       onBankClick={handleBankClick}
       onDropNumber={handleDropNumber}
       onCheck={handleCheck}
+      onContinue={handleContinue}
       onBack={onBack}
     />
   );

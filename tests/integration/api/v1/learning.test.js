@@ -1,27 +1,13 @@
-import { readFileSync } from "node:fs";
-import { createStudent, prepare, request } from "tests/orchestrator.js";
-
-const catalog = JSON.parse(
-  readFileSync("infra/data/course-catalog.json", "utf8"),
-);
-const levelById = new Map(catalog.levels.map((level) => [level.id, level]));
-let keyCounter = 0;
-const newKey = () => `test-key-${process.pid}-${++keyCounter}`;
-
-function attempt(
-  cookie,
-  levelId,
-  {
-    answers = levelById.get(levelId).answerKey,
-    idempotencyKey = newKey(),
-  } = {},
-) {
-  return request("/api/v1/attempts", {
-    method: "POST",
-    cookie,
-    body: { levelId, answers, idempotencyKey },
-  });
-}
+import { randomUUID } from "node:crypto";
+import { createStudent, prepare, query, request } from "tests/orchestrator.js";
+import {
+  answersOf,
+  attempt,
+  completeLesson,
+  levelById,
+  newKey,
+  wrongAnswersOf,
+} from "tests/catalog.js";
 
 const availability = async (cookie) => {
   const response = await request("/api/v1/users/me/availability", { cookie });
@@ -29,71 +15,125 @@ const availability = async (cookie) => {
     response.data.levels.map((level) => [level.id, level.status]),
   );
 };
+const xpOf = (levelId, difficulty = "medium") =>
+  levelById.get(levelId).variants[difficulty].xpReward;
 
 beforeAll(prepare);
 
 describe("POST /api/v1/attempts", () => {
-  it("resposta errada fica registrada sem XP nem conclusão", async () => {
+  it("resposta errada fica registrada sem XP e devolve a resposta certa", async () => {
     const { cookie } = await createStudent();
-    const wrong = Object.fromEntries(
-      Object.keys(levelById.get(1).answerKey).map((id) => [id, 0]),
-    );
 
-    const response = await attempt(cookie, 1, { answers: wrong });
+    const response = await attempt(cookie, 1, {
+      answers: wrongAnswersOf(1),
+    });
 
     expect(response.status).toBe(200);
     expect(response.data.correct).toBe(false);
+    expect(response.data.correctAnswers).toEqual(answersOf(1));
+    expect(response.data.lessonCompleted).toBe(false);
     expect(response.data.xpAwarded).toBe(0);
     expect(response.data.progress.completedLevels).toEqual([]);
   });
 
-  it("o servidor calcula XP e conclusão, ignorando o que o cliente manda", async () => {
+  it("resposta certa não revela a chave e não conclui antes da 4ª cruzadinha", async () => {
     const { cookie } = await createStudent();
 
-    const response = await request("/api/v1/attempts", {
-      method: "POST",
-      cookie,
-      body: {
-        levelId: 1,
-        answers: levelById.get(1).answerKey,
-        idempotencyKey: newKey(),
-        xpAwarded: 9999,
-        correct: true,
-      },
+    const response = await attempt(cookie, 1);
+
+    expect(response.data.correct).toBe(true);
+    expect(response.data.correctAnswers).toBeUndefined();
+    expect(response.data.lessonCompleted).toBe(false);
+    expect(response.data.xpAwarded).toBe(0);
+  });
+
+  it("cada versão confere com a própria chave", async () => {
+    const { cookie } = await createStudent();
+
+    const easyAnswersOnHard = await attempt(cookie, 1, {
+      difficulty: "hard",
+      answers: answersOf(1, "easy"),
+    });
+    const hard = await attempt(cookie, 1, { difficulty: "hard" });
+
+    expect(easyAnswersOnHard.data.correct).toBe(false);
+    expect(hard.data.correct).toBe(true);
+  });
+
+  it("conclui o nível quando as 4 cruzadinhas da lição estão certas", async () => {
+    const { cookie } = await createStudent();
+
+    const last = await completeLesson(cookie, 1, "hard");
+
+    expect(last.data.lessonCompleted).toBe(true);
+    expect(last.data.xpAwarded).toBe(xpOf(1, "hard"));
+    expect(last.data.progress.completedLevels).toEqual([1]);
+  });
+
+  it("errar e acertar de novo a mesma cruzadinha conclui a lição", async () => {
+    const { cookie } = await createStudent();
+    const lessonId = randomUUID();
+
+    await attempt(cookie, 1, { lessonId, answers: wrongAnswersOf(1) });
+    for (const puzzleIndex of [1, 2, 3])
+      await attempt(cookie, 1, { lessonId, puzzleIndex });
+    const retry = await attempt(cookie, 1, { lessonId, puzzleIndex: 0 });
+
+    expect(retry.data.lessonCompleted).toBe(true);
+    expect(retry.data.xpAwarded).toBe(xpOf(1));
+  });
+
+  it("cruzadinhas certas de outra lição não contam", async () => {
+    const { cookie } = await createStudent();
+
+    for (const puzzleIndex of [0, 1, 2])
+      await attempt(cookie, 1, { puzzleIndex });
+    const last = await attempt(cookie, 1, { puzzleIndex: 3 });
+
+    expect(last.data.lessonCompleted).toBe(false);
+  });
+
+  it("refazer uma lição concluída não dá XP de novo", async () => {
+    const { cookie } = await createStudent();
+
+    await completeLesson(cookie, 1);
+    const again = await completeLesson(cookie, 1);
+
+    expect(again.data.lessonCompleted).toBe(true);
+    expect(again.data.xpAwarded).toBe(0);
+    expect(again.data.progress.totalXp).toBe(xpOf(1));
+  });
+
+  it("repetir a chave de idempotência devolve o mesmo resultado sem registrar de novo", async () => {
+    const { cookie, id } = await createStudent();
+    const idempotencyKey = newKey();
+    const lessonId = randomUUID();
+    const wrong = wrongAnswersOf(1);
+    const first = await attempt(cookie, 1, {
+      idempotencyKey,
+      lessonId,
+      answers: wrong,
     });
 
-    expect(response.data.xpAwarded).toBe(levelById.get(1).xpReward);
-    expect(response.data.progress.totalXp).toBe(levelById.get(1).xpReward);
-  });
-
-  it("dá XP só na primeira conclusão correta", async () => {
-    const { cookie } = await createStudent();
-
-    const first = await attempt(cookie, 1);
-    const second = await attempt(cookie, 1);
-
-    expect(first.data.correct).toBe(true);
-    expect(first.data.xpAwarded).toBe(10);
-    expect(second.data.correct).toBe(true);
-    expect(second.data.xpAwarded).toBe(0);
-    expect(second.data.progress.totalXp).toBe(10);
-    expect(second.data.progress.totalSolved).toBe(1);
-  });
-
-  it("repetir a chave de idempotência devolve o mesmo resultado sem XP em dobro", async () => {
-    const { cookie } = await createStudent();
-    const idempotencyKey = newKey();
-    const first = await attempt(cookie, 1, { idempotencyKey });
-
-    const replay = await attempt(cookie, 1, { idempotencyKey });
+    const replay = await attempt(cookie, 1, {
+      idempotencyKey,
+      lessonId,
+      answers: wrong,
+    });
     expect(replay.status).toBe(200);
     expect(replay.data.replayed).toBe(true);
-    expect(replay.data.xpAwarded).toBe(first.data.xpAwarded);
-    expect(replay.data.progress.totalXp).toBe(10);
+    expect(replay.data.correct).toBe(first.data.correct);
+    expect(replay.data.correctAnswers).toEqual(answersOf(1));
+    const [row] = await query(
+      "SELECT count(*)::integer AS count FROM level_attempts WHERE student_id = $1",
+      [id],
+    );
+    expect(row.count).toBe(1);
 
     const changed = await attempt(cookie, 1, {
       idempotencyKey,
-      answers: { "l01-e01": 1, "l01-e02": 1, "l01-e03": 1 },
+      lessonId,
+      answers: answersOf(1),
     });
     expect(changed.status).toBe(409);
     expect(changed.data.error).toBe("idempotency_key_reused");
@@ -107,25 +147,27 @@ describe("POST /api/v1/attempts", () => {
     expect(locked.data.error).toBe("level_locked");
 
     expect((await attempt(cookie, 4)).data.correct).toBe(true);
-    await attempt(cookie, 1);
+    await completeLesson(cookie, 1);
     expect((await attempt(cookie, 2)).data.correct).toBe(true);
   });
 
   it("recusa dados inválidos", async () => {
     const { cookie } = await createStudent();
+    const lessonBody = () => ({
+      levelId: 1,
+      difficulty: "medium",
+      puzzleIndex: 0,
+      lessonId: randomUUID(),
+      answers: answersOf(1),
+      idempotencyKey: newKey(),
+    });
     const cases = [
       [
         { levelId: "x", answers: {}, idempotencyKey: newKey() },
         "invalid_level_id",
       ],
-      [
-        { levelId: 1, answers: { "l01-e01": -1 }, idempotencyKey: newKey() },
-        "invalid_answers",
-      ],
-      [
-        { levelId: 1, answers: { "l01-e01": 1.5 }, idempotencyKey: newKey() },
-        "invalid_answers",
-      ],
+      [{ ...lessonBody(), answers: { "l01-i1-01": -1 } }, "invalid_answers"],
+      [{ ...lessonBody(), answers: { "l01-i1-01": 1.5 } }, "invalid_answers"],
       [
         { levelId: 1, answers: {}, idempotencyKey: "short" },
         "invalid_idempotency_key",
@@ -134,6 +176,9 @@ describe("POST /api/v1/attempts", () => {
         { levelId: 999, answers: {}, idempotencyKey: newKey() },
         "level_not_found",
       ],
+      [{ ...lessonBody(), difficulty: "expert" }, "invalid_difficulty"],
+      [{ ...lessonBody(), puzzleIndex: 4 }, "invalid_puzzle_index"],
+      [{ ...lessonBody(), lessonId: "abc" }, "invalid_lesson_id"],
     ];
     for (const [body, error] of cases) {
       const response = await request("/api/v1/attempts", {
@@ -176,7 +221,7 @@ describe("GET /api/v1/users/me/availability", () => {
     expect(initial[1]).toBe("available");
     expect(initial[2]).toBe("locked");
 
-    await attempt(cookie, 1);
+    await completeLesson(cookie, 1);
     const later = await availability(cookie);
     expect(later[1]).toBe("completed");
     expect(later[2]).toBe("available");
@@ -186,7 +231,7 @@ describe("GET /api/v1/users/me/availability", () => {
   it("o progresso de uma conta nunca aparece em outra", async () => {
     const alice = await createStudent();
     const bob = await createStudent();
-    await attempt(alice.cookie, 1);
+    await completeLesson(alice.cookie, 1);
 
     const me = await request("/api/v1/users/me", { cookie: bob.cookie });
     expect(me.data.progress.completedLevels).toEqual([]);

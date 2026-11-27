@@ -1,60 +1,85 @@
 import database from "infra/database.js";
-import { ConflictError, ServiceError, ValidationError } from "infra/errors.js";
+import { ConflictError, ValidationError } from "infra/errors.js";
 import { answersMatch, assertSameAnswers } from "models/answers.js";
-import { catalog } from "models/catalog.js";
 import progress, { utcDateKey } from "models/progress.js";
+import { applyDailyAnswer, dailyPuzzle, dailyXp } from "lib/game/dailyRun.mjs";
+import { DAILY_START_STEP, trackForStep } from "lib/game/tracks.mjs";
 
 function finished() {
   return new ConflictError("daily_challenge_finished");
 }
 
-/** O nível do dia é o mesmo para todos: escolhido pela data (UTC). */
-function challengeIndex(dateKey) {
-  const day = Math.floor(Date.parse(`${dateKey}T00:00:00.000Z`) / 86_400_000);
-  return day % catalog.levels.length;
-}
-
-/** Garante a rodada do aluno no dia e devolve { level, run }. */
-async function ensureRun(studentId, dateKey) {
-  const selected = await database.query(
-    `SELECT id, public_data FROM course_levels
-     WHERE is_bonus = false ORDER BY id OFFSET $1 LIMIT 1`,
-    [challengeIndex(dateKey)],
+/**
+ * Garante a rodada do aluno no dia. O degrau inicial vem da dificuldade geral
+ * no momento em que o dia começa.
+ */
+async function ensureRun(client, student, dateKey) {
+  await client.query(
+    `INSERT INTO daily_challenge_runs (student_id, challenge_date, status, start_step)
+     VALUES ($1, $2::date, 'in_progress', $3)
+     ON CONFLICT (student_id, challenge_date) DO NOTHING`,
+    [student.id, dateKey, DAILY_START_STEP[student.difficulty] ?? 3],
   );
-  const level = selected.rows[0];
-  if (!level) throw new ServiceError("course_unavailable");
-  await database.query(
-    `INSERT INTO daily_challenge_runs (student_id, challenge_date, level_id, status)
-     VALUES ($1, $2::date, $3, 'in_progress') ON CONFLICT (student_id, challenge_date) DO NOTHING`,
-    [studentId, dateKey, level.id],
-  );
-  const run = await database.query(
-    `SELECT challenge_date::text, level_id, status, hearts, attempt_count, submitted_answers
+  const { rows } = await client.query(
+    `SELECT status, hearts, attempt_count, submitted_answers,
+            current_index, score, start_step
      FROM daily_challenge_runs WHERE student_id = $1 AND challenge_date = $2::date`,
-    [studentId, dateKey],
+    [student.id, dateKey],
   );
-  return { level, run: run.rows[0] };
+  return rows[0];
 }
 
-async function get(student) {
-  const dateKey = utcDateKey();
-  const { level, run } = await ensureRun(student.id, dateKey);
+const toRun = (row, dateKey) => ({
+  date: dateKey,
+  startStep: row.start_step,
+  currentIndex: row.current_index,
+  score: row.score,
+  hearts: row.hearts,
+  status: row.status,
+});
+
+/** A cruzadinha atual, sem respostas, no formato de um nível. */
+function publicLevel(run, { step, puzzle }) {
   return {
-    date: dateKey,
-    status: run.status,
-    hearts: run.hearts,
-    attemptCount: run.attempt_count,
-    fills: run.submitted_answers,
-    level: level.public_data,
+    id: -(Number(run.date.replaceAll("-", "")) * 1000 + run.currentIndex),
+    chapter: 0,
+    session: 1,
+    title: "Desafio diário",
+    subtitle: `Cruzadinha ${run.currentIndex + 1}`,
+    emoji: "🔥",
+    difficulty: trackForStep(step),
+    xpReward: dailyXp(step),
+    grid: puzzle.grid,
+    inputIds: puzzle.inputIds,
+    bank: puzzle.bank,
   };
 }
 
-/** Salva o que o aluno já preencheu, para continuar depois. */
+const currentPuzzle = (run) =>
+  dailyPuzzle(run.date, run.startStep, run.currentIndex, run.score);
+
+async function get(student) {
+  const dateKey = utcDateKey();
+  const row = await ensureRun(database, student, dateKey);
+  const run = toRun(row, dateKey);
+  const current = currentPuzzle(run);
+  return {
+    ...run,
+    step: current.step,
+    attemptCount: row.attempt_count,
+    fills: row.submitted_answers,
+    level: publicLevel(run, current),
+  };
+}
+
+/** Salva o que o aluno já preencheu na cruzadinha atual, para continuar depois. */
 async function saveDraft(student, answers) {
   const dateKey = utcDateKey();
-  const { level, run } = await ensureRun(student.id, dateKey);
-  if (run.status !== "in_progress") throw finished();
-  const validInputIds = new Set(level.public_data.inputIds);
+  const row = await ensureRun(database, student, dateKey);
+  if (row.status !== "in_progress") throw finished();
+  const validInputIds = new Set(
+    currentPuzzle(toRun(row, dateKey)).puzzle.inputIds,
+  );
   if (Object.keys(answers).some((id) => !validInputIds.has(id))) {
     throw new ValidationError("invalid_answers");
   }
@@ -92,52 +117,73 @@ async function recordCompletion(client, studentId, dateKey) {
   );
 }
 
+async function resetDailyStreak(client, studentId, dateKey) {
+  await client.query(
+    `INSERT INTO student_progress (student_id, current_daily_streak, last_daily_challenge_on)
+     VALUES ($1, 0, $2::date)
+     ON CONFLICT (student_id) DO UPDATE SET
+      current_daily_streak = 0, last_daily_challenge_on = $2::date, updated_at = now()`,
+    [studentId, dateKey],
+  );
+}
+
 /**
- * Corrige a tentativa do dia. Acertar conclui e dá XP; errar custa um coração,
- * e sem corações o desafio falha e a sequência diária zera.
+ * Corrige a cruzadinha atual do dia. Acertar soma ponto e XP; errar gasta uma
+ * vida e devolve a resposta certa. Nos dois casos a rodada passa para a
+ * próxima cruzadinha; sem vidas, o desafio do dia termina.
  */
 async function submit(student, { answers, idempotencyKey }) {
   const dateKey = utcDateKey();
-  await ensureRun(student.id, dateKey);
 
   const result = await database.transaction(async (client) => {
+    await ensureRun(client, student, dateKey);
     const {
-      rows: [run],
+      rows: [row],
     } = await client.query(
-      `SELECT level_id, status, hearts FROM daily_challenge_runs
+      `SELECT status, hearts, current_index, score, start_step
+       FROM daily_challenge_runs
        WHERE student_id = $1 AND challenge_date = $2::date FOR UPDATE`,
       [student.id, dateKey],
     );
+    const run = toRun(row, dateKey);
+
     const duplicate = await client.query(
-      `SELECT is_correct, xp_awarded, submitted_answers FROM daily_challenge_attempts
+      `SELECT is_correct, xp_awarded, submitted_answers, puzzle_index, solved_before
+       FROM daily_challenge_attempts
        WHERE student_id = $1 AND challenge_date = $2::date AND idempotency_key = $3`,
       [student.id, dateKey, idempotencyKey],
     );
     if (duplicate.rowCount) {
       const [previous] = duplicate.rows;
       assertSameAnswers(previous.submitted_answers, answers);
+      const replayedPuzzle = dailyPuzzle(
+        dateKey,
+        run.startStep,
+        previous.puzzle_index,
+        previous.solved_before,
+      ).puzzle;
       return {
         correct: previous.is_correct,
+        ...(previous.is_correct
+          ? {}
+          : { correctAnswers: replayedPuzzle.answers }),
         xpAwarded: previous.xp_awarded,
         status: run.status,
         hearts: run.hearts,
+        score: run.score,
         replayed: true,
       };
     }
     if (run.status !== "in_progress") throw finished();
 
-    const {
-      rows: [level],
-    } = await client.query(
-      "SELECT public_data, answer_key FROM course_levels WHERE id = $1",
-      [run.level_id],
-    );
-    const correct = answersMatch(answers, level.answer_key);
-    const xpAwarded = correct ? level.public_data.xpReward : 0;
+    const { step, puzzle } = currentPuzzle(run);
+    const correct = answersMatch(answers, puzzle.answers);
+    const xpAwarded = correct ? dailyXp(step) : 0;
     await client.query(
       `INSERT INTO daily_challenge_attempts
-        (student_id, challenge_date, idempotency_key, submitted_answers, is_correct, xp_awarded)
-       VALUES ($1, $2::date, $3, $4::jsonb, $5, $6)`,
+        (student_id, challenge_date, idempotency_key, submitted_answers,
+         is_correct, xp_awarded, puzzle_index, solved_before)
+       VALUES ($1, $2::date, $3, $4::jsonb, $5, $6, $7, $8)`,
       [
         student.id,
         dateKey,
@@ -145,50 +191,48 @@ async function submit(student, { answers, idempotencyKey }) {
         JSON.stringify(answers),
         correct,
         xpAwarded,
+        run.currentIndex,
+        run.score,
       ],
     );
 
+    const next = applyDailyAnswer(run, correct);
+    await client.query(
+      `UPDATE daily_challenge_runs
+       SET status = $3, hearts = $4, score = $5, current_index = $6,
+           attempt_count = attempt_count + 1, submitted_answers = '{}'::jsonb,
+           completed_at = CASE WHEN $3 = 'in_progress' THEN NULL ELSE now() END
+       WHERE student_id = $1 AND challenge_date = $2::date`,
+      [
+        student.id,
+        dateKey,
+        next.status,
+        next.hearts,
+        next.score,
+        next.currentIndex,
+      ],
+    );
     if (correct) {
-      await client.query(
-        `UPDATE daily_challenge_runs
-         SET status = 'completed', completed_at = now(), attempt_count = attempt_count + 1
-         WHERE student_id = $1 AND challenge_date = $2::date`,
-        [student.id, dateKey],
-      );
       await client.query(
         `INSERT INTO xp_events (student_id, source, source_id, amount)
          VALUES ($1, 'daily_challenge', $2, $3) ON CONFLICT DO NOTHING`,
-        [student.id, dateKey, xpAwarded],
+        [student.id, `${dateKey}:${run.currentIndex}`, xpAwarded],
       );
-      await recordCompletion(client, student.id, dateKey);
-      return {
-        correct: true,
-        xpAwarded,
-        status: "completed",
-        hearts: run.hearts,
-        replayed: false,
-      };
+      // O dia conta para a sequência a partir do primeiro acerto.
+      if (next.score === 1) await recordCompletion(client, student.id, dateKey);
     }
+    if (next.status === "failed")
+      await resetDailyStreak(client, student.id, dateKey);
 
-    const hearts = Math.max(0, run.hearts - 1);
-    const status = hearts === 0 ? "failed" : "in_progress";
-    await client.query(
-      `UPDATE daily_challenge_runs
-       SET status = $3, hearts = $4, attempt_count = attempt_count + 1,
-           submitted_answers = $5::jsonb
-       WHERE student_id = $1 AND challenge_date = $2::date`,
-      [student.id, dateKey, status, hearts, JSON.stringify(answers)],
-    );
-    if (status === "failed") {
-      await client.query(
-        `INSERT INTO student_progress (student_id, current_daily_streak, last_daily_challenge_on)
-         VALUES ($1, 0, $2::date)
-         ON CONFLICT (student_id) DO UPDATE SET
-          current_daily_streak = 0, last_daily_challenge_on = $2::date, updated_at = now()`,
-        [student.id, dateKey],
-      );
-    }
-    return { correct: false, xpAwarded: 0, status, hearts, replayed: false };
+    return {
+      correct,
+      ...(correct ? {} : { correctAnswers: puzzle.answers }),
+      xpAwarded,
+      status: next.status,
+      hearts: next.hearts,
+      score: next.score,
+      replayed: false,
+    };
   });
 
   return { ...result, progress: await progress.get(student.id) };

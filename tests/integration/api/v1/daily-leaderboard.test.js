@@ -1,11 +1,16 @@
-import { readFileSync } from "node:fs";
 import { createStudent, prepare, request } from "tests/orchestrator.js";
+import { completeLesson } from "tests/catalog.js";
+import { dailyPuzzle } from "lib/game/dailyRun.mjs";
+import { DAILY_START_STEP } from "lib/game/tracks.mjs";
 
-const catalog = JSON.parse(
-  readFileSync("infra/data/course-catalog.json", "utf8"),
-);
-const answerKeyOf = (levelId) =>
-  catalog.levels.find((level) => level.id === levelId).answerKey;
+// A cruzadinha atual é gerada de novo a partir do que a API devolve.
+const answersFor = (challenge) =>
+  dailyPuzzle(
+    challenge.date,
+    challenge.startStep,
+    challenge.currentIndex,
+    challenge.score,
+  ).puzzle.answers;
 let keyCounter = 0;
 const newKey = () => `daily-key-${process.pid}-${++keyCounter}`;
 
@@ -28,17 +33,28 @@ const wrongAnswersFor = (challenge) =>
 beforeAll(prepare);
 
 describe("/api/v1/daily-challenge", () => {
-  it("começa em andamento sem expor as respostas", async () => {
+  it("começa na dificuldade geral do aluno, com 3 vidas, sem expor as respostas", async () => {
     const { cookie } = await createStudent();
+    await request("/api/v1/users/me", {
+      method: "PATCH",
+      cookie,
+      body: { difficulty: "hard" },
+    });
 
     const response = await getChallenge(cookie);
 
     expect(response.status).toBe(200);
-    expect(response.data.status).toBe("in_progress");
-    expect(response.data.date).toBe(new Date().toISOString().slice(0, 10));
-    expect(response.data.attemptCount).toBe(0);
-    expect(response.data.hearts).toBeGreaterThan(0);
-    expect(JSON.stringify(response.data)).not.toMatch(/answer_?key/i);
+    expect(response.data).toMatchObject({
+      status: "in_progress",
+      date: new Date().toISOString().slice(0, 10),
+      hearts: 3,
+      score: 0,
+      currentIndex: 0,
+      startStep: DAILY_START_STEP.hard,
+      step: DAILY_START_STEP.hard,
+    });
+    expect(response.data.level.inputIds.length).toBeGreaterThan(0);
+    expect(JSON.stringify(response.data)).not.toMatch(/answer|answer_?key/i);
   });
 
   it("sem sessão responde 401", async () => {
@@ -62,7 +78,30 @@ describe("/api/v1/daily-challenge", () => {
     expect(unknown.data.error).toBe("invalid_answers");
   });
 
-  it("errar custa um coração; acertar conclui uma única vez", async () => {
+  it("acertar soma ponto e XP e passa para a próxima cruzadinha", async () => {
+    const { cookie } = await createStudent();
+    const { data: challenge } = await getChallenge(cookie);
+
+    const correct = await submit(cookie, {
+      answers: answersFor(challenge),
+      idempotencyKey: newKey(),
+    });
+
+    expect(correct.data).toMatchObject({
+      correct: true,
+      score: 1,
+      hearts: 3,
+      status: "in_progress",
+      xpAwarded: 5 + challenge.step,
+    });
+    expect(correct.data.correctAnswers).toBeUndefined();
+    expect(correct.data.progress.dailyChallengesCompleted).toBe(1);
+    const next = await getChallenge(cookie);
+    expect(next.data.currentIndex).toBe(1);
+    expect(next.data.level.inputIds).not.toEqual(challenge.level.inputIds);
+  });
+
+  it("errar gasta uma vida, mostra a resposta certa e segue para a próxima", async () => {
     const { cookie } = await createStudent();
     const { data: challenge } = await getChallenge(cookie);
 
@@ -70,41 +109,91 @@ describe("/api/v1/daily-challenge", () => {
       answers: wrongAnswersFor(challenge),
       idempotencyKey: newKey(),
     });
-    expect(wrong.data.correct).toBe(false);
-    expect(wrong.data.hearts).toBe(challenge.hearts - 1);
 
-    const idempotencyKey = newKey();
-    const answers = answerKeyOf(challenge.level.id);
-    const correct = await submit(cookie, { answers, idempotencyKey });
-    expect(correct.data.correct).toBe(true);
-    expect(correct.data.status).toBe("completed");
-    expect(correct.data.progress.dailyChallengesCompleted).toBe(1);
-    const xp = correct.data.progress.totalXp;
-    expect(xp).toBeGreaterThan(0);
-
-    const replay = await submit(cookie, { answers, idempotencyKey });
-    expect(replay.data.replayed).toBe(true);
-    expect(replay.data.progress.totalXp).toBe(xp);
-
-    const again = await submit(cookie, { answers, idempotencyKey: newKey() });
-    expect(again.status).toBe(409);
-    expect(again.data.error).toBe("daily_challenge_finished");
+    expect(wrong.data).toMatchObject({
+      correct: false,
+      hearts: 2,
+      score: 0,
+      xpAwarded: 0,
+      correctAnswers: answersFor(challenge),
+    });
+    expect((await getChallenge(cookie)).data.currentIndex).toBe(1);
   });
 
-  it("acabar os corações falha o desafio", async () => {
+  it("continua de onde parou no mesmo dia", async () => {
+    const { cookie } = await createStudent();
+    const { data: first } = await getChallenge(cookie);
+    await submit(cookie, {
+      answers: wrongAnswersFor(first),
+      idempotencyKey: newKey(),
+    });
+
+    const again = await getChallenge(cookie);
+    const thirdTime = await getChallenge(cookie);
+    expect(again.data).toMatchObject({ currentIndex: 1, hearts: 2 });
+    expect(thirdTime.data.level).toEqual(again.data.level);
+  });
+
+  it("repetir a chave de idempotência não gasta outra vida", async () => {
     const { cookie } = await createStudent();
     const { data: challenge } = await getChallenge(cookie);
+    const body = {
+      answers: wrongAnswersFor(challenge),
+      idempotencyKey: newKey(),
+    };
+
+    await submit(cookie, body);
+    const replay = await submit(cookie, body);
+
+    expect(replay.data.replayed).toBe(true);
+    expect(replay.data.hearts).toBe(2);
+    expect((await getChallenge(cookie)).data.hearts).toBe(2);
+  });
+
+  it("o 3º erro encerra o desafio do dia", async () => {
+    const { cookie } = await createStudent();
+    let challenge = (await getChallenge(cookie)).data;
+    await submit(cookie, {
+      answers: answersFor(challenge),
+      idempotencyKey: newKey(),
+    });
 
     let last;
-    for (let i = 0; i < challenge.hearts; i += 1) {
+    for (let i = 0; i < 3; i += 1) {
+      challenge = (await getChallenge(cookie)).data;
       last = await submit(cookie, {
         answers: wrongAnswersFor(challenge),
         idempotencyKey: newKey(),
       });
     }
 
-    expect(last.data.status).toBe("failed");
-    expect(last.data.hearts).toBe(0);
+    expect(last.data).toMatchObject({
+      hearts: 0,
+      score: 1,
+      status: "completed",
+    });
+    const after = await submit(cookie, {
+      answers: wrongAnswersFor(challenge),
+      idempotencyKey: newKey(),
+    });
+    expect(after.status).toBe(409);
+    expect(after.data.error).toBe("daily_challenge_finished");
+  });
+
+  it("sem nenhum acerto o dia falha e a sequência zera", async () => {
+    const { cookie } = await createStudent();
+
+    let last;
+    for (let i = 0; i < 3; i += 1) {
+      const challenge = (await getChallenge(cookie)).data;
+      last = await submit(cookie, {
+        answers: wrongAnswersFor(challenge),
+        idempotencyKey: newKey(),
+      });
+    }
+
+    expect(last.data).toMatchObject({ status: "failed", score: 0 });
+    expect(last.data.progress.currentDailyStreak).toBe(0);
   });
 });
 
@@ -168,13 +257,8 @@ describe("GET /api/v1/leaderboard", () => {
   it("lista só quem aceitou aparecer e tem XP", async () => {
     const visible = await createStudent();
     const hidden = await createStudent();
-    for (const student of [visible, hidden]) {
-      await request("/api/v1/attempts", {
-        method: "POST",
-        cookie: student.cookie,
-        body: { levelId: 1, answers: answerKeyOf(1), idempotencyKey: newKey() },
-      });
-    }
+    for (const student of [visible, hidden])
+      await completeLesson(student.cookie, 1);
     await request("/api/v1/users/me", {
       method: "PATCH",
       cookie: visible.cookie,
