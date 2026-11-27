@@ -67,7 +67,8 @@ function findEquations(grid) {
       Boolean(equals.isVertical) !== vertical
     )
       return;
-    const keys = [0, 2, 4].map((i) => `${positions[i][1]},${positions[i][0]}`);
+    const numberPositions = [positions[0], positions[2], positions[4]];
+    const keys = numberPositions.map(([x, y]) => `${y},${x}`);
     equations.push({
       orientation,
       left,
@@ -149,25 +150,25 @@ function countSolutions(equations, inputIds, bank) {
 // has exactly one unknown blank, so the player must reason across equations.
 function countStalls(equations, inputIds) {
   const known = new Set();
-  const unknownIn = (equation) =>
-    new Set(
+  const unknownIn = (equation) => [
+    ...new Set(
       numberCells(equation)
         .map((cell) => cell.inputId)
         .filter((id) => id !== undefined && !known.has(id)),
-    );
+    ),
+  ];
   let stalls = 0;
   while (known.size < inputIds.length) {
-    const ready = equations.find((equation) => unknownIn(equation).size === 1);
-    if (ready) {
-      known.add([...unknownIn(ready)][0]);
-      continue;
+    // Takes the first equation with the fewest unknown blanks.
+    let fewest = null;
+    for (const equation of equations) {
+      const unknown = unknownIn(equation);
+      if (unknown.length > 0 && (!fewest || unknown.length < fewest.length))
+        fewest = unknown;
     }
-    const next = equations
-      .filter((equation) => unknownIn(equation).size > 0)
-      .sort((a, b) => unknownIn(a).size - unknownIn(b).size)[0];
-    if (!next) break;
-    stalls += 1;
-    known.add([...unknownIn(next)][0]);
+    if (!fewest) break;
+    if (fewest.length > 1) stalls += 1;
+    known.add(fewest[0]);
   }
   return stalls;
 }
@@ -209,16 +210,25 @@ function validateCrossword(level, equations, strict, errors, prefix) {
     errors.push(`${prefix}: has more than one solution with the bank numbers`);
 
   const stalls = countStalls(equations, inputIds);
-  if (level.difficulty === "easy" && stalls > 0)
-    errors.push(`${prefix}: easy level must be solvable by chain deduction`);
-  if (level.difficulty === "medium" && stalls > 1)
-    errors.push(`${prefix}: medium level allows at most one deduction stall`);
-  if (
-    (level.difficulty === "hard" || level.difficulty === "very_hard") &&
-    inputIds.length >= 4 &&
-    stalls === 0
-  )
-    errors.push(`${prefix}: hard level needs at least one deduction stall`);
+  switch (level.difficulty) {
+    case "easy":
+      if (stalls > 0)
+        errors.push(
+          `${prefix}: easy level must be solvable by chain deduction`,
+        );
+      break;
+    case "medium":
+      if (stalls > 1)
+        errors.push(
+          `${prefix}: medium level allows at most one deduction stall`,
+        );
+      break;
+    case "hard":
+    case "very_hard":
+      if (inputIds.length >= 4 && stalls === 0)
+        errors.push(`${prefix}: hard level needs at least one deduction stall`);
+      break;
+  }
 }
 
 function validateLevel(level, { chapterIds, expectBonus, strict }, errors) {
